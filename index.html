@@ -177,6 +177,18 @@
 
 <div id="toast"></div>
 
+<footer style="text-align:center;padding:32px 20px 48px;border-top:1px solid var(--border);margin-top:40px;">
+  <a href="https://www.strava.com" target="_blank" rel="noopener" style="display:inline-block;line-height:0;">
+    <img src="https://developers.strava.com/images/api_logo_pwrdBy_strava_horiz_white.png" 
+         alt="Powered by Strava" 
+         style="height:32px;width:auto;opacity:0.7;"
+         srcset="https://developers.strava.com/images/api_logo_pwrdBy_strava_horiz_white@2x.png 2x"/>
+  </a>
+  <p style="margin-top:10px;font-size:11px;color:var(--muted);font-family:var(--font-mono);">
+    GTR Fest 17 is not affiliated with or endorsed by Strava.
+  </p>
+</footer>
+
 <script>
 let LB = [], TEAMS = [], activeMetric = 'points';
 let activeStart = CONFIG.CHALLENGE_START || '2026-04-01';
@@ -263,9 +275,11 @@ function renderHeaderActions() {
   const athlete = Session.get();
   const el = document.getElementById('header-actions');
   if (!athlete) {
-    el.innerHTML = `<a href="${Strava.getAuthUrl()}" class="btn btn-strava">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M15.387 17.944l-2.089-4.116h-3.065L15.387 24l5.15-10.172h-3.066m-7.008-5.599l2.836 5.598h4.172L10.463 0l-7 13.828h4.169"/></svg>
-      Connect Strava
+    el.innerHTML = `<a href="${Strava.getAuthUrl()}" style="display:inline-block;line-height:0;">
+      <img src="https://developers.strava.com/images/btn_strava_connectwith_orange.png" 
+           alt="Connect with Strava" 
+           style="height:48px;width:auto;cursor:pointer;"
+           srcset="https://developers.strava.com/images/btn_strava_connectwith_orange@2x.png 2x"/>
     </a>`;
   } else {
     el.innerHTML = `
