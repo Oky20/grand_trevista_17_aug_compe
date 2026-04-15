@@ -123,12 +123,9 @@
 <body>
 <div class="wrap">
   <header>
-    <div class="header-left" style="display:flex;align-items:center;gap:20px;">
-      <img src="GTR_Fest.png" alt="GTR Fest" style="height:90px;width:auto;object-fit:contain;flex-shrink:0;"/>
-      <div>
-        <h1 id="challenge-name">FITNESS CHALLENGE</h1>
-        <p style="font-family:var(--font-mono);font-size:12px;color:var(--muted);margin-top:4px;" id="countdown"></p>
-      </div>
+    <div class="header-left">
+      <h1 id="challenge-name">GTR FEST 17</h1>
+      <p style="font-family:var(--font-mono);font-size:12px;color:var(--muted);margin-top:4px;" id="countdown"></p>
     </div>
     <div class="header-right" id="header-actions">
       <div class="spinner" style="width:20px;height:20px"></div>
@@ -188,10 +185,7 @@ let activeEnd   = CONFIG.CHALLENGE_END;
 // ── INIT ─────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', async () => {
   // Header info
-  document.getElementById('challenge-name').textContent = CONFIG.CHALLENGE_NAME.toUpperCase();
-  const s = new Date(CONFIG.CHALLENGE_START).toLocaleDateString('en-GB',{day:'numeric',month:'short'});
-  const e = new Date(CONFIG.CHALLENGE_END).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'});
-  document.getElementById('challenge-period').textContent = `${s} — ${e}`;
+  // Title is hardcoded in HTML as GTR FEST 17
 
   // Tab clicks
   document.querySelectorAll('.tab').forEach(btn => {
