@@ -16,6 +16,7 @@ serve(async (req) => {
 
   try {
     const { athlete_id } = await req.json();
+    const athleteIdInt = parseInt(athlete_id, 10);
     if (!athlete_id) return json({ error: "Missing athlete_id" }, 400);
 
     const sb = createClient(
@@ -27,7 +28,7 @@ serve(async (req) => {
     const { data: member, error: memberErr } = await sb
       .from("members")
       .select("*")
-      .eq("strava_athlete_id", athlete_id)
+      .eq("strava_athlete_id", athleteIdInt)
       .single();
 
     if (memberErr || !member) return json({ error: "Member not found" }, 404);
@@ -57,7 +58,7 @@ serve(async (req) => {
         access_token:     refreshData.access_token,
         refresh_token:    refreshData.refresh_token,
         token_expires_at: refreshData.expires_at,
-      }).eq("strava_athlete_id", athlete_id);
+      }).eq("strava_athlete_id", athleteIdInt);
     }
 
     // Fetch activities list from Strava (challenge period)
@@ -98,7 +99,7 @@ serve(async (req) => {
 
       return {
         strava_activity_id: a.id,
-        athlete_id:         athlete_id,
+        athlete_id:         athleteIdInt,
         name:               a.name,
         sport_type:         a.sport_type || a.type,
         distance:           a.distance,      // meters
