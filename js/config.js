@@ -6,7 +6,7 @@
 const CONFIG = {
   // --- Strava App ---
   STRAVA_CLIENT_ID: '225527',
-  STRAVA_REDIRECT_URI: 'https://YOUR_VERCEL_URL/callback.html', // update after deploy
+  STRAVA_REDIRECT_URI: 'https://grand-trevista-17-aug-competition.vercel.app/', // update after deploy
 
   // --- Supabase ---
   SUPABASE_URL: 'https://cusjylwdeutawnbhhcpv.supabase.co',
