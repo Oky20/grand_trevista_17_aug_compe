@@ -13,8 +13,8 @@ const CONFIG = {
   SUPABASE_ANON_KEY: 'sb_publishable_QCHhsyVbnij44Da6x8Nl9w_ZBVRDQwW',
 
   // --- Challenge Period ---
-  CHALLENGE_START: '2025-04-01', // YYYY-MM-DD
-  CHALLENGE_END:   '2025-04-30',
+  CHALLENGE_START: '2026-04-01', // YYYY-MM-DD
+  CHALLENGE_END:   '2026-04-30',
   CHALLENGE_NAME:  'May Fitness Challenge 2025',
 
   // --- Teams ---
