@@ -1,6 +1,6 @@
 // supabase/functions/strava-sync/index.ts
 // Fetches latest Strava activities for a given athlete_id
-// Handles token refresh automatically
+// Handles token refresh + fetches calories per activity
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
@@ -53,7 +53,6 @@ serve(async (req) => {
       const refreshData = await refreshRes.json();
       accessToken = refreshData.access_token;
 
-      // Update stored tokens
       await sb.from("members").update({
         access_token:     refreshData.access_token,
         refresh_token:    refreshData.refresh_token,
@@ -61,7 +60,7 @@ serve(async (req) => {
       }).eq("strava_athlete_id", athlete_id);
     }
 
-    // Fetch activities from Strava (challenge period)
+    // Fetch activities list from Strava (challenge period)
     const challengeStart = Deno.env.get("CHALLENGE_START") || "";
     const afterTs = challengeStart
       ? Math.floor(new Date(challengeStart).getTime() / 1000)
@@ -75,19 +74,38 @@ serve(async (req) => {
     if (!activitiesRes.ok) return json({ error: "Failed to fetch activities" }, 400);
 
     const activities = await activitiesRes.json();
-
     if (!activities.length) return json({ synced: 0 });
 
-    // Map to our schema
-    const rows = activities.map((a: any) => ({
-      strava_activity_id: a.id,
-      athlete_id:         athlete_id,
-      name:               a.name,
-      sport_type:         a.sport_type || a.type,
-      distance:           a.distance,           // meters
-      moving_time:        a.moving_time,         // seconds
-      calories:           a.calories || 0,
-      start_date:         a.start_date_local,
+    // Fetch detail per activity to get calories
+    // Strava list endpoint does not return calories — need individual fetch
+    // Rate limit: max 100 req/15min, so we limit to 50 activities per sync
+    const limited = activities.slice(0, 50);
+
+    const rows = await Promise.all(limited.map(async (a: any) => {
+      let calories = 0;
+      try {
+        const detailRes = await fetch(
+          `https://www.strava.com/api/v3/activities/${a.id}`,
+          { headers: { Authorization: `Bearer ${accessToken}` } }
+        );
+        if (detailRes.ok) {
+          const detail = await detailRes.json();
+          calories = detail.calories || 0;
+        }
+      } catch (_) {
+        // fallback to 0 if detail fetch fails
+      }
+
+      return {
+        strava_activity_id: a.id,
+        athlete_id:         athlete_id,
+        name:               a.name,
+        sport_type:         a.sport_type || a.type,
+        distance:           a.distance,      // meters
+        moving_time:        a.moving_time,   // seconds
+        calories,
+        start_date:         a.start_date_local,
+      };
     }));
 
     // Upsert to Supabase
