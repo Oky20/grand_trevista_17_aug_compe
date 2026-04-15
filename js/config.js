@@ -10,7 +10,7 @@ const CONFIG = {
 
   // --- Supabase ---
   SUPABASE_URL: 'https://cusjylwdeutawnbhhcpv.supabase.co',
-  SUPABASE_ANON_KEY: 'sb_publishable_QCHhsyVbnij44Da6x8Nl9w_ZBVRDQwW',
+  SUPABASE_ANON_KEY: 'UOVpNqj1JU5ZG0nofvxlf1oBXrBpJ6D8INyGfgyG3pKHJMiHOgOxX/MlUiLJUu6YDFu/thL7Y+WcDe3ctjAc3A==',
 
   // --- Challenge Period ---
   CHALLENGE_START: '2025-04-01', // YYYY-MM-DD
