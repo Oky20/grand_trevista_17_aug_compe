@@ -20,7 +20,7 @@ serve(async (req) => {
 
     const sb = createClient(
       Deno.env.get("SUPABASE_URL")!,
-      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
+      Deno.env.get("DB_SERVICE_ROLE_KEY")!
     );
 
     // Fetch member record
