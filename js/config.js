@@ -19,12 +19,12 @@ const CONFIG = {
 
   // --- Teams ---
   TEAMS: [
-    { id: 1, name: 'Team Alpha',   color: '#FF6B6B', emoji: '🔴' },
-    { id: 2, name: 'Team Beta',    color: '#4ECDC4', emoji: '🟢' },
-    { id: 3, name: 'Team Gamma',   color: '#FFE66D', emoji: '🟡' },
-    { id: 4, name: 'Team Delta',   color: '#A78BFA', emoji: '🟣' },
-    { id: 5, name: 'Team Epsilon', color: '#F97316', emoji: '🟠' },
-    { id: 6, name: 'Team Zeta',    color: '#60A5FA', emoji: '🔵' },
+    { id: 1, name: 'Zona 1',   color: '#FF6B6B', emoji: '🔴' },
+    { id: 2, name: 'Zona 2',    color: '#4ECDC4', emoji: '🟢' },
+    { id: 3, name: 'Zona 3',   color: '#FFE66D', emoji: '🟡' },
+    { id: 4, name: 'Zona 4',   color: '#A78BFA', emoji: '🟣' },
+    { id: 5, name: 'Zona 5', color: '#F97316', emoji: '🟠' },
+    { id: 6, name: 'Zona 6',    color: '#60A5FA', emoji: '🔵' },
   ],
 
   // --- Minimum Duration per Sport (in minutes) ---
