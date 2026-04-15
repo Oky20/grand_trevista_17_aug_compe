@@ -36,11 +36,11 @@ const Strava = {
   },
 
   // Fetch activities for a member (calls Edge Function)
-  async fetchActivities(athleteId) {
+  async fetchActivities(athleteId, startDate) {
     const res = await fetch(`${CONFIG.SUPABASE_URL}/functions/v1/strava-sync`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ athlete_id: athleteId }),
+      body: JSON.stringify({ athlete_id: athleteId, start_date: startDate || CONFIG.CHALLENGE_START }),
     });
     if (!res.ok) throw new Error(await res.text());
     return res.json();
@@ -93,10 +93,12 @@ const DB = {
   },
 
   // Leaderboard (computed view from DB, refreshed via Edge Function)
-  async getLeaderboard() {
+  async getLeaderboard(startDate, endDate) {
+    const start = startDate || CONFIG.CHALLENGE_START;
+    const end   = endDate   || CONFIG.CHALLENGE_END;
     const [members, activities] = await Promise.all([
       DB.getMembers(),
-      DB.getActivities(CONFIG.CHALLENGE_START, CONFIG.CHALLENGE_END),
+      DB.getActivities(start, end),
     ]);
     const leaderboard = Scoring.calcLeaderboard(members, activities);
     const teams       = Scoring.calcTeamStats(leaderboard);
