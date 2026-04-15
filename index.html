@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Fitness Challenge</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/config.js"></script>
+<script src="js/scoring.js"></script>
+<script src="js/api.js"></script>
+<style>
+  :root {
+    --bg:#0a0a0f;--surface:#13131a;--card:#1c1c26;--border:#2a2a38;
+    --text:#e8e8f0;--muted:#6b6b80;--accent:#f0ff44;--accent2:#ff6b6b;
+    --gold:#ffd700;--silver:#c0c0c0;--bronze:#cd7f32;--radius:12px;
+    --font-display:'Bebas Neue',sans-serif;
+    --font-body:'DM Sans',sans-serif;
+    --font-mono:'JetBrains Mono',monospace;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{background:var(--bg);color:var(--text);font-family:var(--font-body);min-height:100vh;overflow-x:hidden;}
+  body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(240,255,68,.03) 1px,transparent 1px),linear-gradient(90deg,rgba(240,255,68,.03) 1px,transparent 1px);background-size:40px 40px;pointer-events:none;z-index:0;}
+  .wrap{position:relative;z-index:1;max-width:1100px;margin:0 auto;padding:0 20px 80px;}
+  header{padding:40px 0 32px;display:flex;align-items:flex-end;justify-content:space-between;gap:20px;flex-wrap:wrap;border-bottom:1px solid var(--border);margin-bottom:40px;}
+  .header-left h1{font-family:var(--font-display);font-size:clamp(36px,6vw,72px);letter-spacing:2px;line-height:1;color:var(--accent);text-shadow:0 0 40px rgba(240,255,68,.3);}
+  .header-left p{font-size:13px;color:var(--muted);margin-top:6px;font-family:var(--font-mono);}
+  .header-right{display:flex;gap:10px;align-items:center;flex-wrap:wrap;}
+  .btn{padding:10px 20px;border-radius:8px;border:none;font-family:var(--font-body);font-size:13px;font-weight:600;cursor:pointer;transition:all .2s;text-decoration:none;display:inline-flex;align-items:center;gap:6px;}
+  .btn-strava{background:#fc4c02;color:#fff;}
+  .btn-strava:hover{background:#e04400;transform:translateY(-1px);}
+  .btn-outline{background:transparent;color:var(--text);border:1px solid var(--border);}
+  .btn-outline:hover{border-color:var(--accent);color:var(--accent);}
+  .btn-sync{background:var(--accent);color:#000;}
+  .btn-sync:hover{background:#e8f700;transform:translateY(-1px);}
+  .btn-sync:disabled{opacity:.5;cursor:not-allowed;transform:none;}
+  .athlete-pill{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:8px 14px;font-size:13px;display:flex;align-items:center;gap:8px;}
+  .athlete-pill img{width:24px;height:24px;border-radius:50%;object-fit:cover;}
+  .tabs{display:flex;gap:4px;margin-bottom:32px;border-bottom:1px solid var(--border);overflow-x:auto;scrollbar-width:none;}
+  .tabs::-webkit-scrollbar{display:none;}
+  .tab{padding:10px 20px;font-size:13px;font-weight:500;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap;transition:all .2s;background:none;border-top:none;border-left:none;border-right:none;font-family:var(--font-body);margin-bottom:-1px;}
+  .tab:hover{color:var(--text);}
+  .tab.active{color:var(--accent);border-bottom-color:var(--accent);}
+  .panel{display:none;}
+  .panel.active{display:block;animation:fadeIn .3s ease;}
+  @keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+  .stats-strip{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin-bottom:32px;}
+  .stat-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:18px 20px;transition:border-color .2s;}
+  .stat-card:hover{border-color:var(--accent);}
+  .stat-card .label{font-size:11px;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin-bottom:6px;font-family:var(--font-mono);}
+  .stat-card .value{font-family:var(--font-display);font-size:32px;color:var(--accent);line-height:1;}
+  .stat-card .unit{font-size:12px;color:var(--muted);margin-top:2px;font-family:var(--font-mono);}
+  .lb-table{width:100%;border-collapse:collapse;}
+  .lb-table thead th{font-family:var(--font-mono);font-size:10px;text-transform:uppercase;letter-spacing:1px;color:var(--muted);text-align:left;padding:0 12px 10px;border-bottom:1px solid var(--border);}
+  .lb-table thead th:nth-child(n+4){text-align:right;}
+  .lb-row{border-bottom:1px solid rgba(42,42,56,.5);transition:background .15s;animation:slideIn .3s ease both;}
+  .lb-row:hover{background:rgba(240,255,68,.03);}
+  @keyframes slideIn{from{opacity:0;transform:translateX(-10px)}to{opacity:1;transform:none}}
+  .lb-row td{padding:14px 12px;vertical-align:middle;}
+  .lb-row td:nth-child(n+4){text-align:right;}
+  .rank-badge{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-family:var(--font-display);font-size:18px;}
+  .rank-1{background:rgba(255,215,0,.15);color:var(--gold);border:1px solid rgba(255,215,0,.3);}
+  .rank-2{background:rgba(192,192,192,.1);color:var(--silver);border:1px solid rgba(192,192,192,.2);}
+  .rank-3{background:rgba(205,127,50,.1);color:var(--bronze);border:1px solid rgba(205,127,50,.2);}
+  .rank-n{background:var(--surface);color:var(--muted);border:1px solid var(--border);font-size:13px;font-family:var(--font-mono);}
+  .member-info{display:flex;align-items:center;gap:10px;}
+  .member-info img{width:36px;height:36px;border-radius:50%;object-fit:cover;border:2px solid var(--border);}
+  .member-name{font-weight:500;font-size:14px;}
+  .member-team{font-size:11px;color:var(--muted);font-family:var(--font-mono);}
+  .team-dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:4px;}
+  .points-cell{font-family:var(--font-display);font-size:22px;color:var(--accent);}
+  .metric-val{font-family:var(--font-mono);font-size:13px;color:var(--text);}
+  .metric-unit{font-size:10px;color:var(--muted);}
+  .streak-badge{display:inline-flex;align-items:center;gap:4px;background:rgba(255,107,107,.1);border:1px solid rgba(255,107,107,.2);border-radius:6px;padding:2px 8px;font-size:11px;font-family:var(--font-mono);color:var(--accent2);}
+  .team-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px;margin-bottom:40px;}
+  .team-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:24px;position:relative;overflow:hidden;transition:transform .2s,border-color .2s;animation:fadeIn .4s ease both;}
+  .team-card:hover{transform:translateY(-2px);border-color:var(--accent);}
+  .team-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--team-color,var(--accent));}
+  .team-card-rank{position:absolute;top:20px;right:20px;font-family:var(--font-display);font-size:48px;color:rgba(255,255,255,.04);line-height:1;pointer-events:none;}
+  .team-name{font-family:var(--font-display);font-size:24px;letter-spacing:1px;margin-bottom:4px;color:var(--team-color,var(--accent));}
+  .team-members-count{font-size:12px;color:var(--muted);font-family:var(--font-mono);margin-bottom:20px;}
+  .team-stats-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+  .ts-label{font-size:10px;text-transform:uppercase;letter-spacing:1px;color:var(--muted);font-family:var(--font-mono);}
+  .ts-val{font-family:var(--font-display);font-size:22px;color:var(--text);line-height:1.2;}
+  .ts-val.big{font-size:32px;color:var(--team-color,var(--accent));}
+  .metric-tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:24px;}
+  .mtab{padding:6px 16px;border-radius:20px;border:1px solid var(--border);background:transparent;color:var(--muted);font-size:12px;font-family:var(--font-mono);cursor:pointer;transition:all .2s;}
+  .mtab.active{background:var(--accent);color:#000;border-color:var(--accent);font-weight:600;}
+  .mtab:hover:not(.active){border-color:var(--text);color:var(--text);}
+  .loading{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:80px 20px;gap:16px;color:var(--muted);}
+  .spinner{width:32px;height:32px;border:2px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .7s linear infinite;}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  .empty{text-align:center;padding:60px 20px;color:var(--muted);font-size:14px;}
+  .empty .icon{font-size:48px;margin-bottom:12px;}
+  .scoring-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px;}
+  .score-rule{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:16px 20px;display:flex;align-items:flex-start;gap:14px;}
+  .score-rule .sicon{font-size:24px;line-height:1;flex-shrink:0;margin-top:2px;}
+  .score-rule .rule-title{font-weight:600;font-size:14px;margin-bottom:4px;}
+  .score-rule .rule-desc{font-size:12px;color:var(--muted);line-height:1.5;}
+  .score-rule .pts{margin-left:auto;flex-shrink:0;font-family:var(--font-display);font-size:22px;color:var(--accent);padding-left:12px;}
+  #toast{position:fixed;bottom:24px;right:24px;background:var(--card);border:1px solid var(--border);border-radius:10px;padding:14px 20px;font-size:13px;max-width:320px;transform:translateY(100px);opacity:0;transition:all .3s;z-index:999;}
+  #toast.show{transform:none;opacity:1;}
+  #toast.success{border-color:var(--accent);color:var(--accent);}
+  #toast.error{border-color:var(--accent2);color:var(--accent2);}
+  .team-section-header{font-family:var(--font-display);font-size:20px;letter-spacing:1px;margin:32px 0 12px;}
+  @media(max-width:600px){
+    .lb-table thead th:is(:nth-child(4),:nth-child(5),:nth-child(6),:nth-child(7)){display:none;}
+    .lb-row td:is(:nth-child(4),:nth-child(5),:nth-child(6),:nth-child(7)){display:none;}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="header-left">
+      <h1 id="challenge-name">FITNESS CHALLENGE</h1>
+      <p id="challenge-period"></p>
+      <p style="font-family:var(--font-mono);font-size:12px;color:var(--muted);margin-top:4px;" id="countdown"></p>
+    </div>
+    <div class="header-right" id="header-actions">
+      <div class="spinner" style="width:20px;height:20px"></div>
+    </div>
+  </header>
+
+  <div class="tabs">
+    <button class="tab active" data-tab="overall">🏆 Overall</button>
+    <button class="tab" data-tab="teams">👥 Teams</button>
+    <button class="tab" data-tab="individual">📊 Individual</button>
+    <button class="tab" data-tab="scoring">📋 Scoring Guide</button>
+  </div>
+
+  <div class="panel active" id="panel-overall">
+    <div class="stats-strip" id="overall-stats"></div>
+    <div id="overall-lb-wrap"></div>
+  </div>
+
+  <div class="panel" id="panel-teams">
+    <div class="team-grid" id="team-grid"></div>
+    <div id="team-lb-wrap"></div>
+  </div>
+
+  <div class="panel" id="panel-individual">
+    <div class="metric-tabs">
+      <button class="mtab active" data-metric="points">🏆 Points</button>
+      <button class="mtab" data-metric="calories">🔥 Calories</button>
+      <button class="mtab" data-metric="distance">📏 Distance</button>
+      <button class="mtab" data-metric="duration">⏱️ Duration</button>
+      <button class="mtab" data-metric="activities">🎯 Activities</button>
+    </div>
+    <div id="metric-lb-wrap"></div>
+  </div>
+
+  <div class="panel" id="panel-scoring">
+    <div class="scoring-grid" id="scoring-grid"></div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+let LB = [], TEAMS = [], activeMetric = 'points';
+
+// ── INIT ─────────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', async () => {
+  // Header info
+  document.getElementById('challenge-name').textContent = CONFIG.CHALLENGE_NAME.toUpperCase();
+  const s = new Date(CONFIG.CHALLENGE_START).toLocaleDateString('en-GB',{day:'numeric',month:'short'});
+  const e = new Date(CONFIG.CHALLENGE_END).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'});
+  document.getElementById('challenge-period').textContent = `${s} — ${e}`;
+
+  // Tab clicks
+  document.querySelectorAll('.tab').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+      document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById('panel-'+btn.dataset.tab).classList.add('active');
+    });
+  });
+
+  // Metric tab clicks
+  document.querySelectorAll('.mtab').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.mtab').forEach(t=>t.classList.remove('active'));
+      btn.classList.add('active');
+      activeMetric = btn.dataset.metric;
+      renderMetricLB();
+    });
+  });
+
+  renderHeaderActions();
+  renderScoringGuide();
+  countdown();
+  setInterval(countdown, 60000);
+  await loadData();
+});
+
+function countdown() {
+  const end = new Date(CONFIG.CHALLENGE_END + 'T23:59:59');
+  const diff = end - new Date();
+  const el = document.getElementById('countdown');
+  if (diff <= 0) { el.textContent = '🏁 Challenge ended'; return; }
+  const d=Math.floor(diff/86400000), h=Math.floor(diff%86400000/3600000), m=Math.floor(diff%3600000/60000);
+  el.textContent = `⏳ ${d}d ${h}h ${m}m remaining`;
+}
+
+// ── DATA ─────────────────────────────────────────────────────
+async function loadData() {
+  try {
+    const result = await DB.getLeaderboard();
+    LB = result.leaderboard;
+    TEAMS = result.teams;
+    renderOverallStats();
+    renderOverallLB();
+    renderTeams();
+    renderMetricLB();
+  } catch(err) {
+    console.error(err);
+    showToast('Failed to load data — check Supabase config.', 'error');
+  }
+}
+
+// ── HEADER ACTIONS ───────────────────────────────────────────
+function renderHeaderActions() {
+  const athlete = Session.get();
+  const el = document.getElementById('header-actions');
+  if (!athlete) {
+    el.innerHTML = `<a href="${Strava.getAuthUrl()}" class="btn btn-strava">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M15.387 17.944l-2.089-4.116h-3.065L15.387 24l5.15-10.172h-3.066m-7.008-5.599l2.836 5.598h4.172L10.463 0l-7 13.828h4.169"/></svg>
+      Connect Strava
+    </a>`;
+  } else {
+    el.innerHTML = `
+      <div class="athlete-pill">
+        <img src="${athlete.profile_medium||''}" alt="" onerror="this.style.display='none'"/>
+        <span>${athlete.firstname} ${athlete.lastname}</span>
+      </div>
+      <button class="btn btn-sync" id="sync-btn" onclick="syncNow()">⚡ Sync</button>
+      <button class="btn btn-outline" onclick="doLogout()">Sign out</button>`;
+  }
+}
+
+async function syncNow() {
+  const btn = document.getElementById('sync-btn');
+  const athlete = Session.get();
+  if (!athlete) return;
+  btn.disabled = true; btn.textContent = '⏳ Syncing...';
+  try {
+    await Strava.fetchActivities(athlete.id);
+    await loadData();
+    showToast('✅ Sync complete!', 'success');
+  } catch(err) {
+    showToast('Sync failed: ' + err.message, 'error');
+  } finally { btn.disabled=false; btn.textContent='⚡ Sync'; }
+}
+
+function doLogout() { Session.clear(); renderHeaderActions(); showToast('Signed out.'); }
+
+// ── OVERALL ──────────────────────────────────────────────────
+function renderOverallStats() {
+  const totalPts  = LB.reduce((s,m)=>s+m.totalPoints,0);
+  const totalCal  = LB.reduce((s,m)=>s+m.totalCalories,0);
+  const totalKm   = LB.reduce((s,m)=>s+m.totalDistanceKm,0);
+  const totalActs = LB.reduce((s,m)=>s+m.activityCount,0);
+  document.getElementById('overall-stats').innerHTML = [
+    ['👥 Participants',    LB.length,              'athletes'],
+    ['🔥 Total Calories',  fmt(Math.round(totalCal)), 'kcal burned'],
+    ['📏 Total Distance',  fmt(Math.round(totalKm)),  'km covered'],
+    ['🎯 Activities',      totalActs,              'valid workouts'],
+    ['🏆 Total Points',    fmt(totalPts),          'across all teams'],
+  ].map(([label,value,unit])=>`
+    <div class="stat-card">
+      <div class="label">${label}</div>
+      <div class="value">${value}</div>
+      <div class="unit">${unit}</div>
+    </div>`).join('');
+}
+
+function renderOverallLB() {
+  document.getElementById('overall-lb-wrap').innerHTML = buildTable(LB, 'points');
+}
+
+// ── TEAMS ────────────────────────────────────────────────────
+function renderTeams() {
+  document.getElementById('team-grid').innerHTML = TEAMS.map((t,i)=>`
+    <div class="team-card" style="--team-color:${t.color}">
+      <div class="team-card-rank">#${i+1}</div>
+      <div class="team-name">${t.emoji} ${t.name}</div>
+      <div class="team-members-count">${t.memberCount} member${t.memberCount!==1?'s':''}</div>
+      <div class="team-stats-row">
+        <div><div class="ts-label">Points</div><div class="ts-val big">${fmt(t.totalPoints)}</div></div>
+        <div><div class="ts-label">Activities</div><div class="ts-val">${t.activityCount}</div></div>
+        <div><div class="ts-label">Calories</div><div class="ts-val">${fmt(Math.round(t.totalCalories))}</div></div>
+        <div><div class="ts-label">Distance</div><div class="ts-val">${fmt(Math.round(t.totalDistanceKm))} km</div></div>
+      </div>
+    </div>`).join('');
+
+  const teamById = {};
+  CONFIG.TEAMS.forEach(t=>teamById[t.id]=t);
+  let html = '';
+  TEAMS.forEach(t => {
+    const members = LB.filter(m=>m.team_id===t.id);
+    if (!members.length) return;
+    html += `<div class="team-section-header" style="color:${t.color}">${t.emoji} ${t.name}</div>
+             ${buildTable(members,'points',true)}`;
+  });
+  document.getElementById('team-lb-wrap').innerHTML = html;
+}
+
+// ── INDIVIDUAL ───────────────────────────────────────────────
+function renderMetricLB() {
+  let sorted = [...LB];
+  if (activeMetric==='calories')   sorted.sort((a,b)=>b.totalCalories-a.totalCalories);
+  if (activeMetric==='distance')   sorted.sort((a,b)=>b.totalDistanceKm-a.totalDistanceKm);
+  if (activeMetric==='duration')   sorted.sort((a,b)=>b.totalDurationMin-a.totalDurationMin);
+  if (activeMetric==='activities') sorted.sort((a,b)=>b.activityCount-a.activityCount);
+  document.getElementById('metric-lb-wrap').innerHTML = buildTable(sorted, activeMetric);
+}
+
+// ── TABLE ────────────────────────────────────────────────────
+function buildTable(members, metric, compact=false) {
+  if (!members.length) return `<div class="empty"><div class="icon">🏃</div>No data yet — connect Strava to join!</div>`;
+  const teamById={};
+  CONFIG.TEAMS.forEach(t=>teamById[t.id]=t);
+
+  const rows = members.map((m,i)=>{
+    const rank=i+1;
+    const rc = rank<=3?`rank-${rank}`:'rank-n';
+    const team=teamById[m.team_id]||{name:'No Team',color:'#666',emoji:'⚪'};
+    let primary='';
+    switch(metric){
+      case 'points':     primary=`<span class="points-cell">${m.totalPoints}</span>`; break;
+      case 'calories':   primary=`<span class="metric-val">${fmt(Math.round(m.totalCalories))} <span class="metric-unit">kcal</span></span>`; break;
+      case 'distance':   primary=`<span class="metric-val">${m.totalDistanceKm.toFixed(1)} <span class="metric-unit">km</span></span>`; break;
+      case 'duration':   primary=`<span class="metric-val">${fmtDur(m.totalDurationMin)}</span>`; break;
+      case 'activities': primary=`<span class="metric-val">${m.activityCount} <span class="metric-unit">acts</span></span>`; break;
+    }
+    const streak = m.currentStreak>=2?`<span class="streak-badge">🔥 ${m.currentStreak}d</span>`:'';
+    return `<tr class="lb-row" style="animation-delay:${i*30}ms">
+      <td><div class="rank-badge ${rc}">${rank}</div></td>
+      <td><div class="member-info">
+        <img src="${m.profile_pic||''}" alt="" onerror="this.style.display='none'" loading="lazy"/>
+        <div>
+          <div class="member-name">${m.name} ${streak}</div>
+          <div class="member-team"><span class="team-dot" style="background:${team.color}"></span>${team.name}</div>
+        </div>
+      </div></td>
+      <td>${primary}</td>
+      ${!compact?`
+      <td><span class="metric-val">${fmt(Math.round(m.totalCalories))} <span class="metric-unit">kcal</span></span></td>
+      <td><span class="metric-val">${m.totalDistanceKm.toFixed(1)} <span class="metric-unit">km</span></span></td>
+      <td><span class="metric-val">${fmtDur(m.totalDurationMin)}</span></td>
+      <td><span class="metric-val">${m.activityCount}</span></td>`:''}
+    </tr>`;
+  }).join('');
+
+  return `<table class="lb-table">
+    <thead><tr>
+      <th>#</th><th>Athlete</th><th>${{points:'Points',calories:'Calories',distance:'Distance',duration:'Duration',activities:'Activities'}[metric]||metric}</th>
+      ${!compact?'<th>Calories</th><th>Distance</th><th>Duration</th><th>Acts</th>':''}
+    </tr></thead>
+    <tbody>${rows}</tbody>
+  </table>`;
+}
+
+// ── SCORING GUIDE ────────────────────────────────────────────
+function renderScoringGuide() {
+  const S=CONFIG.SCORING;
+  const rules=[
+    ['✅','Valid Activity',`Complete a workout above the minimum duration for your sport.`,`+${S.BASE_ACTIVITY}`],
+    ['🔥','Calorie Bonus',`+${S.CALORIES_BONUS} pts per ${S.CALORIES_PER} kcal burned. Unlimited stacking.`,`+${S.CALORIES_BONUS}/500kcal`],
+    ['📏','Distance Bonus',`+${S.DISTANCE_BONUS} pts per ${S.DISTANCE_PER} km. Unlimited stacking.`,`+${S.DISTANCE_BONUS}/5km`],
+    ['⏱️','Duration Bonus',`Above 60 min: +${S.DURATION_BONUS} pts per 30 min. Unlimited.`,`+${S.DURATION_BONUS}/30m`],
+    ['🏆','Daily Top Calories',`Highest calories in your team for the day.`,`+${S.DAILY_TOP_CALORIES}`],
+    ['🎯','Streak M1','3 consecutive days. Claimed once per challenge.',`+${S.STREAK_MILESTONES[0]}`],
+    ['🎯','Streak M2','6 consecutive days. Claimed once per challenge.',`+${S.STREAK_MILESTONES[1]}`],
+    ['🎯','Streak M3','9 consecutive days. Claimed once per challenge.',`+${S.STREAK_MILESTONES[2]}`],
+    ['🎯','Streak M4+','12+ consecutive days. Max streak bonus = 100 pts.',`+${S.STREAK_MILESTONES[3]}`],
+  ];
+  document.getElementById('scoring-grid').innerHTML=rules.map(([icon,title,desc,pts])=>`
+    <div class="score-rule">
+      <div class="sicon">${icon}</div>
+      <div><div class="rule-title">${title}</div><div class="rule-desc">${desc}</div></div>
+      <div class="pts">${pts}</div>
+    </div>`).join('');
+}
+
+// ── UTILS ────────────────────────────────────────────────────
+function fmt(n){return n.toLocaleString('en-US');}
+function fmtDur(m){const h=Math.floor(m/60),mn=Math.round(m%60);return h>0?`${h}h ${mn}m`:`${mn}m`;}
+
+let _tt;
+function showToast(msg,type=''){
+  const el=document.getElementById('toast');
+  el.textContent=msg;el.className='show '+(type||'');
+  clearTimeout(_tt);_tt=setTimeout(()=>el.className='',3500);
+}
+</script>
+</body>
+</html>
