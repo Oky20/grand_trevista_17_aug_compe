@@ -28,7 +28,7 @@ const Strava = {
   async exchangeCode(code) {
     const res = await fetch(`${CONFIG.SUPABASE_URL}/functions/v1/strava-auth`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${CONFIG.SUPABASE_ANON_KEY}` },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ code }),
     });
     if (!res.ok) throw new Error(await res.text());
@@ -39,7 +39,7 @@ const Strava = {
   async fetchActivities(athleteId) {
     const res = await fetch(`${CONFIG.SUPABASE_URL}/functions/v1/strava-sync`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${CONFIG.SUPABASE_ANON_KEY}` },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ athlete_id: athleteId }),
     });
     if (!res.ok) throw new Error(await res.text());
