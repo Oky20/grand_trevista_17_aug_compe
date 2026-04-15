@@ -104,6 +104,16 @@
   #toast.success{border-color:var(--accent);color:var(--accent);}
   #toast.error{border-color:var(--accent2);color:var(--accent2);}
   .team-section-header{font-family:var(--font-display);font-size:20px;letter-spacing:1px;margin:32px 0 12px;}
+
+  .date-range-bar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:16px 0;border-bottom:1px solid var(--border);margin-bottom:32px;}
+  .date-range-bar label{font-size:11px;text-transform:uppercase;letter-spacing:1px;color:var(--muted);font-family:var(--font-mono);}
+  .date-input{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:8px 12px;color:var(--text);font-family:var(--font-mono);font-size:13px;cursor:pointer;outline:none;transition:border-color .2s;}
+  .date-input:focus{border-color:var(--accent);}
+  .date-input::-webkit-calendar-picker-indicator{filter:invert(1) brightness(.5);}
+  .date-sep{color:var(--muted);font-family:var(--font-mono);font-size:13px;}
+  .btn-apply{background:var(--accent);color:#000;padding:8px 16px;border-radius:8px;border:none;font-size:12px;font-weight:700;cursor:pointer;font-family:var(--font-body);transition:all .2s;}
+  .btn-apply:hover{background:#e8f700;}
+
   @media(max-width:600px){
     .lb-table thead th:is(:nth-child(4),:nth-child(5),:nth-child(6),:nth-child(7)){display:none;}
     .lb-row td:is(:nth-child(4),:nth-child(5),:nth-child(6),:nth-child(7)){display:none;}
@@ -128,6 +138,16 @@
     <button class="tab" data-tab="teams">👥 Teams</button>
     <button class="tab" data-tab="individual">📊 Individual</button>
     <button class="tab" data-tab="scoring">📋 Scoring Guide</button>
+  </div>
+
+  
+  <div class="date-range-bar">
+    <label>Period</label>
+    <input type="date" class="date-input" id="range-start"/>
+    <span class="date-sep">→</span>
+    <input type="date" class="date-input" id="range-end"/>
+    <button class="btn-apply" onclick="applyDateRange()">Apply</button>
+    <span style="font-size:12px;color:var(--muted);font-family:var(--font-mono);" id="range-label"></span>
   </div>
 
   <div class="panel active" id="panel-overall">
@@ -160,6 +180,8 @@
 
 <script>
 let LB = [], TEAMS = [], activeMetric = 'points';
+let activeStart = CONFIG.CHALLENGE_START;
+let activeEnd   = CONFIG.CHALLENGE_END;
 
 // ── INIT ─────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', async () => {
@@ -189,6 +211,12 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
   });
 
+
+  // Init date range inputs
+  document.getElementById('range-start').value = CONFIG.CHALLENGE_START;
+  document.getElementById('range-end').value   = CONFIG.CHALLENGE_END;
+  updateRangeLabel();
+
   renderHeaderActions();
   renderScoringGuide();
   countdown();
@@ -208,7 +236,7 @@ function countdown() {
 // ── DATA ─────────────────────────────────────────────────────
 async function loadData() {
   try {
-    const result = await DB.getLeaderboard();
+    const result = await DB.getLeaderboard(activeStart, activeEnd);
     LB = result.leaderboard;
     TEAMS = result.teams;
     renderOverallStats();
@@ -241,13 +269,34 @@ function renderHeaderActions() {
   }
 }
 
+
+// ── DATE RANGE ───────────────────────────────────────────────
+function applyDateRange() {
+  const start = document.getElementById('range-start').value;
+  const end   = document.getElementById('range-end').value;
+  if (!start || !end) return showToast('Pilih start dan end date dulu!', 'error');
+  if (start > end)    return showToast('Start date harus sebelum end date!', 'error');
+  activeStart = start;
+  activeEnd   = end;
+  updateRangeLabel();
+  loadData();
+  showToast('✅ Period updated!', 'success');
+}
+
+function updateRangeLabel() {
+  const s = new Date(activeStart).toLocaleDateString('en-GB', {day:'numeric',month:'short',year:'numeric'});
+  const e = new Date(activeEnd).toLocaleDateString('en-GB', {day:'numeric',month:'short',year:'numeric'});
+  const el = document.getElementById('range-label');
+  if (el) el.textContent = `Showing: ${s} — ${e}`;
+}
+
 async function syncNow() {
   const btn = document.getElementById('sync-btn');
   const athlete = Session.get();
   if (!athlete) return;
   btn.disabled = true; btn.textContent = '⏳ Syncing...';
   try {
-    await Strava.fetchActivities(athlete.id);
+    await Strava.fetchActivities(athlete.id, activeStart);
     await loadData();
     showToast('✅ Sync complete!', 'success');
   } catch(err) {
