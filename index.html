@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>GTRFest 17 Agustus</title>
+<title>Fitness Challenge</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -142,9 +142,9 @@
   
   <div class="date-range-bar">
     <label>Period</label>
-    <input type="date" class="date-input" id="range-start"/>
+    <input type="date" class="date-input" id="range-start" value="2026-04-01"/>
     <span class="date-sep">→</span>
-    <input type="date" class="date-input" id="range-end"/>
+    <input type="date" class="date-input" id="range-end" value="2026-04-30"/>
     <button class="btn-apply" onclick="applyDateRange()">Apply</button>
     <span style="font-size:12px;color:var(--muted);font-family:var(--font-mono);" id="range-label"></span>
   </div>
@@ -179,8 +179,8 @@
 
 <script>
 let LB = [], TEAMS = [], activeMetric = 'points';
-let activeStart = CONFIG.CHALLENGE_START;
-let activeEnd   = CONFIG.CHALLENGE_END;
+let activeStart = CONFIG.CHALLENGE_START || '2026-04-01';
+let activeEnd   = CONFIG.CHALLENGE_END   || '2026-04-30';
 
 // ── INIT ─────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', async () => {
