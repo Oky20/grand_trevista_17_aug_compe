@@ -179,7 +179,7 @@
 
 <footer style="text-align:center;padding:32px 20px 48px;border-top:1px solid var(--border);margin-top:40px;">
   <a href="https://www.strava.com" target="_blank" rel="noopener" style="display:inline-block;line-height:0;">
-    <img src="powered_by_strava.png" 
+    <img src="api_logo_pwrdBy_strava_horiz_white.png" 
          alt="Powered by Strava" 
          style="height:32px;width:auto;opacity:0.7;"
          onerror="this.style.display='none';this.nextElementSibling.style.display='inline'"/>
@@ -277,10 +277,10 @@ function renderHeaderActions() {
   const el = document.getElementById('header-actions');
   if (!athlete) {
     el.innerHTML = `<a href="${Strava.getAuthUrl()}" style="display:inline-block;line-height:0;">
-      <img src="btn_strava_connectwith_orange.png" 
-           alt="Connect with Strava" 
+      <img src="btn_strava_connect_with_orange.png"
+           alt="Connect with Strava"
            style="height:48px;width:auto;cursor:pointer;"
-           onerror="this.outerHTML='<span class=\'btn btn-strava\'>Connect with Strava</span>'"/>
+           onerror="this.outerHTML='<a href=\'${Strava.getAuthUrl()}\' class=\'btn btn-strava\'>Connect with Strava</a>'"/>
     </a>`;
   } else {
     el.innerHTML = `
