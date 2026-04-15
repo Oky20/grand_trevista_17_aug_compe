@@ -123,10 +123,12 @@
 <body>
 <div class="wrap">
   <header>
-    <div class="header-left">
-      <h1 id="challenge-name">FITNESS CHALLENGE</h1>
-      <p id="challenge-period"></p>
-      <p style="font-family:var(--font-mono);font-size:12px;color:var(--muted);margin-top:4px;" id="countdown"></p>
+    <div class="header-left" style="display:flex;align-items:center;gap:20px;">
+      <img src="GTR_Fest.png" alt="GTR Fest" style="height:90px;width:auto;object-fit:contain;flex-shrink:0;"/>
+      <div>
+        <h1 id="challenge-name">FITNESS CHALLENGE</h1>
+        <p style="font-family:var(--font-mono);font-size:12px;color:var(--muted);margin-top:4px;" id="countdown"></p>
+      </div>
     </div>
     <div class="header-right" id="header-actions">
       <div class="spinner" style="width:20px;height:20px"></div>
@@ -225,10 +227,23 @@ document.addEventListener('DOMContentLoaded', async () => {
 });
 
 function countdown() {
-  const end = new Date(CONFIG.CHALLENGE_END + 'T23:59:59');
-  const diff = end - new Date();
   const el = document.getElementById('countdown');
-  if (diff <= 0) { el.textContent = '🏁 Challenge ended'; return; }
+  if (!el) return;
+  const now = new Date();
+  const start = new Date(activeStart);
+  const end   = new Date(activeEnd + 'T23:59:59');
+
+  if (now < start) {
+    const diff = start - now;
+    const d=Math.floor(diff/86400000), h=Math.floor(diff%86400000/3600000);
+    el.textContent = `🗓️ Starts in ${d}d ${h}h`;
+    return;
+  }
+  if (now > end) {
+    el.textContent = '🏁 Challenge ended';
+    return;
+  }
+  const diff = end - now;
   const d=Math.floor(diff/86400000), h=Math.floor(diff%86400000/3600000), m=Math.floor(diff%3600000/60000);
   el.textContent = `⏳ ${d}d ${h}h ${m}m remaining`;
 }
@@ -279,6 +294,7 @@ function applyDateRange() {
   activeStart = start;
   activeEnd   = end;
   updateRangeLabel();
+  countdown();
   loadData();
   showToast('✅ Period updated!', 'success');
 }
