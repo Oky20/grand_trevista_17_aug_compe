@@ -329,7 +329,7 @@ async function loadData() {
     renderTeams();
     renderMetricLB();
     renderAthleteSelector();
-    // Re-render selected athlete if any
+    renderAllActivities();
     if (selectedAthleteId) renderAthleteActivities(selectedAthleteId);
   } catch(err) {
     console.error(err);
@@ -553,7 +553,12 @@ function initActivitiesTab() {
   // Search input
   document.getElementById('acts-search').addEventListener('input', e => {
     actsSearch = e.target.value.toLowerCase();
+    selectedAthleteId = null;
     renderAthleteSelector();
+    if (!actsSearch) {
+      // Back to all view when search cleared
+      renderAllActivities();
+    }
   });
 }
 
@@ -562,14 +567,84 @@ function filterTeam(teamId, btn) {
   document.querySelectorAll('.team-filter-btn').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
   selectedAthleteId = null;
+  actsSearch = '';
+  document.getElementById('acts-search').value = '';
   renderAthleteSelector();
+  renderAllActivities();
+}
 
-  // If team selected, auto-show all activities for that team
-  if (actsFilterTeam !== 'all') {
-    renderTeamActivities(actsFilterTeam);
-  } else {
-    document.getElementById('acts-content').innerHTML = '';
+function renderAllActivities() {
+  const teamById = {};
+  CONFIG.TEAMS.forEach(t => teamById[t.id] = t);
+
+  const sportIcon = {
+    'Run':'🏃','Walk':'🚶','Ride':'🚴','VirtualRide':'🚴','Swim':'🏊',
+    'Padel':'🏸','Tennis':'🎾','Badminton':'🏸','WeightTraining':'💪',
+    'Workout':'💪','Yoga':'🧘','Pilates':'🧘','Hike':'🥾',
+  };
+
+  // Gather all valid activities, filtered by team if needed
+  let members = [...LB];
+  if (actsFilterTeam !== 'all') members = members.filter(m => m.team_id === actsFilterTeam);
+
+  // Flatten all activities with member info, sort by date desc
+  const allActs = [];
+  members.forEach(m => {
+    const team = teamById[m.team_id] || { color: '#666', name: 'No Team', emoji: '⚪' };
+    (m.activities || []).forEach(a => {
+      allActs.push({ ...a, member: m, team });
+    });
+  });
+
+  allActs.sort((a, b) => new Date(b.start_date) - new Date(a.start_date));
+
+  if (!allActs.length) {
+    document.getElementById('acts-content').innerHTML =
+      `<div class="empty"><div class="icon">🏃</div>No activities in this period.</div>`;
+    return;
   }
+
+  const rows = allActs.map((a, i) => {
+    const icon   = sportIcon[a.sport_type] || '🏅';
+    const distKm = ((a.distance||0)/1000).toFixed(1);
+    const durMin = Math.round((a.moving_time||0)/60);
+    const cal    = Math.round(a.calories||0);
+    const date   = new Date(a.start_date).toLocaleDateString('en-GB',{weekday:'short',day:'numeric',month:'short'});
+    const pts    = a.points || 0;
+    const bd     = a.breakdown || {};
+    const bonuses = [];
+    if (bd.base)     bonuses.push(`+${bd.base} base`);
+    if (bd.calories) bonuses.push(`+${bd.calories} cal`);
+    if (bd.distance) bonuses.push(`+${bd.distance} dist`);
+    if (bd.duration) bonuses.push(`+${bd.duration} dur`);
+    if (bd.dailyTop) bonuses.push(`+${bd.dailyTop} 🏆`);
+    if (bd.streak)   bonuses.push(`+${bd.streak} 🔥`);
+
+    return `<div class="act-card" style="animation-delay:${Math.min(i,20)*15}ms">
+      <div class="act-sport-icon">${icon}</div>
+      <div class="act-main">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:2px;">
+          <img src="${a.member.profile_pic||''}" alt="" onerror="this.style.display='none'"
+            style="width:20px;height:20px;border-radius:50%;object-fit:cover;flex-shrink:0;"/>
+          <span style="font-size:12px;color:var(--muted);font-family:var(--font-mono);">
+            ${a.member.name}
+            <span style="color:${a.team.color}"> · ${a.team.emoji} ${a.team.name}</span>
+          </span>
+        </div>
+        <div class="act-name">${a.name||a.sport_type}</div>
+        <div class="act-date">${date} · ${a.sport_type}</div>
+        <div class="act-stats">
+          <div class="act-stat">⏱ <span>${durMin}m</span></div>
+          ${distKm > 0 ? `<div class="act-stat">📏 <span>${distKm} km</span></div>` : ''}
+          ${cal > 0 ? `<div class="act-stat">🔥 <span>${cal} kcal</span></div>` : ''}
+        </div>
+        ${bonuses.length ? `<div class="act-breakdown">${bonuses.map(b=>`<span class="act-bonus">${b}</span>`).join('')}</div>` : ''}
+      </div>
+      <div class="act-pts"><div class="act-pts-val">${pts}</div><div class="act-pts-label">pts</div></div>
+    </div>`;
+  }).join('');
+
+  document.getElementById('acts-content').innerHTML = rows;
 }
 
 function renderTeamActivities(teamId) {
@@ -654,13 +729,17 @@ function renderTeamActivities(teamId) {
 function renderAthleteSelector() {
   const teamById = {};
   CONFIG.TEAMS.forEach(t => teamById[t.id] = t);
-
   const el = document.getElementById('athlete-selector');
 
-  // If a team is selected (not "all"), show all athletes in that team as chips
-  if (actsFilterTeam !== 'all') {
-    let filtered = LB.filter(m => m.team_id === actsFilterTeam);
-    if (actsSearch) filtered = filtered.filter(m => m.name.toLowerCase().includes(actsSearch));
+  // Show matching athlete chips when searching
+  if (actsSearch) {
+    let filtered = [...LB];
+    if (actsFilterTeam !== 'all') filtered = filtered.filter(m => m.team_id === actsFilterTeam);
+    filtered = filtered.filter(m => m.name.toLowerCase().includes(actsSearch));
+    if (!filtered.length) {
+      el.innerHTML = `<div style="color:var(--muted);font-size:13px;padding:8px 0;font-family:var(--font-mono);">No athletes found.</div>`;
+      return;
+    }
     el.innerHTML = filtered.map(m => {
       const team = teamById[m.team_id] || { color: '#666' };
       const sel  = m.strava_athlete_id === selectedAthleteId ? 'selected' : '';
@@ -670,37 +749,15 @@ function renderAthleteSelector() {
         <span>${m.name}</span>
       </div>`;
     }).join('');
-    return;
+  } else {
+    el.innerHTML = '';
   }
-
-  // If search is empty and no team selected, hide chips
-  if (!actsSearch) {
-    el.innerHTML = `<div style="color:var(--muted);font-size:13px;padding:8px 0;font-family:var(--font-mono);">
-      Search athlete or select a team to view activities.
-    </div>`;
-    return;
-  }
-
-  // Search mode — show matching athletes across all teams
-  const filtered = LB.filter(m => m.name.toLowerCase().includes(actsSearch));
-  if (!filtered.length) {
-    el.innerHTML = `<div style="color:var(--muted);font-size:13px;padding:8px 0;">No athletes found.</div>`;
-    return;
-  }
-
-  el.innerHTML = filtered.map(m => {
-    const team = teamById[m.team_id] || { color: '#666' };
-    const sel  = m.strava_athlete_id === selectedAthleteId ? 'selected' : '';
-    return `<div class="athlete-chip ${sel}" onclick="selectAthlete(${m.strava_athlete_id})">
-      <span class="chip-team-dot" style="background:${team.color}"></span>
-      <img src="${m.profile_pic||''}" alt="" onerror="this.style.display='none'" loading="lazy"/>
-      <span>${m.name}</span>
-    </div>`;
-  }).join('');
 }
 
 function selectAthlete(athleteId) {
   selectedAthleteId = athleteId;
+  actsSearch = '';
+  document.getElementById('acts-search').value = '';
   renderAthleteSelector();
   renderAthleteActivities(athleteId);
 }
