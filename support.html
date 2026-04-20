@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Support — GTR Fest 17</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<style>
+:root{--bg:#111116;--card:#1c1c25;--card2:#21212c;--border:#2a2a38;--border2:#333345;--text:#f0f0f5;--muted:#888899;--dim:#555566;--orange:#FC5200;--r:8px;--rlg:12px;--sans:'Inter',sans-serif;--mono:'JetBrains Mono',monospace;}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14px;line-height:1.6;min-height:100vh;}
+.wrap{max-width:680px;margin:0 auto;padding:48px 20px 80px;}
+header{display:flex;align-items:center;justify-content:space-between;margin-bottom:40px;padding-bottom:20px;border-bottom:1px solid var(--border);}
+.logo{font-size:16px;font-weight:600;color:var(--text);}
+.back{font-size:13px;color:var(--muted);text-decoration:none;display:flex;align-items:center;gap:6px;transition:color .15s;}
+.back:hover{color:var(--orange);}
+h1{font-size:22px;font-weight:600;margin-bottom:6px;}
+.subtitle{font-size:14px;color:var(--muted);margin-bottom:40px;}
+.section{margin-bottom:32px;}
+.section-title{font-size:11px;text-transform:uppercase;letter-spacing:.8px;color:var(--dim);font-family:var(--mono);margin-bottom:14px;}
+.card{background:var(--card);border:0.5px solid var(--border);border-radius:var(--rlg);overflow:hidden;}
+.contact-item{display:flex;align-items:center;gap:14px;padding:16px 20px;border-bottom:0.5px solid var(--border);transition:background .15s;}
+.contact-item:last-child{border-bottom:none;}
+.contact-item.clickable:hover{background:var(--card2);}
+.contact-item a{text-decoration:none;color:inherit;display:flex;align-items:center;gap:14px;width:100%;}
+.contact-icon{width:38px;height:38px;border-radius:var(--r);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;background:var(--card2);border:0.5px solid var(--border2);}
+.contact-label{font-size:11px;color:var(--muted);font-family:var(--mono);margin-bottom:2px;}
+.contact-val{font-size:14px;font-weight:500;color:var(--text);}
+.contact-arrow{margin-left:auto;color:var(--dim);font-size:16px;}
+.faq-item{padding:18px 20px;border-bottom:0.5px solid var(--border);}
+.faq-item:last-child{border-bottom:none;}
+.faq-q{font-weight:500;font-size:14px;margin-bottom:6px;}
+.faq-a{font-size:13px;color:var(--muted);line-height:1.6;}
+.faq-a code{background:var(--card2);border:0.5px solid var(--border2);border-radius:4px;padding:1px 6px;font-family:var(--mono);font-size:12px;color:var(--text);}
+.steps{display:flex;flex-direction:column;gap:0;}
+.step{display:flex;gap:14px;padding:16px 20px;border-bottom:0.5px solid var(--border);}
+.step:last-child{border-bottom:none;}
+.step-num{width:26px;height:26px;border-radius:50%;background:rgba(252,82,0,.15);color:var(--orange);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;flex-shrink:0;margin-top:1px;font-family:var(--mono);}
+.step-body{}
+.step-title{font-weight:500;font-size:14px;margin-bottom:3px;}
+.step-desc{font-size:13px;color:var(--muted);line-height:1.5;}
+footer{text-align:center;padding:24px 20px;border-top:1px solid var(--border);margin-top:40px;}
+.footer-text{font-size:11px;color:var(--dim);font-family:var(--mono);line-height:1.8;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div class="logo">GTR Fest 17</div>
+    <a href="index.html" class="back">← Leaderboard</a>
+  </header>
+
+  <h1>Support</h1>
+  <p class="subtitle">Having trouble connecting Strava or joining the challenge? We're here to help.</p>
+
+  <!-- CONTACT -->
+  <div class="section">
+    <div class="section-title">Contact Panitia</div>
+    <div class="card">
+      <div class="contact-item">
+          <div class="contact-icon">💬</div>
+          <div>
+            <div class="contact-label">WhatsApp Group</div>
+            <div class="contact-val">Warga Trevista</div>
+          </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- HOW TO JOIN -->
+  <div class="section">
+    <div class="section-title">How to Join</div>
+    <div class="card steps">
+      <div class="step">
+        <div class="step-num">1</div>
+        <div class="step-body">
+          <div class="step-title">Register via Google Form</div>
+          <div class="step-desc">Make sure you have submitted the registration form with your Strava profile link. Only registered participants can join.</div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <div class="step-body">
+          <div class="step-title">Connect your Strava account</div>
+          <div class="step-desc">Click "Connect with Strava" on the leaderboard page and authorize the app. Your team will be assigned automatically based on your registration.</div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <div class="step-body">
+          <div class="step-title">Sync your activities</div>
+          <div class="step-desc">After connecting, click "Sync" to pull your activities from Strava. Data syncs automatically every day at midnight.</div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">4</div>
+        <div class="step-body">
+          <div class="step-title">Check the leaderboard</div>
+          <div class="step-desc">Your points will appear on the leaderboard after syncing. Check the Scoring Guide tab to see how points are calculated.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- FAQ -->
+  <div class="section">
+    <div class="section-title">Frequently Asked Questions</div>
+    <div class="card">
+      <div class="faq-item">
+        <div class="faq-q">I get "Not Registered" when connecting Strava.</div>
+        <div class="faq-a">Your Strava ID is not in the participant list yet. Make sure you submitted the registration form, then contact admin to get added. Share your Strava profile URL (e.g. <code>strava.com/athletes/12345678</code>).</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">My activities are not showing up.</div>
+        <div class="faq-a">Click the "Sync" button after connecting. If activities still don't appear, make sure your Strava activities are set to Public or Followers. Private activities cannot be accessed.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">My points seem incorrect.</div>
+        <div class="faq-a">Check the Activities tab to see point breakdown per activity. Note that activities below the minimum duration for your sport type, or with less than 4 kcal/min, do not earn points.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">I'm in the wrong team.</div>
+        <div class="faq-a">Team assignment is based on your registration data. If there's an error, contact the admin to correct it.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">How often is the leaderboard updated?</div>
+        <div class="faq-a">Automatically every day at midnight (WIB). You can also manually sync anytime by clicking the "Sync" button after logging in.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">Can I disconnect my Strava account?</div>
+        <div class="faq-a">Yes — click "Sign out" on the leaderboard. To fully revoke access, go to your Strava settings → My Apps, and remove GTR Fest 17. Contact admin if you want your data deleted.</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<footer>
+  <div class="footer-text">
+    GTR Fest 17 · Powered by Strava<br/>
+    Not affiliated with or endorsed by Strava.<br/>
+    Community Application under the Strava API Agreement.
+  </div>
+</footer>
+
+</body>
+</html>
