@@ -48,11 +48,11 @@ const CONFIG = {
   // --- Scoring System ---
   SCORING: {
     BASE_ACTIVITY:        10,   // per valid activity
-    CALORIES_PER:        500,   // every X calories
+    CALORIES_PER:        250,   // every X calories
     CALORIES_BONUS:        5,   // points per threshold
-    DISTANCE_PER:          5,   // every X km
+    DISTANCE_PER:        2.5,   // every X km
     DISTANCE_BONUS:        5,   // points per threshold
-    DURATION_BASE:        60,   // minutes before bonus starts
+    DURATION_BASE:        30,   // minutes before bonus starts
     DURATION_STEP:        30,   // every X minutes above base
     DURATION_BONUS:        5,   // points per step
     MIN_CAL_PER_MIN:       4,   // min calories/minute for valid activity (skipped if calories=0)
