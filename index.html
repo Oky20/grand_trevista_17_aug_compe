@@ -407,8 +407,8 @@ function rScoring(){
   const rules=[
     ['✅','Valid Activity',`Min duration met + ≥${S.MIN_CAL_PER_MIN??4} kcal/min (if calories recorded).`,`+${S.BASE_ACTIVITY}`],
     ['🔥','Calorie Bonus',`+${S.CALORIES_BONUS} per ${S.CALORIES_PER} kcal. Unlimited.`,`+${S.CALORIES_BONUS}/500`],
-    ['📏','Distance Bonus',`+${S.DISTANCE_BONUS} per ${S.DISTANCE_PER} km. Unlimited.`,`+${S.DISTANCE_BONUS}/5km`],
-    ['⏱️','Duration Bonus',`Above 60 min: +${S.DURATION_BONUS} per 30 min.`,`+${S.DURATION_BONUS}/30m`],
+    ['📏','Distance Bonus',`+${S.DISTANCE_BONUS} per ${S.DISTANCE_PER} km. Unlimited.`,`+${S.DISTANCE_BONUS}/${S.DISTANCE_PER}km`],
+    ['⏱️','Duration Bonus',`Above +${S.DURATION_BASE} min: +${S.DURATION_BONUS} per 30 min.`,`+${S.DURATION_BONUS}/30m`],
     ['🏆','Daily Top Cal',`Highest calories burned across ALL athletes that day.`,`+${S.DAILY_TOP_CALORIES}`],
     ['🎯','Streak M1','3 consecutive days. Once per challenge.',`+${S.STREAK_MILESTONES[0]}`],
     ['🎯','Streak M2','6 consecutive days. Once per challenge.',`+${S.STREAK_MILESTONES[1]}`],
