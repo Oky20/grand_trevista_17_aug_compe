@@ -114,6 +114,46 @@
   .btn-apply{background:var(--accent);color:#000;padding:8px 16px;border-radius:8px;border:none;font-size:12px;font-weight:700;cursor:pointer;font-family:var(--font-body);transition:all .2s;}
   .btn-apply:hover{background:#e8f700;}
 
+
+  .acts-filter-bar{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:20px;}
+  .acts-search-wrap{flex:1;min-width:200px;}
+  .acts-search{width:100%;background:var(--card);border:1px solid var(--border);border-radius:8px;padding:9px 14px;color:var(--text);font-family:var(--font-mono);font-size:13px;outline:none;transition:border-color .2s;}
+  .acts-search:focus{border-color:var(--accent);}
+  .team-filter-wrap{display:flex;gap:6px;flex-wrap:wrap;}
+  .team-filter-btn{padding:6px 14px;border-radius:20px;border:1px solid var(--border);background:transparent;color:var(--muted);font-size:12px;font-family:var(--font-mono);cursor:pointer;transition:all .2s;white-space:nowrap;}
+  .team-filter-btn:hover{border-color:var(--text);color:var(--text);}
+  .team-filter-btn.active{background:var(--accent);color:#000;border-color:var(--accent);font-weight:600;}
+  .athlete-selector{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:24px;min-height:44px;}
+  .athlete-chip{display:flex;align-items:center;gap:8px;padding:6px 14px 6px 8px;border-radius:20px;border:1px solid var(--border);background:var(--card);cursor:pointer;transition:all .2s;font-size:13px;}
+  .athlete-chip img{width:24px;height:24px;border-radius:50%;object-fit:cover;}
+  .athlete-chip:hover{border-color:var(--accent);}
+  .athlete-chip.selected{background:rgba(240,255,68,.1);border-color:var(--accent);color:var(--accent);}
+  .athlete-chip .chip-team-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0;}
+  .acts-athlete-header{display:flex;align-items:center;gap:14px;padding:20px 0 16px;border-bottom:1px solid var(--border);margin-bottom:20px;}
+  .acts-athlete-header img{width:48px;height:48px;border-radius:50%;object-fit:cover;border:2px solid var(--border);}
+  .acts-athlete-name{font-weight:600;font-size:18px;}
+  .acts-athlete-meta{font-size:12px;color:var(--muted);font-family:var(--font-mono);margin-top:2px;}
+  .acts-summary{display:flex;gap:20px;flex-wrap:wrap;margin-bottom:24px;}
+  .acts-sum-item{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:12px 18px;text-align:center;}
+  .acts-sum-val{font-family:var(--font-display);font-size:24px;color:var(--accent);line-height:1;}
+  .acts-sum-label{font-size:10px;text-transform:uppercase;letter-spacing:1px;color:var(--muted);font-family:var(--font-mono);margin-top:4px;}
+  .act-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:16px 20px;margin-bottom:10px;display:flex;align-items:center;gap:16px;transition:border-color .2s;animation:slideIn .2s ease both;}
+  .act-card:hover{border-color:var(--border);}
+  .act-sport-icon{width:40px;height:40px;border-radius:10px;background:rgba(240,255,68,.08);border:1px solid rgba(240,255,68,.15);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;}
+  .act-main{flex:1;min-width:0;}
+  .act-name{font-weight:500;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .act-date{font-size:11px;color:var(--muted);font-family:var(--font-mono);margin-top:2px;}
+  .act-stats{display:flex;gap:16px;margin-top:8px;flex-wrap:wrap;}
+  .act-stat{font-size:12px;font-family:var(--font-mono);color:var(--muted);}
+  .act-stat span{color:var(--text);}
+  .act-pts{text-align:right;flex-shrink:0;}
+  .act-pts-val{font-family:var(--font-display);font-size:26px;color:var(--accent);line-height:1;}
+  .act-pts-label{font-size:10px;color:var(--muted);font-family:var(--font-mono);}
+  .act-breakdown{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px;}
+  .act-bonus{background:rgba(240,255,68,.08);border:1px solid rgba(240,255,68,.15);border-radius:4px;padding:2px 7px;font-size:10px;font-family:var(--font-mono);color:var(--accent);}
+  .act-invalid{opacity:.4;border-style:dashed;}
+  .act-invalid .act-pts-val{color:var(--muted);}
+
   @media(max-width:600px){
     .lb-table thead th:is(:nth-child(4),:nth-child(5),:nth-child(6),:nth-child(7)){display:none;}
     .lb-row td:is(:nth-child(4),:nth-child(5),:nth-child(6),:nth-child(7)){display:none;}
@@ -136,6 +176,7 @@
     <button class="tab active" data-tab="overall">🏆 Overall</button>
     <button class="tab" data-tab="teams">👥 Teams</button>
     <button class="tab" data-tab="individual">📊 Individual</button>
+    <button class="tab" data-tab="activities">🏃 Activities</button>
     <button class="tab" data-tab="scoring">📋 Scoring Guide</button>
   </div>
 
@@ -168,6 +209,23 @@
       <button class="mtab" data-metric="activities">🎯 Activities</button>
     </div>
     <div id="metric-lb-wrap"></div>
+  </div>
+
+
+  <div class="panel" id="panel-activities">
+    <!-- Filter bar -->
+    <div class="acts-filter-bar">
+      <div class="acts-search-wrap">
+        <input type="text" class="acts-search" id="acts-search" placeholder="🔍 Search athlete..."/>
+      </div>
+      <div class="team-filter-wrap">
+        <button class="team-filter-btn active" data-team="all" onclick="filterTeam('all', this)">All Teams</button>
+      </div>
+    </div>
+    <!-- Athlete selector -->
+    <div class="athlete-selector" id="athlete-selector"></div>
+    <!-- Activity list -->
+    <div id="acts-content"></div>
   </div>
 
   <div class="panel" id="panel-scoring">
@@ -228,6 +286,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   renderHeaderActions();
   renderScoringGuide();
+  initActivitiesTab();
   countdown();
   setInterval(countdown, 60000);
   await loadData();
@@ -258,13 +317,20 @@ function countdown() {
 // ── DATA ─────────────────────────────────────────────────────
 async function loadData() {
   try {
-    const result = await DB.getLeaderboard(activeStart, activeEnd);
-    LB = result.leaderboard;
-    TEAMS = result.teams;
+    const [lbResult, acts] = await Promise.all([
+      DB.getLeaderboard(activeStart, activeEnd),
+      DB.getActivities(activeStart, activeEnd),
+    ]);
+    LB            = lbResult.leaderboard;
+    TEAMS         = lbResult.teams;
+    allActivities = acts;
     renderOverallStats();
     renderOverallLB();
     renderTeams();
     renderMetricLB();
+    renderAthleteSelector();
+    // Re-render selected athlete if any
+    if (selectedAthleteId) renderAthleteActivities(selectedAthleteId);
   } catch(err) {
     console.error(err);
     showToast('Failed to load data — check Supabase config.', 'error');
@@ -463,6 +529,185 @@ function renderScoringGuide() {
 // ── UTILS ────────────────────────────────────────────────────
 function fmt(n){return n.toLocaleString('en-US');}
 function fmtDur(m){const h=Math.floor(m/60),mn=Math.round(m%60);return h>0?`${h}h ${mn}m`:`${mn}m`;}
+
+
+// ── ACTIVITIES TAB ────────────────────────────────────────────
+let selectedAthleteId = null;
+let actsFilterTeam    = 'all';
+let actsSearch        = '';
+let allActivities     = [];
+
+function initActivitiesTab() {
+  // Build team filter buttons
+  const wrap = document.querySelector('.team-filter-wrap');
+  CONFIG.TEAMS.forEach(t => {
+    const btn = document.createElement('button');
+    btn.className = 'team-filter-btn';
+    btn.dataset.team = t.id;
+    btn.textContent = `${t.emoji} ${t.name}`;
+    btn.style.setProperty('--tc', t.color);
+    btn.onclick = () => filterTeam(t.id, btn);
+    wrap.appendChild(btn);
+  });
+
+  // Search input
+  document.getElementById('acts-search').addEventListener('input', e => {
+    actsSearch = e.target.value.toLowerCase();
+    renderAthleteSelector();
+  });
+}
+
+function filterTeam(teamId, btn) {
+  actsFilterTeam = teamId === 'all' ? 'all' : Number(teamId);
+  document.querySelectorAll('.team-filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  selectedAthleteId = null;
+  renderAthleteSelector();
+  document.getElementById('acts-content').innerHTML = '';
+}
+
+function renderAthleteSelector() {
+  const teamById = {};
+  CONFIG.TEAMS.forEach(t => teamById[t.id] = t);
+
+  let filtered = [...LB];
+  if (actsFilterTeam !== 'all') filtered = filtered.filter(m => m.team_id === actsFilterTeam);
+  if (actsSearch) filtered = filtered.filter(m => m.name.toLowerCase().includes(actsSearch));
+
+  const el = document.getElementById('athlete-selector');
+  if (!filtered.length) {
+    el.innerHTML = `<div style="color:var(--muted);font-size:13px;padding:8px 0;">No athletes found.</div>`;
+    return;
+  }
+
+  el.innerHTML = filtered.map(m => {
+    const team = teamById[m.team_id] || { color: '#666' };
+    const sel  = m.strava_athlete_id === selectedAthleteId ? 'selected' : '';
+    return `<div class="athlete-chip ${sel}" onclick="selectAthlete(${m.strava_athlete_id})">
+      <span class="chip-team-dot" style="background:${team.color}"></span>
+      <img src="${m.profile_pic||''}" alt="" onerror="this.style.display='none'" loading="lazy"/>
+      <span>${m.name}</span>
+    </div>`;
+  }).join('');
+}
+
+function selectAthlete(athleteId) {
+  selectedAthleteId = athleteId;
+  renderAthleteSelector();
+  renderAthleteActivities(athleteId);
+}
+
+function renderAthleteActivities(athleteId) {
+  const member = LB.find(m => m.strava_athlete_id === athleteId);
+  if (!member) return;
+
+  const teamById = {};
+  CONFIG.TEAMS.forEach(t => teamById[t.id] = t);
+  const team = teamById[member.team_id] || { name: 'No Team', color: '#666', emoji: '⚪' };
+
+  const sportIcon = {
+    'Run':'🏃','Walk':'🚶','Ride':'🚴','VirtualRide':'🚴','Swim':'🏊',
+    'Padel':'🏸','Tennis':'🎾','Badminton':'🏸','WeightTraining':'💪',
+    'Workout':'💪','Yoga':'🧘','Pilates':'🧘','Hike':'🥾',
+  };
+
+  // Sort activities by date descending
+  const acts = [...(member.activities || [])].sort((a,b) =>
+    new Date(b.start_date) - new Date(a.start_date)
+  );
+
+  // Also include invalid activities from allActivities
+  const validIds = new Set(acts.map(a => a.strava_activity_id));
+  const invalidActs = allActivities
+    .filter(a => a.athlete_id === athleteId && !validIds.has(a.strava_activity_id))
+    .map(a => ({ ...a, points: 0, breakdown: { valid: false } }))
+    .sort((a,b) => new Date(b.start_date) - new Date(a.start_date));
+
+  const allActs = [...acts, ...invalidActs].sort((a,b) =>
+    new Date(b.start_date) - new Date(a.start_date)
+  );
+
+  const totalPts  = member.totalPoints;
+  const totalActs = member.activityCount;
+  const totalKm   = member.totalDistanceKm;
+  const totalCal  = member.totalCalories;
+
+  let html = `
+    <div class="acts-athlete-header">
+      <img src="${member.profile_pic||''}" alt="" onerror="this.style.display='none'"/>
+      <div>
+        <div class="acts-athlete-name">${member.name}</div>
+        <div class="acts-athlete-meta">
+          <span style="color:${team.color}">${team.emoji} ${team.name}</span>
+          &nbsp;·&nbsp; ${totalActs} valid activities
+        </div>
+      </div>
+    </div>
+    <div class="acts-summary">
+      <div class="acts-sum-item">
+        <div class="acts-sum-val">${totalPts}</div>
+        <div class="acts-sum-label">Total Points</div>
+      </div>
+      <div class="acts-sum-item">
+        <div class="acts-sum-val">${totalActs}</div>
+        <div class="acts-sum-label">Activities</div>
+      </div>
+      <div class="acts-sum-item">
+        <div class="acts-sum-val">${fmt(Math.round(totalCal))}</div>
+        <div class="acts-sum-label">Calories</div>
+      </div>
+      <div class="acts-sum-item">
+        <div class="acts-sum-val">${totalKm.toFixed(1)}</div>
+        <div class="acts-sum-label">km</div>
+      </div>
+    </div>
+  `;
+
+  if (!allActs.length) {
+    html += `<div class="empty"><div class="icon">🏃</div>No activities in this period.</div>`;
+  } else {
+    html += allActs.map((a, i) => {
+      const valid   = a.breakdown?.valid !== false;
+      const icon    = sportIcon[a.sport_type] || '🏅';
+      const distKm  = ((a.distance || 0) / 1000).toFixed(1);
+      const durMin  = Math.round((a.moving_time || 0) / 60);
+      const cal     = Math.round(a.calories || 0);
+      const date    = new Date(a.start_date).toLocaleDateString('en-GB', { weekday:'short', day:'numeric', month:'short' });
+      const pts     = a.points || 0;
+      const bd      = a.breakdown || {};
+
+      // Build bonus pills
+      const bonuses = [];
+      if (bd.base)       bonuses.push(`+${bd.base} base`);
+      if (bd.calories)   bonuses.push(`+${bd.calories} cal`);
+      if (bd.distance)   bonuses.push(`+${bd.distance} dist`);
+      if (bd.duration)   bonuses.push(`+${bd.duration} dur`);
+      if (bd.dailyTop)   bonuses.push(`+${bd.dailyTop} 🏆`);
+      if (bd.streak)     bonuses.push(`+${bd.streak} 🔥streak`);
+
+      return `<div class="act-card ${valid?'':'act-invalid'}" style="animation-delay:${i*20}ms">
+        <div class="act-sport-icon">${icon}</div>
+        <div class="act-main">
+          <div class="act-name">${a.name || a.sport_type}</div>
+          <div class="act-date">${date} · ${a.sport_type}</div>
+          <div class="act-stats">
+            <div class="act-stat">⏱ <span>${durMin}m</span></div>
+            ${distKm > 0 ? `<div class="act-stat">📏 <span>${distKm} km</span></div>` : ''}
+            ${cal > 0 ? `<div class="act-stat">🔥 <span>${cal} kcal</span></div>` : ''}
+            ${!valid ? `<div class="act-stat" style="color:var(--accent2)">⚠ Below min duration</div>` : ''}
+          </div>
+          ${valid && bonuses.length ? `<div class="act-breakdown">${bonuses.map(b=>`<span class="act-bonus">${b}</span>`).join('')}</div>` : ''}
+        </div>
+        <div class="act-pts">
+          <div class="act-pts-val">${pts}</div>
+          <div class="act-pts-label">pts</div>
+        </div>
+      </div>`;
+    }).join('');
+  }
+
+  document.getElementById('acts-content').innerHTML = html;
+}
 
 let _tt;
 function showToast(msg,type=''){
