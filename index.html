@@ -255,6 +255,7 @@ function doLogout(){Session.clear();rHA();toast('Signed out.');}
 function applyRange(){
   const s=document.getElementById('rs').value,e=document.getElementById('re').value;
   if(!s||!e)return toast('Pick start and end date.','error');
+  if(s<'2026-04-01'){document.getElementById('rs').value='2026-04-01';return toast('Start date minimum 1 Apr 2026.','error');}
   if(s>e)return toast('Start must be before end.','error');
   aS=s;aE=e;window.aS=s;window.aE=e;
   console.log('applyRange: aS=',aS,'aE=',aE);
