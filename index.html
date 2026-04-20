@@ -191,6 +191,9 @@ document.addEventListener('click', e => {
   // Athlete chips
   const aid = e.target.closest('[data-aid]')?.dataset?.aid;
   if (aid) { selAth(Number(aid)); return; }
+  // Sync & logout buttons (dynamic, re-created by rHA)
+  if (e.target.id === 'sbtn')      { syncNow(); return; }
+  if (e.target.id === 'logout-btn'){ doLogout(); return; }
 });
 
 document.addEventListener('DOMContentLoaded',async()=>{
