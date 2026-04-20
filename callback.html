@@ -4,81 +4,78 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>Connecting Strava...</title>
-<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;600&family=JetBrains+Mono&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono&display=swap" rel="stylesheet"/>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="js/config.js"></script>
 <script src="js/scoring.js"></script>
 <script src="js/api.js"></script>
 <style>
-  :root{--bg:#0a0a0f;--card:#1c1c26;--border:#2a2a38;--text:#e8e8f0;--muted:#6b6b80;--accent:#f0ff44;--accent2:#ff6b6b;}
+  :root{--bg:#111116;--card:#1c1c25;--border:#2a2a38;--border2:#333345;--text:#f0f0f5;--muted:#888899;--dim:#555566;--orange:#FC5200;--accent2:#e24b4a;--r:8px;}
   *{margin:0;padding:0;box-sizing:border-box;}
-  body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min-height:100vh;display:flex;align-items:center;justify-content:center;}
-  body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(240,255,68,.03) 1px,transparent 1px),linear-gradient(90deg,rgba(240,255,68,.03) 1px,transparent 1px);background-size:40px 40px;pointer-events:none;}
-  .card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:48px 40px;max-width:440px;width:90%;text-align:center;position:relative;z-index:1;}
-  .logo{font-family:'Bebas Neue',sans-serif;font-size:28px;color:var(--accent);letter-spacing:2px;margin-bottom:32px;}
-  .spinner{width:48px;height:48px;border:3px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .7s linear infinite;margin:0 auto 24px;}
-  @keyframes spin{to{transform:rotate(360deg)}}
-  .status{font-size:15px;color:var(--muted);margin-bottom:8px;}
+  body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;min-height:100vh;display:flex;align-items:center;justify-content:center;}
+  .card{background:var(--card);border:0.5px solid var(--border);border-radius:16px;padding:48px 40px;max-width:440px;width:90%;text-align:center;}
+  .logo{font-size:16px;font-weight:600;color:var(--text);letter-spacing:.5px;margin-bottom:32px;font-family:'JetBrains Mono',monospace;}
+  .spin{width:44px;height:44px;border:2px solid var(--border2);border-top-color:var(--orange);border-radius:50%;animation:sp .7s linear infinite;margin:0 auto 20px;}
+  @keyframes sp{to{transform:rotate(360deg)}}
+  .status{font-size:14px;color:var(--muted);}
   .big-icon{font-size:52px;margin-bottom:16px;}
-  .title{font-family:'Bebas Neue',sans-serif;font-size:28px;letter-spacing:1px;margin-bottom:8px;color:var(--accent);}
-  .error-box{background:rgba(255,107,107,.08);border:1px solid rgba(255,107,107,.2);border-radius:10px;padding:16px;margin-top:16px;font-size:13px;color:var(--accent2);text-align:left;font-family:'JetBrains Mono',monospace;}
-  .athlete-row{display:flex;align-items:center;gap:12px;background:rgba(255,255,255,.04);border-radius:10px;padding:12px 16px;margin:20px 0;text-align:left;}
-  .athlete-row img{width:44px;height:44px;border-radius:50%;object-fit:cover;flex-shrink:0;}
-  .athlete-name{font-weight:600;font-size:15px;}
-  .athlete-meta{font-size:12px;color:var(--muted);}
-  .section-label{font-size:12px;color:var(--muted);text-align:left;margin-bottom:8px;text-transform:uppercase;letter-spacing:1px;font-family:'JetBrains Mono',monospace;}
-  .team-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px;}
-  .team-btn{padding:10px 12px;border-radius:8px;border:1px solid var(--border);background:transparent;color:var(--text);font-size:13px;cursor:pointer;transition:all .2s;text-align:left;font-family:'DM Sans',sans-serif;}
-  .team-btn:hover{border-color:var(--accent);}
-  .team-btn.selected{background:rgba(240,255,68,.1);border-color:var(--accent);color:var(--accent);}
-  .team-dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:6px;vertical-align:middle;}
-  .btn-confirm{width:100%;padding:13px;border-radius:8px;border:none;background:var(--accent);color:#000;font-weight:700;font-size:14px;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .2s;margin-top:4px;}
-  .btn-confirm:hover:not(:disabled){background:#e8f700;}
-  .btn-confirm:disabled{opacity:.4;cursor:not-allowed;}
-  .back-link{display:inline-block;margin-top:20px;color:var(--accent);font-size:14px;text-decoration:none;}
+  .title{font-size:22px;font-weight:600;margin-bottom:8px;}
+  .subtitle{font-size:14px;color:var(--muted);line-height:1.6;}
+  .error-box{background:rgba(226,75,74,.08);border:0.5px solid rgba(226,75,74,.3);border-radius:var(--r);padding:14px 16px;margin-top:16px;font-size:12px;color:var(--accent2);text-align:left;font-family:'JetBrains Mono',monospace;line-height:1.6;}
+  .team-badge{display:inline-flex;align-items:center;gap:8px;background:rgba(252,82,0,.1);border:0.5px solid rgba(252,82,0,.3);border-radius:20px;padding:6px 16px;font-size:14px;font-weight:500;color:var(--orange);margin:12px 0;}
+  .back-link{display:inline-block;margin-top:24px;color:var(--orange);font-size:13px;text-decoration:none;}
   .back-link:hover{text-decoration:underline;}
+  .athlete-row{display:flex;align-items:center;gap:12px;background:rgba(255,255,255,.04);border-radius:var(--r);padding:12px 14px;margin:16px 0;text-align:left;}
+  .athlete-row img{width:40px;height:40px;border-radius:50%;object-fit:cover;flex-shrink:0;}
+  .athlete-name{font-weight:500;font-size:14px;}
+  .athlete-meta{font-size:11px;color:var(--muted);font-family:'JetBrains Mono',monospace;margin-top:2px;}
 </style>
 </head>
 <body>
 <div class="card" id="card">
-  <div class="logo">FITNESS CHALLENGE</div>
-  <div class="spinner"></div>
-  <div class="status" id="status">Connecting to Strava...</div>
+  <div class="logo">GTR FEST 17</div>
+  <div class="spin"></div>
+  <div class="status" id="status">Verifying registration...</div>
 </div>
 
 <script>
 async function main() {
-  const params = new URLSearchParams(window.location.search);
-  const code   = params.get('code');
+  const params   = new URLSearchParams(window.location.search);
+  const code     = params.get('code');
   const errParam = params.get('error');
 
   if (errParam || !code) {
-    return showError('Strava authorization was denied or cancelled.', errParam||'No authorization code received.');
+    return showError('Strava authorization was denied or cancelled.', errParam || 'No code received.');
   }
 
   try {
-    setStatus('Exchanging token...');
-    const tokenData = await Strava.exchangeCode(code);
-    const athlete   = tokenData.athlete;
+    setStatus('Verifying registration...');
 
-    setStatus('Saving your profile...');
-    await DB.upsertMember({
-      strava_athlete_id: athlete.id,
-      name:              `${athlete.firstname} ${athlete.lastname}`,
-      profile_pic:       athlete.profile_medium || '',
-      access_token:      tokenData.access_token,
-      refresh_token:     tokenData.refresh_token,
-      token_expires_at:  tokenData.expires_at,
-      team_id:           null,
-    });
+    // Exchange code — Edge Function handles whitelist check + team assignment
+    let tokenData;
+    try {
+      tokenData = await Strava.exchangeCode(code);
+    } catch(err) {
+      let parsed = null;
+      try { parsed = JSON.parse(err.message); } catch(_) {}
+      if (parsed?.error === 'not_whitelisted') {
+        return showNotWhitelisted(parsed.athlete);
+      }
+      throw err;
+    }
+
+    const athlete = tokenData.athlete;
+
+    // Save session — member already saved with correct team by Edge Function
     Session.set(athlete);
 
-    const existing = await DB.getMember(athlete.id);
-    if (existing?.team_id) {
-      showSuccess(athlete, existing.team_id);
-    } else {
-      showTeamPicker(athlete);
-    }
+    setStatus('Almost done...');
+
+    // Auto sync in background
+    Strava.fetchActivities(athlete.id).catch(console.error);
+
+    showSuccess(athlete, tokenData.team_id);
+
   } catch(err) {
     console.error(err);
     showError('Something went wrong during authentication.', err.message);
@@ -91,90 +88,54 @@ function setStatus(msg) {
 
 function showError(msg, detail) {
   document.getElementById('card').innerHTML = `
-    <div class="logo">FITNESS CHALLENGE</div>
+    <div class="logo">GTR FEST 17</div>
     <div class="big-icon">❌</div>
     <div class="title" style="color:var(--accent2)">Oops!</div>
-    <div class="status">${msg}</div>
-    ${detail?`<div class="error-box">${detail}</div>`:''}
+    <div class="subtitle">${msg}</div>
+    ${detail ? `<div class="error-box">${detail}</div>` : ''}
     <a class="back-link" href="index.html">← Back to leaderboard</a>
   `;
-}
-
-function showTeamPicker(athlete) {
-  document.getElementById('card').innerHTML = `
-    <div class="logo">FITNESS CHALLENGE</div>
-    <div class="big-icon">👋</div>
-    <div class="title">Welcome, ${athlete.firstname}!</div>
-    <div class="status">Pick your team to join the challenge.</div>
-    <div class="athlete-row">
-      <img src="${athlete.profile_medium||''}" alt="" onerror="this.style.display='none'"/>
-      <div>
-        <div class="athlete-name">${athlete.firstname} ${athlete.lastname}</div>
-        <div class="athlete-meta">Strava ID #${athlete.id}</div>
-      </div>
-    </div>
-    <div class="section-label">Select your team</div>
-    <div class="team-grid">
-      ${CONFIG.TEAMS.map(t=>`
-        <button class="team-btn" onclick="selectTeam(${t.id},this)">
-          <span class="team-dot" style="background:${t.color}"></span>${t.emoji} ${t.name}
-        </button>`).join('')}
-    </div>
-    <button class="btn-confirm" id="confirm-btn" onclick="confirmTeam(${athlete.id})" disabled>
-      Join Challenge →
-    </button>
-  `;
-}
-
-function selectTeam(id, btn) {
-  document.querySelectorAll('.team-btn').forEach(b=>b.classList.remove('selected'));
-  btn.classList.add('selected');
-  window._selectedTeam = id;
-  document.getElementById('confirm-btn').disabled = false;
-}
-
-async function confirmTeam(athleteId) {
-  const teamId = window._selectedTeam;
-  if (!teamId) return;
-  const btn = document.getElementById('confirm-btn');
-  btn.disabled = true; btn.textContent = 'Joining...';
-  try {
-    await DB.updateMemberTeam(athleteId, teamId);
-    showSuccess(Session.get(), teamId);
-  } catch(err) {
-    showError('Failed to join team.', err.message);
-  }
-}
-
-function showSuccess(athlete, teamId) {
-  const team = CONFIG.TEAMS.find(t=>t.id===teamId)||{name:'your team',emoji:'🎉',color:'var(--accent)'};
-  document.getElementById('card').innerHTML = `
-    <div class="logo">FITNESS CHALLENGE</div>
-    <div class="big-icon">🎉</div>
-    <div class="title">You're in!</div>
-    <div class="status">${athlete.firstname}, you joined <strong style="color:${team.color}">${team.emoji} ${team.name}</strong></div>
-    <br/>
-    <div class="status" style="font-size:13px;color:var(--muted)">Syncing activities in the background...</div>
-    <a class="back-link" href="index.html">View Leaderboard →</a>
-  `;
-  // Fire-and-forget background sync
-  Strava.fetchActivities(athlete.id).catch(console.error);
-  setTimeout(()=>{ window.location.href='index.html'; }, 3000);
 }
 
 function showNotWhitelisted(athlete) {
   const name = athlete?.name || 'You';
   document.getElementById('card').innerHTML = `
-    <div class="logo">FITNESS CHALLENGE</div>
+    <div class="logo">GTR FEST 17</div>
     <div class="big-icon">🚫</div>
     <div class="title" style="color:var(--accent2)">Not Registered</div>
-    <div class="status">${name}, your Strava account is not registered for this challenge.</div>
-    <div class="error-box" style="margin-top:16px;">
+    <div class="subtitle">${name}, your Strava account is not registered for this challenge.</div>
+    <div class="error-box">
       Strava ID: ${athlete?.id || 'unknown'}<br/>
-      Contact the organizer to get added to the participant list.
+      Please contact the organizer to register.
     </div>
     <a class="back-link" href="index.html">← Back to leaderboard</a>
   `;
+}
+
+function showSuccess(athlete, teamId) {
+  const team = CONFIG.TEAMS.find(t => t.id === teamId);
+  const teamName = team ? `${team.emoji} ${team.name}` : 'your team';
+  const teamColor = team?.color || 'var(--orange)';
+
+  document.getElementById('card').innerHTML = `
+    <div class="logo">GTR FEST 17</div>
+    <div class="big-icon">🎉</div>
+    <div class="title">You're in!</div>
+    <div class="athlete-row">
+      <img src="${athlete.profile_medium || ''}" alt="" onerror="this.style.display='none'"/>
+      <div>
+        <div class="athlete-name">${athlete.firstname} ${athlete.lastname}</div>
+        <div class="athlete-meta">Strava ID #${athlete.id}</div>
+      </div>
+    </div>
+    <div class="team-badge" style="color:${teamColor};border-color:${teamColor}30;background:${teamColor}15;">
+      ${teamName}
+    </div>
+    <div class="subtitle" style="margin-top:8px;font-size:13px;">Syncing your activities...</div>
+    <a class="back-link" href="index.html">View Leaderboard →</a>
+  `;
+
+  setTimeout(() => { window.location.href = 'index.html'; }, 3000);
 }
 
 main();
