@@ -15,7 +15,7 @@ const CONFIG = {
   // --- Challenge Period ---
   CHALLENGE_START: '2026-04-01', // YYYY-MM-DD
   CHALLENGE_END:   '2026-04-30',
-  CHALLENGE_NAME:  'May Fitness Challenge 2025',
+  CHALLENGE_NAME:  'GTR 17 Aug Fitness Challenge 2025',
 
   // --- Teams ---
   TEAMS: [
@@ -44,7 +44,7 @@ const CONFIG = {
     'Hike':         30,
     'DEFAULT':      30,
   },
-
+ 
   // --- Scoring System ---
   SCORING: {
     BASE_ACTIVITY:        10,   // per valid activity
@@ -55,12 +55,14 @@ const CONFIG = {
     DURATION_BASE:        60,   // minutes before bonus starts
     DURATION_STEP:        30,   // every X minutes above base
     DURATION_BONUS:        5,   // points per step
-    DAILY_TOP_CALORIES:    5,   // bonus for top calorie burner of the day in group
+    MIN_CAL_PER_MIN:       4,   // min calories/minute for valid activity (skipped if calories=0)
+    DAILY_TOP_CALORIES:    5,   // bonus for top calorie burner of the day — overall all athletes
     STREAK_MILESTONES:  [10, 20, 30, 40], // poin per milestone (index 0=M1, 1=M2, etc), M4+ flat at 40
   },
 };
-
+ 
 // Freeze config so it can't be mutated
 Object.freeze(CONFIG);
 Object.freeze(CONFIG.SCORING);
 Object.freeze(CONFIG.MIN_DURATION);
+ 
