@@ -168,6 +168,7 @@ footer{text-align:center;padding:24px 20px 36px;border-top:1px solid var(--borde
     <span style="display:none;color:var(--orange);font-weight:500;font-size:13px;">Powered by Strava</span>
   </a>
   <p style="margin-top:8px;font-size:11px;color:var(--dim);font-family:var(--mono);">GTR Fest 17 is not affiliated with or endorsed by Strava.</p>
+  <p style="margin-top:4px;font-size:11px;color:var(--dim);font-family:var(--mono);">GTR Fest 17 is a Community Application under the Strava API Agreement, used exclusively for organizing group fitness activities.</p>
 </footer>
 <script>
 let LB=[],TEAMS=[],AACTS=[];
@@ -406,9 +407,9 @@ function rScoring(){
   const S=CONFIG.SCORING;
   const rules=[
     ['✅','Valid Activity',`Min duration met + ≥${S.MIN_CAL_PER_MIN??4} kcal/min (if calories recorded).`,`+${S.BASE_ACTIVITY}`],
-    ['🔥','Calorie Bonus',`+${S.CALORIES_BONUS} per ${S.CALORIES_PER} kcal. Unlimited.`,`+${S.CALORIES_BONUS}/${S.CALORIES_PER}`],
-    ['📏','Distance Bonus',`+${S.DISTANCE_BONUS} per ${S.DISTANCE_PER} km. Unlimited.`,`+${S.DISTANCE_BONUS}/${S.DISTANCE_PER}km`],
-    ['⏱️','Duration Bonus',`Above +${S.DURATION_BASE} min: +${S.DURATION_BONUS} per 30 min.`,`+${S.DURATION_BONUS}/30m`],
+    ['🔥','Calorie Bonus',`+${S.CALORIES_BONUS} per ${S.CALORIES_PER} kcal. Unlimited.`,`+${S.CALORIES_BONUS}/500`],
+    ['📏','Distance Bonus',`+${S.DISTANCE_BONUS} per ${S.DISTANCE_PER} km. Unlimited.`,`+${S.DISTANCE_BONUS}/5km`],
+    ['⏱️','Duration Bonus',`Above 60 min: +${S.DURATION_BONUS} per 30 min.`,`+${S.DURATION_BONUS}/30m`],
     ['🏆','Daily Top Cal',`Highest calories burned across ALL athletes that day.`,`+${S.DAILY_TOP_CALORIES}`],
     ['🎯','Streak M1','3 consecutive days. Once per challenge.',`+${S.STREAK_MILESTONES[0]}`],
     ['🎯','Streak M2','6 consecutive days. Once per challenge.',`+${S.STREAK_MILESTONES[1]}`],
