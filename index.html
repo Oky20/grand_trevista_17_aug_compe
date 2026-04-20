@@ -119,7 +119,7 @@ footer{text-align:center;padding:24px 20px 36px;border-top:1px solid var(--borde
   <input type="date" class="di" id="rs" value="2026-04-01"/>
   <span class="dsep">→</span>
   <input type="date" class="di" id="re" value="2026-04-30"/>
-  <button class="btn btn-g" onclick="applyRange()" style="padding:6px 14px;font-size:12px;">Apply</button>
+  <button class="btn btn-g" id="apply-btn" style="padding:6px 14px;font-size:12px;">Apply</button>
   <span class="dlbl" id="dlbl"></span>
 </div>
 <div class="tabs">
@@ -150,7 +150,7 @@ footer{text-align:center;padding:24px 20px 36px;border-top:1px solid var(--borde
   <div class="af">
     <input type="text" class="asrch" id="asrch" placeholder="Search athlete..."/>
     <div style="display:flex;gap:6px;flex-wrap:wrap;" id="tfbtns">
-      <button class="tfb active" data-team="all" onclick="filterTeam('all',this)">All</button>
+      <button class="tfb active" data-team="all" id="tf-all">All</button>
     </div>
   </div>
   <div class="achips" id="achips"></div>
@@ -175,11 +175,23 @@ footer{text-align:center;padding:24px 20px 36px;border-top:1px solid var(--borde
 </footer>
 <script>
 let LB=[],TEAMS=[],AACTS=[];
-let aMet='points',aS=CONFIG.CHALLENGE_START||'2026-04-01',aE=CONFIG.CHALLENGE_END||'2026-04-30';
+let aMet='points';
+window.aS=CONFIG.CHALLENGE_START||'2026-04-01';
+window.aE=CONFIG.CHALLENGE_END||'2026-04-30';
+let aS=window.aS,aE=window.aE;
 let aTm='all',aSrch='',selA=null;
 let PG={overall:1,individual:1,acts:1};
 const PS=15;
 const SICO={Run:'🏃',Walk:'🚶',Ride:'🚴',VirtualRide:'🚴',Swim:'🏊',Padel:'🏸',Tennis:'🎾',Badminton:'🏸',WeightTraining:'💪',Workout:'💪',Yoga:'🧘',Pilates:'🧘',Hike:'🥾'};
+
+document.addEventListener('click', e => {
+  // Pagination
+  const pg = e.target.dataset?.pg;
+  if (pg) { const [key, p] = pg.split(':'); gp(key, Number(p)); return; }
+  // Athlete chips
+  const aid = e.target.closest('[data-aid]')?.dataset?.aid;
+  if (aid) { selAth(Number(aid)); return; }
+});
 
 document.addEventListener('DOMContentLoaded',async()=>{
   document.querySelectorAll('.tab').forEach(b=>b.addEventListener('click',()=>{
@@ -194,7 +206,10 @@ document.addEventListener('DOMContentLoaded',async()=>{
   document.getElementById('asrch').addEventListener('input',e=>{
     aSrch=e.target.value.toLowerCase();selA=null;rChips();if(!aSrch)rActs();
   });
-  document.getElementById('rs').value=aS;document.getElementById('re').value=aE;
+  document.getElementById('rs').value=aS;
+  document.getElementById('re').value=aE;
+  document.getElementById('apply-btn').addEventListener('click', applyRange);
+  document.getElementById('tf-all').addEventListener('click', e => filterTeam('all', e.currentTarget));
   updDlbl();cdown();setInterval(cdown,60000);
   initTF();rHA();rScoring();await loadData();
 });
@@ -218,11 +233,11 @@ async function loadData(){
 function rHA(){
   const a=Session.get(),el=document.getElementById('ha');
   if(!a){
-    el.innerHTML=`<a href="${Strava.getAuthUrl()}" style="display:inline-block;line-height:0;"><img src="btn_strava_connect_with_orange.png" alt="Connect with Strava" style="height:44px;width:auto;" onerror="this.outerHTML='<button class=\\'btn btn-p\\' onclick=\\'location.href=Strava.getAuthUrl()\\'>Connect with Strava</button>'"/></a>`;
+    el.innerHTML=`<a href="${Strava.getAuthUrl()}" style="display:inline-block;line-height:0;"><img src="btn_strava_connect_with_orange.png" alt="Connect with Strava" style="height:44px;width:auto;" onerror="this.outerHTML='<a href=\''+Strava.getAuthUrl()+'\' class=\'btn btn-p\'>Connect with Strava</a>'"/></a>`;
   }else{
     el.innerHTML=`<div class="apill"><img src="${a.profile_medium||''}" alt="" onerror="this.style.display='none'"/><span>${a.firstname} ${a.lastname}</span></div>
-    <button class="btn btn-p" id="sbtn" onclick="syncNow()">Sync</button>
-    <button class="btn btn-g" onclick="doLogout()">Sign out</button>`;
+    <button class="btn btn-p" id="sbtn" id="sync-btn-el">Sync</button>
+    <button class="btn btn-g" id="logout-btn-el">Sign out</button>`;
   }
 }
 async function syncNow(){
@@ -238,7 +253,7 @@ function applyRange(){
   const s=document.getElementById('rs').value,e=document.getElementById('re').value;
   if(!s||!e)return toast('Pick start and end date.','error');
   if(s>e)return toast('Start must be before end.','error');
-  aS=s;aE=e;updDlbl();cdown();loadData();
+  aS=s;aE=e;window.aS=s;window.aE=e;updDlbl();cdown();loadData();
 }
 function updDlbl(){
   const s=new Date(aS).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'});
@@ -318,12 +333,12 @@ function bTable(members,metric,pgKey){
 
 function pgr(p,pages,tot,key){
   const s=(p-1)*PS+1,e=Math.min(p*PS,tot);
-  let b=`<button class="pbn" ${p<=1?'disabled':''} onclick="gp('${key}',${p-1})">←</button>`;
+  let b=`<button class="pbn" ${p<=1?'disabled':''} data-pg="${key}:${p-1}">←</button>`;
   for(let i=1;i<=pages;i++){
     if(pages>7&&i>2&&i<pages-1&&Math.abs(i-p)>1){if(i===3||i===pages-2)b+=`<span style="color:var(--dim);padding:0 2px;font-family:var(--mono)">…</span>`;continue;}
-    b+=`<button class="pbn ${i===p?'on':''}" onclick="gp('${key}',${i})">${i}</button>`;
+    b+=`<button class="pbn ${i===p?'on':''}" data-pg="${key}:${i}">${i}</button>`;
   }
-  b+=`<button class="pbn" ${p>=pages?'disabled':''} onclick="gp('${key}',${p+1})">→</button>`;
+  b+=`<button class="pbn" ${p>=pages?'disabled':''} data-pg="${key}:${p+1}">→</button>`;
   return`<div class="pgr"><span class="pi">${s}–${e} of ${tot}</span><div class="pb">${b}</div></div>`;
 }
 
@@ -338,7 +353,7 @@ function initTF(){
   const w=document.getElementById('tfbtns');
   CONFIG.TEAMS.forEach(t=>{
     const b=document.createElement('button');b.className='tfb';b.dataset.team=t.id;
-    b.textContent=`${t.emoji} ${t.name}`;b.onclick=()=>filterTeam(t.id,b);w.appendChild(b);
+    b.textContent=`${t.emoji} ${t.name}`;b.dataset.team=t.id;b.addEventListener('click',e=>filterTeam(t.id,e.currentTarget));w.appendChild(b);
   });
 }
 function filterTeam(id,btn){
@@ -354,7 +369,7 @@ function rChips(){
   if(!f.length){el.innerHTML=`<span style="font-size:12px;color:var(--dim);font-family:var(--mono)">No athletes found.</span>`;return;}
   el.innerHTML=f.map(m=>{
     const team=tb[m.team_id]||{color:'#555'};const sel=m.strava_athlete_id===selA?'sel':'';
-    return`<div class="achip ${sel}" onclick="selAth(${m.strava_athlete_id})">
+    return`<div class="achip ${sel}" data-aid="${m.strava_athlete_id}">
       <span class="td" style="background:${team.color};width:6px;height:6px;"></span>
       ${m.profile_pic?`<img src="${m.profile_pic}" alt="" onerror="this.style.display='none'">`:''}
       <span>${m.name}</span></div>`;
