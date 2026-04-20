@@ -162,6 +162,21 @@ function showSuccess(athlete, teamId) {
   setTimeout(()=>{ window.location.href='index.html'; }, 3000);
 }
 
+function showNotWhitelisted(athlete) {
+  const name = athlete?.name || 'You';
+  document.getElementById('card').innerHTML = `
+    <div class="logo">FITNESS CHALLENGE</div>
+    <div class="big-icon">🚫</div>
+    <div class="title" style="color:var(--accent2)">Not Registered</div>
+    <div class="status">${name}, your Strava account is not registered for this challenge.</div>
+    <div class="error-box" style="margin-top:16px;">
+      Strava ID: ${athlete?.id || 'unknown'}<br/>
+      Contact the organizer to get added to the participant list.
+    </div>
+    <a class="back-link" href="index.html">← Back to leaderboard</a>
+  `;
+}
+
 main();
 </script>
 </body>
