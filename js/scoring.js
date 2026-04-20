@@ -1,6 +1,6 @@
 // ============================================================
 // SCORING ENGINE
-// Pure functions — no DOM, no Supabase deps
+// Pure functions - no DOM, no Supabase deps
 // ============================================================
 
 const Scoring = (() => {
@@ -18,7 +18,7 @@ const Scoring = (() => {
     // Must meet minimum duration
     if (actualMinutes < minMinutes) return false;
 
-    // Calorie efficiency check — skip if calories not recorded (0)
+    // Calorie efficiency check - skip if calories not recorded (0)
     const calories = activity.calories || 0;
     if (calories > 0) {
       const calPerMin = calories / actualMinutes;
@@ -148,7 +148,7 @@ const Scoring = (() => {
       }
       if (day !== lastDay) lastActiveDateMap[act.athlete_id] = day;
 
-      // Check if top calorie for the day — overall across ALL athletes
+      // Check if top calorie for the day - overall across ALL athletes
       const allDayCals = Object.values(dailyCalMap[day] || {});
       const maxOverallCal = allDayCals.length > 0 ? Math.max(...allDayCals) : 0;
       const isDailyTop = maxOverallCal > 0 && (dailyCalMap[day]?.[act.athlete_id] || 0) >= maxOverallCal;
