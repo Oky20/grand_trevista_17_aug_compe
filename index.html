@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+
 <html lang="en">
 <head>
 <meta charset="UTF-8"/>
@@ -116,7 +117,7 @@ footer{text-align:center;padding:24px 20px 36px;border-top:1px solid var(--borde
 </header>
 <div class="dbar">
   <label>Period</label>
-  <input type="date" class="di" id="rs" value="2026-04-01"/>
+  <input type="date" class="di" id="rs" value="2026-04-01" min="2026-04-01"/>
   <span class="dsep">→</span>
   <input type="date" class="di" id="re" value="2026-04-30"/>
   <button class="btn btn-g" id="apply-btn" style="padding:6px 14px;font-size:12px;">Apply</button>
@@ -184,273 +185,235 @@ let PG={overall:1,individual:1,acts:1};
 const PS=15;
 const SICO={Run:'🏃',Walk:'🚶',Ride:'🚴',VirtualRide:'🚴',Swim:'🏊',Padel:'🏸',Tennis:'🎾',Badminton:'🏸',WeightTraining:'💪',Workout:'💪',Yoga:'🧘',Pilates:'🧘',Hike:'🥾'};
 
-document.addEventListener('click', e => {
-  // Pagination
-  const pg = e.target.dataset?.pg;
-  if (pg) { const [key, p] = pg.split(':'); gp(key, Number(p)); return; }
-  // Athlete chips
-  const aid = e.target.closest('[data-aid]')?.dataset?.aid;
-  if (aid) { selAth(Number(aid)); return; }
-  // Sync & logout buttons (dynamic, re-created by rHA)
-  if (e.target.id === 'sbtn')      { syncNow(); return; }
-  if (e.target.id === 'logout-btn'){ doLogout(); return; }
+document.addEventListener(‘click’, e => {
+// Pagination
+const pg = e.target.dataset?.pg;
+if (pg) { const [key, p] = pg.split(’:’); gp(key, Number(p)); return; }
+// Athlete chips
+const aid = e.target.closest(’[data-aid]’)?.dataset?.aid;
+if (aid) { selAth(Number(aid)); return; }
+// Sync & logout buttons (dynamic, re-created by rHA)
+if (e.target.id === ‘sbtn’)      { syncNow(); return; }
+if (e.target.id === ‘logout-btn’){ doLogout(); return; }
 });
 
-document.addEventListener('DOMContentLoaded',async()=>{
-  document.querySelectorAll('.tab').forEach(b=>b.addEventListener('click',()=>{
-    document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
-    document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
-    b.classList.add('active');document.getElementById('panel-'+b.dataset.tab).classList.add('active');
-  }));
-  document.querySelectorAll('.mt').forEach(b=>b.addEventListener('click',()=>{
-    document.querySelectorAll('.mt').forEach(t=>t.classList.remove('active'));
-    b.classList.add('active');aMet=b.dataset.metric;PG.individual=1;rInd();
-  }));
-  document.getElementById('asrch').addEventListener('input',e=>{
-    aSrch=e.target.value.toLowerCase();selA=null;rChips();if(!aSrch)rActs();
-  });
-  document.getElementById('rs').value=aS;
-  document.getElementById('re').value=aE;
-  document.getElementById('apply-btn').addEventListener('click', applyRange);
-  document.getElementById('tf-all').addEventListener('click', e => filterTeam('all', e.currentTarget));
-  updDlbl();cdown();setInterval(cdown,60000);
-  initTF();rHA();rScoring();await loadData();
+document.addEventListener(‘DOMContentLoaded’,async()=>{
+document.querySelectorAll(’.tab’).forEach(b=>b.addEventListener(‘click’,()=>{
+document.querySelectorAll(’.tab’).forEach(t=>t.classList.remove(‘active’));
+document.querySelectorAll(’.panel’).forEach(p=>p.classList.remove(‘active’));
+b.classList.add(‘active’);document.getElementById(‘panel-’+b.dataset.tab).classList.add(‘active’);
+}));
+document.querySelectorAll(’.mt’).forEach(b=>b.addEventListener(‘click’,()=>{
+document.querySelectorAll(’.mt’).forEach(t=>t.classList.remove(‘active’));
+b.classList.add(‘active’);aMet=b.dataset.metric;PG.individual=1;rInd();
+}));
+document.getElementById(‘asrch’).addEventListener(‘input’,e=>{
+aSrch=e.target.value.toLowerCase();selA=null;rChips();if(!aSrch)rActs();
+});
+document.getElementById(‘rs’).value=aS;
+document.getElementById(‘re’).value=aE;
+document.getElementById(‘apply-btn’).addEventListener(‘click’, applyRange);
+document.getElementById(‘tf-all’).addEventListener(‘click’, e => filterTeam(‘all’, e.currentTarget));
+updDlbl();cdown();setInterval(cdown,60000);
+initTF();rHA();rScoring();await loadData();
 });
 
 function cdown(){
-  const el=document.getElementById('countdown');if(!el)return;
-  const now=new Date(),s=new Date(aS),e=new Date(aE+'T23:59:59');
-  if(now<s){const d=Math.floor((s-now)/86400000),h=Math.floor((s-now)%86400000/3600000);el.textContent=`Starts in ${d}d ${h}h`;}
-  else if(now>e){el.textContent='Challenge ended';}
-  else{const df=e-now,d=Math.floor(df/86400000),h=Math.floor(df%86400000/3600000),m=Math.floor(df%3600000/60000);el.textContent=`${d}d ${h}h ${m}m remaining`;}
+const el=document.getElementById(‘countdown’);if(!el)return;
+const now=new Date(),s=new Date(aS),e=new Date(aE+‘T23:59:59’);
+if(now<s){const d=Math.floor((s-now)/86400000),h=Math.floor((s-now)%86400000/3600000);el.textContent=`Starts in ${d}d ${h}h`;}
+else if(now>e){el.textContent=‘Challenge ended’;}
+else{const df=e-now,d=Math.floor(df/86400000),h=Math.floor(df%86400000/3600000),m=Math.floor(df%3600000/60000);el.textContent=`${d}d ${h}h ${m}m remaining`;}
 }
 
 async function loadData(){
-  try{
-    const[lb,acts]=await Promise.all([DB.getLeaderboard(aS,aE),DB.getActivities(aS,aE)]);
-    LB=lb.leaderboard;TEAMS=lb.teams;AACTS=acts;PG={overall:1,individual:1,acts:1};
-    rOStats();rOLB();rTeams();rInd();rActs();rChips();
-  }catch(e){console.error(e);toast('Failed to load data.','error');}
+try{
+const[lb,acts]=await Promise.all([DB.getLeaderboard(aS,aE),DB.getActivities(aS,aE)]);
+LB=lb.leaderboard;TEAMS=lb.teams;AACTS=acts;PG={overall:1,individual:1,acts:1};
+rOStats();rOLB();rTeams();rInd();rActs();rChips();
+}catch(e){console.error(e);toast(‘Failed to load data.’,‘error’);}
 }
 
 function rHA(){
-  const a=Session.get(),el=document.getElementById('ha');
-  if(!a){
-    el.innerHTML=`<a href="${Strava.getAuthUrl()}" style="display:inline-block;line-height:0;"><img src="btn_strava_connect_with_orange.png" alt="Connect with Strava" style="height:44px;width:auto;" onerror="this.outerHTML='<a href=\''+Strava.getAuthUrl()+'\' class=\'btn btn-p\'>Connect with Strava</a>'"/></a>`;
-  }else{
-    el.innerHTML=`<div class="apill"><img src="${a.profile_medium||''}" alt="" onerror="this.style.display='none'"/><span>${a.firstname} ${a.lastname}</span></div>
-    <button class="btn btn-p" id="sbtn" id="sync-btn-el">Sync</button>
-    <button class="btn btn-g" id="logout-btn-el">Sign out</button>`;
-  }
+const a=Session.get(),el=document.getElementById(‘ha’);
+if(!a){
+el.innerHTML=`<a href="${Strava.getAuthUrl()}" style="display:inline-block;line-height:0;"><img src="btn_strava_connect_with_orange.png" alt="Connect with Strava" style="height:44px;width:auto;" onerror="this.outerHTML='<a href=\''+Strava.getAuthUrl()+'\' class=\'btn btn-p\'>Connect with Strava</a>'"/></a>`;
+}else{
+el.innerHTML=`<div class="apill"><img src="${a.profile_medium||''}" alt="" onerror="this.style.display='none'"/><span>${a.firstname} ${a.lastname}</span></div> <button class="btn btn-p" id="sbtn" id="sync-btn-el">Sync</button> <button class="btn btn-g" id="logout-btn-el">Sign out</button>`;
+}
 }
 async function syncNow(){
-  const btn=document.getElementById('sbtn'),a=Session.get();if(!a)return;
-  const syncStart=document.getElementById('rs').value||aS;
-  btn.disabled=true;btn.textContent='Syncing...';
-  try{await Strava.fetchActivities(a.id,syncStart);await loadData();toast('Sync complete!','success');}
-  catch(e){toast('Sync failed: '+e.message,'error');}
-  finally{btn.disabled=false;btn.textContent='Sync';}
+const btn=document.getElementById(‘sbtn’),a=Session.get();if(!a)return;
+const syncStart=document.getElementById(‘rs’).value||aS;
+btn.disabled=true;btn.textContent=‘Syncing…’;
+try{await Strava.fetchActivities(a.id,syncStart);await loadData();toast(‘Sync complete!’,‘success’);}
+catch(e){toast(’Sync failed: ’+e.message,‘error’);}
+finally{btn.disabled=false;btn.textContent=‘Sync’;}
 }
-function doLogout(){Session.clear();rHA();toast('Signed out.');}
+function doLogout(){Session.clear();rHA();toast(‘Signed out.’);}
 
 function applyRange(){
-  const s=document.getElementById('rs').value,e=document.getElementById('re').value;
-  if(!s||!e)return toast('Pick start and end date.','error');
-  if(s>e)return toast('Start must be before end.','error');
-  aS=s;aE=e;window.aS=s;window.aE=e;
-  console.log('applyRange: aS=',aS,'aE=',aE);
-  updDlbl();cdown();loadData();
+const s=document.getElementById(‘rs’).value,e=document.getElementById(‘re’).value;
+if(!s||!e)return toast(‘Pick start and end date.’,‘error’);
+if(s>e)return toast(‘Start must be before end.’,‘error’);
+aS=s;aE=e;window.aS=s;window.aE=e;
+console.log(‘applyRange: aS=’,aS,‘aE=’,aE);
+updDlbl();cdown();loadData();
 }
 function updDlbl(){
-  const s=new Date(aS).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'});
-  const e=new Date(aE).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'});
-  const el=document.getElementById('dlbl');if(el)el.textContent=`${s} — ${e}`;
+const s=new Date(aS).toLocaleDateString(‘en-GB’,{day:‘numeric’,month:‘short’,year:‘numeric’});
+const e=new Date(aE).toLocaleDateString(‘en-GB’,{day:‘numeric’,month:‘short’,year:‘numeric’});
+const el=document.getElementById(‘dlbl’);if(el)el.textContent=`${s} — ${e}`;
 }
 
 function rOStats(){
-  const tp=LB.reduce((s,m)=>s+m.totalPoints,0),tc=LB.reduce((s,m)=>s+m.totalCalories,0),
-    tk=LB.reduce((s,m)=>s+m.totalDistanceKm,0),ta=LB.reduce((s,m)=>s+m.activityCount,0);
-  document.getElementById('ostats').innerHTML=[
-    ['Athletes',LB.length,'connected'],['Calories',fmt(Math.round(tc)),'kcal burned'],
-    ['Distance',fmt(Math.round(tk)),'km total'],['Activities',ta,'valid workouts'],['Points',fmt(tp),'combined'],
-  ].map(([l,v,u])=>`<div class="sc"><div class="sl">${l}</div><div class="sv">${v}</div><div class="su">${u}</div></div>`).join('');
+const tp=LB.reduce((s,m)=>s+m.totalPoints,0),tc=LB.reduce((s,m)=>s+m.totalCalories,0),
+tk=LB.reduce((s,m)=>s+m.totalDistanceKm,0),ta=LB.reduce((s,m)=>s+m.activityCount,0);
+document.getElementById(‘ostats’).innerHTML=[
+[‘Athletes’,LB.length,‘connected’],[‘Calories’,fmt(Math.round(tc)),‘kcal burned’],
+[‘Distance’,fmt(Math.round(tk)),‘km total’],[‘Activities’,ta,‘valid workouts’],[‘Points’,fmt(tp),‘combined’],
+].map(([l,v,u])=>`<div class="sc"><div class="sl">${l}</div><div class="sv">${v}</div><div class="su">${u}</div></div>`).join(’’);
 }
-function rOLB(){document.getElementById('olb').innerHTML=bTable(LB,'points','overall');}
+function rOLB(){document.getElementById(‘olb’).innerHTML=bTable(LB,‘points’,‘overall’);}
 
 function rTeams(){
-  document.getElementById('tgrid').innerHTML=TEAMS.map((t,i)=>`
-    <div class="tc" style="--tc:${t.color}"><div class="tcr">#${i+1}</div>
-    <div class="tcn">${t.emoji} ${t.name}</div><div class="tcc">${t.memberCount} member${t.memberCount!==1?'s':''}</div>
-    <div class="tcs">
-      <div><div class="tsl">Points</div><div class="tsv big">${fmt(t.totalPoints)}</div></div>
-      <div><div class="tsl">Activities</div><div class="tsv">${t.activityCount}</div></div>
-      <div><div class="tsl">Calories</div><div class="tsv">${fmt(Math.round(t.totalCalories))}</div></div>
-      <div><div class="tsl">Distance</div><div class="tsv">${fmt(Math.round(t.totalDistanceKm))} km</div></div>
-    </div></div>`).join('');
+document.getElementById(‘tgrid’).innerHTML=TEAMS.map((t,i)=>` <div class="tc" style="--tc:${t.color}"><div class="tcr">#${i+1}</div> <div class="tcn">${t.emoji} ${t.name}</div><div class="tcc">${t.memberCount} member${t.memberCount!==1?'s':''}</div> <div class="tcs"> <div><div class="tsl">Points</div><div class="tsv big">${fmt(t.totalPoints)}</div></div> <div><div class="tsl">Activities</div><div class="tsv">${t.activityCount}</div></div> <div><div class="tsl">Calories</div><div class="tsv">${fmt(Math.round(t.totalCalories))}</div></div> <div><div class="tsl">Distance</div><div class="tsv">${fmt(Math.round(t.totalDistanceKm))} km</div></div> </div></div>`).join(’’);
 }
 
 function rInd(){
-  let s=[...LB];
-  if(aMet==='calories')s.sort((a,b)=>b.totalCalories-a.totalCalories);
-  if(aMet==='distance')s.sort((a,b)=>b.totalDistanceKm-a.totalDistanceKm);
-  if(aMet==='duration')s.sort((a,b)=>b.totalDurationMin-a.totalDurationMin);
-  if(aMet==='activities')s.sort((a,b)=>b.activityCount-a.activityCount);
-  document.getElementById('ilb').innerHTML=bTable(s,aMet,'individual');
+let s=[…LB];
+if(aMet===‘calories’)s.sort((a,b)=>b.totalCalories-a.totalCalories);
+if(aMet===‘distance’)s.sort((a,b)=>b.totalDistanceKm-a.totalDistanceKm);
+if(aMet===‘duration’)s.sort((a,b)=>b.totalDurationMin-a.totalDurationMin);
+if(aMet===‘activities’)s.sort((a,b)=>b.activityCount-a.activityCount);
+document.getElementById(‘ilb’).innerHTML=bTable(s,aMet,‘individual’);
 }
 
 function bTable(members,metric,pgKey){
-  if(!members.length)return`<div class="empty">No data yet.</div>`;
-  const tb={};CONFIG.TEAMS.forEach(t=>tb[t.id]=t);
-  const p=PG[pgKey]||1,tot=members.length,pages=Math.ceil(tot/PS);
-  const sl=members.slice((p-1)*PS,p*PS);
-  const ML={points:'Points',calories:'Calories',distance:'Distance',duration:'Duration',activities:'Activities'};
-  const rows=sl.map((m,i)=>{
-    const rank=(p-1)*PS+i+1;
-    const rc=rank===1?'rk1':rank===2?'rk2':rank===3?'rk3':'rkn';
-    const team=tb[m.team_id]||{name:'No Team',color:'#555',emoji:'⚪'};
-    const streak=m.currentStreak>=2?`<span class="stk">${m.currentStreak}d</span>`:'';
-    const init=m.name.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
-    let pri='';
-    switch(metric){
-      case'points':pri=`<span class="pc">${m.totalPoints}</span>`;break;
-      case'calories':pri=`<span class="mc">${fmt(Math.round(m.totalCalories))} kcal</span>`;break;
-      case'distance':pri=`<span class="mc">${m.totalDistanceKm.toFixed(1)} km</span>`;break;
-      case'duration':pri=`<span class="mc">${fmtDur(m.totalDurationMin)}</span>`;break;
-      case'activities':pri=`<span class="mc">${m.activityCount}</span>`;break;
-    }
-    return`<tr class="lr">
-      <td><span class="rk ${rc}">${rank}</span></td>
-      <td><div class="mrow">
-        ${m.profile_pic?`<img src="${m.profile_pic}" alt="" onerror="this.outerHTML='<div class=\\'av\\'>${init}</div>'" loading="lazy"/>`:`<div class="av">${init}</div>`}
-        <div><div class="mn">${m.name}${streak}</div><div class="mm"><span class="td" style="background:${team.color}"></span>${team.name}</div></div>
-      </div></td>
-      <td class="r">${pri}</td>
-      <td class="r mc hm">${fmt(Math.round(m.totalCalories))}</td>
-      <td class="r mc hm">${m.totalDistanceKm.toFixed(1)} km</td>
-      <td class="r mc hm">${fmtDur(m.totalDurationMin)}</td>
-      <td class="r mc hm">${m.activityCount}</td>
-    </tr>`;
-  }).join('');
-  return`<div class="lw"><table><thead><tr>
-    <th style="width:44px">#</th><th>Athlete</th><th class="r">${ML[metric]||metric}</th>
-    <th class="r hm">Calories</th><th class="r hm">Distance</th><th class="r hm">Duration</th><th class="r hm">Acts</th>
+if(!members.length)return`<div class="empty">No data yet.</div>`;
+const tb={};CONFIG.TEAMS.forEach(t=>tb[t.id]=t);
+const p=PG[pgKey]||1,tot=members.length,pages=Math.ceil(tot/PS);
+const sl=members.slice((p-1)*PS,p*PS);
+const ML={points:‘Points’,calories:‘Calories’,distance:‘Distance’,duration:‘Duration’,activities:‘Activities’};
+const rows=sl.map((m,i)=>{
+const rank=(p-1)*PS+i+1;
+const rc=rank===1?‘rk1’:rank===2?‘rk2’:rank===3?‘rk3’:‘rkn’;
+const team=tb[m.team_id]||{name:‘No Team’,color:’#555’,emoji:‘⚪’};
+const streak=m.currentStreak>=2?`<span class="stk">${m.currentStreak}d</span>`:’’;
+const init=m.name.split(’ ‘).map(w=>w[0]).join(’’).slice(0,2).toUpperCase();
+let pri=’’;
+switch(metric){
+case’points’:pri=`<span class="pc">${m.totalPoints}</span>`;break;
+case’calories’:pri=`<span class="mc">${fmt(Math.round(m.totalCalories))} kcal</span>`;break;
+case’distance’:pri=`<span class="mc">${m.totalDistanceKm.toFixed(1)} km</span>`;break;
+case’duration’:pri=`<span class="mc">${fmtDur(m.totalDurationMin)}</span>`;break;
+case’activities’:pri=`<span class="mc">${m.activityCount}</span>`;break;
+}
+return`<tr class="lr"> <td><span class="rk ${rc}">${rank}</span></td> <td><div class="mrow"> ${m.profile_pic?`<img src="${m.profile_pic}" alt="" onerror="this.outerHTML='<div class=\\'av\\'>${init}</div>'" loading="lazy"/>`:`<div class="av">${init}</div>`} <div><div class="mn">${m.name}${streak}</div><div class="mm"><span class="td" style="background:${team.color}"></span>${team.name}</div></div> </div></td> <td class="r">${pri}</td> <td class="r mc hm">${fmt(Math.round(m.totalCalories))}</td> <td class="r mc hm">${m.totalDistanceKm.toFixed(1)} km</td> <td class="r mc hm">${fmtDur(m.totalDurationMin)}</td> <td class="r mc hm">${m.activityCount}</td> </tr>`;
+}).join(’’);
+return`<div class="lw"><table><thead><tr>
+<th style="width:44px">#</th><th>Athlete</th><th class="r">${ML[metric]||metric}</th>
+<th class="r hm">Calories</th><th class="r hm">Distance</th><th class="r hm">Duration</th><th class="r hm">Acts</th>
+
   </tr></thead><tbody>${rows}</tbody></table>${pages>1?pgr(p,pages,tot,pgKey):''}</div>`;
 }
 
 function pgr(p,pages,tot,key){
-  const s=(p-1)*PS+1,e=Math.min(p*PS,tot);
-  let b=`<button class="pbn" ${p<=1?'disabled':''} data-pg="${key}:${p-1}">←</button>`;
-  for(let i=1;i<=pages;i++){
-    if(pages>7&&i>2&&i<pages-1&&Math.abs(i-p)>1){if(i===3||i===pages-2)b+=`<span style="color:var(--dim);padding:0 2px;font-family:var(--mono)">…</span>`;continue;}
-    b+=`<button class="pbn ${i===p?'on':''}" data-pg="${key}:${i}">${i}</button>`;
-  }
-  b+=`<button class="pbn" ${p>=pages?'disabled':''} data-pg="${key}:${p+1}">→</button>`;
-  return`<div class="pgr"><span class="pi">${s}–${e} of ${tot}</span><div class="pb">${b}</div></div>`;
+const s=(p-1)*PS+1,e=Math.min(p*PS,tot);
+let b=`<button class="pbn" ${p<=1?'disabled':''} data-pg="${key}:${p-1}">←</button>`;
+for(let i=1;i<=pages;i++){
+if(pages>7&&i>2&&i<pages-1&&Math.abs(i-p)>1){if(i===3||i===pages-2)b+=`<span style="color:var(--dim);padding:0 2px;font-family:var(--mono)">…</span>`;continue;}
+b+=`<button class="pbn ${i===p?'on':''}" data-pg="${key}:${i}">${i}</button>`;
+}
+b+=`<button class="pbn" ${p>=pages?'disabled':''} data-pg="${key}:${p+1}">→</button>`;
+return`<div class="pgr"><span class="pi">${s}–${e} of ${tot}</span><div class="pb">${b}</div></div>`;
 }
 
 function gp(key,p){
-  PG[key]=p;
-  if(key==='overall')rOLB();if(key==='individual')rInd();if(key==='acts')rActs();
-  const pid=key==='acts'?'activities':key;
-  document.getElementById('panel-'+pid)?.scrollIntoView({behavior:'smooth',block:'start'});
+PG[key]=p;
+if(key===‘overall’)rOLB();if(key===‘individual’)rInd();if(key===‘acts’)rActs();
+const pid=key===‘acts’?‘activities’:key;
+document.getElementById(‘panel-’+pid)?.scrollIntoView({behavior:‘smooth’,block:‘start’});
 }
 
 function initTF(){
-  const w=document.getElementById('tfbtns');
-  CONFIG.TEAMS.forEach(t=>{
-    const b=document.createElement('button');b.className='tfb';b.dataset.team=t.id;
-    b.textContent=`${t.emoji} ${t.name}`;b.dataset.team=t.id;b.addEventListener('click',e=>filterTeam(t.id,e.currentTarget));w.appendChild(b);
-  });
+const w=document.getElementById(‘tfbtns’);
+CONFIG.TEAMS.forEach(t=>{
+const b=document.createElement(‘button’);b.className=‘tfb’;b.dataset.team=t.id;
+b.textContent=`${t.emoji} ${t.name}`;b.dataset.team=t.id;b.addEventListener(‘click’,e=>filterTeam(t.id,e.currentTarget));w.appendChild(b);
+});
 }
 function filterTeam(id,btn){
-  aTm=id==='all'?'all':Number(id);
-  document.querySelectorAll('.tfb').forEach(b=>b.classList.remove('active'));btn.classList.add('active');
-  selA=null;aSrch='';document.getElementById('asrch').value='';PG.acts=1;rChips();rActs();
+aTm=id===‘all’?‘all’:Number(id);
+document.querySelectorAll(’.tfb’).forEach(b=>b.classList.remove(‘active’));btn.classList.add(‘active’);
+selA=null;aSrch=’’;document.getElementById(‘asrch’).value=’’;PG.acts=1;rChips();rActs();
 }
 function rChips(){
-  const tb={};CONFIG.TEAMS.forEach(t=>tb[t.id]=t);const el=document.getElementById('achips');
-  if(!aSrch){el.innerHTML='';return;}
-  let f=[...LB];if(aTm!=='all')f=f.filter(m=>m.team_id===aTm);
-  f=f.filter(m=>m.name.toLowerCase().includes(aSrch));
-  if(!f.length){el.innerHTML=`<span style="font-size:12px;color:var(--dim);font-family:var(--mono)">No athletes found.</span>`;return;}
-  el.innerHTML=f.map(m=>{
-    const team=tb[m.team_id]||{color:'#555'};const sel=m.strava_athlete_id===selA?'sel':'';
-    return`<div class="achip ${sel}" data-aid="${m.strava_athlete_id}">
-      <span class="td" style="background:${team.color};width:6px;height:6px;"></span>
-      ${m.profile_pic?`<img src="${m.profile_pic}" alt="" onerror="this.style.display='none'">`:''}
-      <span>${m.name}</span></div>`;
-  }).join('');
+const tb={};CONFIG.TEAMS.forEach(t=>tb[t.id]=t);const el=document.getElementById(‘achips’);
+if(!aSrch){el.innerHTML=’’;return;}
+let f=[…LB];if(aTm!==‘all’)f=f.filter(m=>m.team_id===aTm);
+f=f.filter(m=>m.name.toLowerCase().includes(aSrch));
+if(!f.length){el.innerHTML=`<span style="font-size:12px;color:var(--dim);font-family:var(--mono)">No athletes found.</span>`;return;}
+el.innerHTML=f.map(m=>{
+const team=tb[m.team_id]||{color:’#555’};const sel=m.strava_athlete_id===selA?‘sel’:’’;
+return`<div class="achip ${sel}" data-aid="${m.strava_athlete_id}"> <span class="td" style="background:${team.color};width:6px;height:6px;"></span> ${m.profile_pic?`<img src="${m.profile_pic}" alt="" onerror="this.style.display='none'">`:''} <span>${m.name}</span></div>`;
+}).join(’’);
 }
-function selAth(id){selA=id;aSrch='';document.getElementById('asrch').value='';PG.acts=1;rChips();rActs();}
+function selAth(id){selA=id;aSrch=’’;document.getElementById(‘asrch’).value=’’;PG.acts=1;rChips();rActs();}
 
 function rActs(){
-  const tb={};CONFIG.TEAMS.forEach(t=>tb[t.id]=t);
-  let members=[...LB];
-  if(aTm!=='all')members=members.filter(m=>m.team_id===aTm);
-  if(selA)members=members.filter(m=>m.strava_athlete_id===selA);
-  const all=[];
-  members.forEach(m=>{
-    const team=tb[m.team_id]||{color:'#555',name:'No Team',emoji:'⚪'};
-    (m.activities||[]).forEach(a=>all.push({...a,member:m,team}));
-  });
-  all.sort((a,b)=>new Date(b.start_date)-new Date(a.start_date));
-  if(!all.length){document.getElementById('acontent').innerHTML=`<div class="empty">No activities found.</div>`;return;}
-  const p=PG.acts,tot=all.length,pages=Math.ceil(tot/PS);
-  const sl=all.slice((p-1)*PS,p*PS);const showWho=!selA;
-  const cards=sl.map(a=>{
-    const icon=SICO[a.sport_type]||'🏅';
-    const dk=((a.distance||0)/1000).toFixed(1),dm=Math.round((a.moving_time||0)/60),cal=Math.round(a.calories||0);
-    const date=new Date(a.start_date).toLocaleDateString('en-GB',{weekday:'short',day:'numeric',month:'short',year:'numeric'});
-    const pts=a.points||0,bd=a.breakdown||{};
-    const bn=[];
-    if(bd.base)bn.push(`+${bd.base} base`);if(bd.calories)bn.push(`+${bd.calories} cal`);
-    if(bd.distance)bn.push(`+${bd.distance} dist`);if(bd.duration)bn.push(`+${bd.duration} dur`);
-    if(bd.dailyTop)bn.push(`+${bd.dailyTop} top`);if(bd.streak)bn.push(`+${bd.streak} streak`);
-    return`<div class="acard${bd.valid===false?' ainv':''}">
-      <div class="aico">${icon}</div>
-      <div class="abody">
-        ${showWho?`<div class="awho">${a.member.profile_pic?`<img src="${a.member.profile_pic}" alt="" onerror="this.style.display='none'">`:''}
-          <span class="awn">${a.member.name} <span style="color:${a.team.color}">${a.team.emoji} ${a.team.name}</span></span></div>`:''}
-        <div class="aname">${a.name||a.sport_type}</div>
-        <div class="adate">${date} · ${a.sport_type}</div>
-        <div class="astats">
-          <div class="astat">⏱ <b>${dm}m</b></div>
-          ${dk>0?`<div class="astat">📏 <b>${dk} km</b></div>`:''}
-          ${cal>0?`<div class="astat">🔥 <b>${cal} kcal</b></div>`:''}
-          ${bd.valid===false?`<div class="astat" style="color:#e24b4a">Below min duration</div>`:''}
-        </div>
-        ${bn.length?`<div class="abns">${bn.map(x=>`<span class="abn">${x}</span>`).join('')}</div>`:''}
-      </div>
-      <div class="apts"><div class="apv">${pts}</div><div class="apl">pts</div></div>
-    </div>`;
-  }).join('');
-  document.getElementById('acontent').innerHTML=`<div class="alist">${cards}</div>${pages>1?pgr(p,pages,tot,'acts'):''}`;
+const tb={};CONFIG.TEAMS.forEach(t=>tb[t.id]=t);
+let members=[…LB];
+if(aTm!==‘all’)members=members.filter(m=>m.team_id===aTm);
+if(selA)members=members.filter(m=>m.strava_athlete_id===selA);
+const all=[];
+members.forEach(m=>{
+const team=tb[m.team_id]||{color:’#555’,name:‘No Team’,emoji:‘⚪’};
+(m.activities||[]).forEach(a=>all.push({…a,member:m,team}));
+});
+all.sort((a,b)=>new Date(b.start_date)-new Date(a.start_date));
+if(!all.length){document.getElementById(‘acontent’).innerHTML=`<div class="empty">No activities found.</div>`;return;}
+const p=PG.acts,tot=all.length,pages=Math.ceil(tot/PS);
+const sl=all.slice((p-1)*PS,p*PS);const showWho=!selA;
+const cards=sl.map(a=>{
+const icon=SICO[a.sport_type]||‘🏅’;
+const dk=((a.distance||0)/1000).toFixed(1),dm=Math.round((a.moving_time||0)/60),cal=Math.round(a.calories||0);
+const date=new Date(a.start_date).toLocaleDateString(‘en-GB’,{weekday:‘short’,day:‘numeric’,month:‘short’,year:‘numeric’});
+const pts=a.points||0,bd=a.breakdown||{};
+const bn=[];
+if(bd.base)bn.push(`+${bd.base} base`);if(bd.calories)bn.push(`+${bd.calories} cal`);
+if(bd.distance)bn.push(`+${bd.distance} dist`);if(bd.duration)bn.push(`+${bd.duration} dur`);
+if(bd.dailyTop)bn.push(`+${bd.dailyTop} top`);if(bd.streak)bn.push(`+${bd.streak} streak`);
+return`<div class="acard${bd.valid===false?' ainv':''}"> <div class="aico">${icon}</div> <div class="abody"> ${showWho?`<div class="awho">${a.member.profile_pic?`<img src="${a.member.profile_pic}" alt="" onerror="this.style.display='none'">`:’’}
+<span class="awn">${a.member.name} <span style="color:${a.team.color}">${a.team.emoji} ${a.team.name}</span></span></div>`:''} <div class="aname">${a.name||a.sport_type}</div> <div class="adate">${date} · ${a.sport_type}</div> <div class="astats"> <div class="astat">⏱ <b>${dm}m</b></div> ${dk>0?`<div class="astat">📏 <b>${dk} km</b></div>`:''} ${cal>0?`<div class="astat">🔥 <b>${cal} kcal</b></div>`:''} ${bd.valid===false?`<div class="astat" style="color:#e24b4a">Below min duration</div>`:''} </div> ${bn.length?`<div class="abns">${bn.map(x=>`<span class="abn">${x}</span>`).join(’’)}</div>`:''} </div> <div class="apts"><div class="apv">${pts}</div><div class="apl">pts</div></div> </div>`;
+}).join(’’);
+document.getElementById(‘acontent’).innerHTML=`<div class="alist">${cards}</div>${pages>1?pgr(p,pages,tot,'acts'):''}`;
 }
 
 function rScoring(){
-  const S=CONFIG.SCORING;
-  const rules=[
-    ['✅','Valid Activity',`Min duration met + ≥${S.MIN_CAL_PER_MIN??4} kcal/min (if calories recorded).`,`+${S.BASE_ACTIVITY}`],
-    ['🔥','Calorie Bonus',`+${S.CALORIES_BONUS} per ${S.CALORIES_PER} kcal. Unlimited.`,`+${S.CALORIES_BONUS}/${S.CALORIES_PER}`],
-    ['📏','Distance Bonus',`+${S.DISTANCE_BONUS} per ${S.DISTANCE_PER} km. Unlimited.`,`+${S.DISTANCE_BONUS}/ ${S.DISTANCE_PER}km`],
-    ['⏱️','Duration Bonus',`Above ${S.DURATION_BASE} min: +${S.DURATION_BONUS} per 30 min.`,`+${S.DURATION_BONUS}/${S.DURATION_STEP}m`],
-    ['🏆','Daily Top Cal',`Highest calories burned across ALL athletes that day.`,`+${S.DAILY_TOP_CALORIES}`],
-    ['🎯','Streak M1','3 consecutive days. Once per challenge.',`+${S.STREAK_MILESTONES[0]}`],
-    ['🎯','Streak M2','6 consecutive days. Once per challenge.',`+${S.STREAK_MILESTONES[1]}`],
-    ['🎯','Streak M3','9 consecutive days. Once per challenge.',`+${S.STREAK_MILESTONES[2]}`],
-    ['🎯','Streak M4+','12+ days. Max streak bonus = 100 pts.',`+${S.STREAK_MILESTONES[3]}`],
-  ];
-  document.getElementById('sgrid').innerHTML=rules.map(([i,t,d,p])=>`
-    <div class="sr"><div class="si">${i}</div><div><div class="stt">${t}</div><div class="sd">${d}</div></div><div class="spts">${p}</div></div>`).join('');
+const S=CONFIG.SCORING;
+const rules=[
+[‘✅’,‘Valid Activity’,`Min duration met + ≥${S.MIN_CAL_PER_MIN??4} kcal/min (if calories recorded).`,`+${S.BASE_ACTIVITY}`],
+[‘🔥’,‘Calorie Bonus’,`+${S.CALORIES_BONUS} per ${S.CALORIES_PER} kcal. Unlimited.`,`+${S.CALORIES_BONUS}/${S.CALORIES_PER}`],
+[‘📏’,‘Distance Bonus’,`+${S.DISTANCE_BONUS} per ${S.DISTANCE_PER} km. Unlimited.`,`+${S.DISTANCE_BONUS}/${S.DISTANCE_PER}km`],
+[‘⏱️’,‘Duration Bonus’,`Above ${S.DURATION_BASE} min: +${S.DURATION_BONUS} per ${S.DURATION_STEP} min.`,`+${S.DURATION_BONUS}/${S.DURATION_STEP}m`],
+[‘🏆’,‘Daily Top Cal’,`Highest calories burned across ALL athletes that day.`,`+${S.DAILY_TOP_CALORIES}`],
+[‘🎯’,‘Streak M1’,‘3 consecutive days. Once per challenge.’,`+${S.STREAK_MILESTONES[0]}`],
+[‘🎯’,‘Streak M2’,‘6 consecutive days. Once per challenge.’,`+${S.STREAK_MILESTONES[1]}`],
+[‘🎯’,‘Streak M3’,‘9 consecutive days. Once per challenge.’,`+${S.STREAK_MILESTONES[2]}`],
+[‘🎯’,‘Streak M4+’,‘12+ days. Max streak bonus = 100 pts.’,`+${S.STREAK_MILESTONES[3]}`],
+];
+document.getElementById(‘sgrid’).innerHTML=rules.map(([i,t,d,p])=>` <div class="sr"><div class="si">${i}</div><div><div class="stt">${t}</div><div class="sd">${d}</div></div><div class="spts">${p}</div></div>`).join(’’);
 }
 
-function fmt(n){return Number(n).toLocaleString('en-US');}
+function fmt(n){return Number(n).toLocaleString(‘en-US’);}
 function fmtDur(m){const h=Math.floor(m/60),mn=Math.round(m%60);return h>0?`${h}h ${mn}m`:`${mn}m`;}
 let _tt;
-function toast(msg,type=''){
-  const el=document.getElementById('toast');el.textContent=msg;el.className='show '+(type||'');
-  clearTimeout(_tt);_tt=setTimeout(()=>el.className='',3200);
+function toast(msg,type=’’){
+const el=document.getElementById(‘toast’);el.textContent=msg;el.className=‘show ‘+(type||’’);
+clearTimeout(_tt);_tt=setTimeout(()=>el.className=’’,3200);
 }
 </script>
+
 </body>
 </html>
