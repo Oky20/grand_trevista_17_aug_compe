@@ -242,8 +242,9 @@ function rHA(){
 }
 async function syncNow(){
   const btn=document.getElementById('sbtn'),a=Session.get();if(!a)return;
+  const syncStart=document.getElementById('rs').value||aS;
   btn.disabled=true;btn.textContent='Syncing...';
-  try{await Strava.fetchActivities(a.id,aS);await loadData();toast('Sync complete!','success');}
+  try{await Strava.fetchActivities(a.id,syncStart);await loadData();toast('Sync complete!','success');}
   catch(e){toast('Sync failed: '+e.message,'error');}
   finally{btn.disabled=false;btn.textContent='Sync';}
 }
@@ -253,7 +254,9 @@ function applyRange(){
   const s=document.getElementById('rs').value,e=document.getElementById('re').value;
   if(!s||!e)return toast('Pick start and end date.','error');
   if(s>e)return toast('Start must be before end.','error');
-  aS=s;aE=e;window.aS=s;window.aE=e;updDlbl();cdown();loadData();
+  aS=s;aE=e;window.aS=s;window.aE=e;
+  console.log('applyRange: aS=',aS,'aE=',aE);
+  updDlbl();cdown();loadData();
 }
 function updDlbl(){
   const s=new Date(aS).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'});
