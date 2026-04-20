@@ -1,121 +1,103 @@
 // ============================================================
-// API HELPERS — Supabase + Strava
+// API HELPERS — Supabase REST API (no JS client needed)
+// Compatible with new sb_publishable_ key format
 // ============================================================
 
-// Lazy-init Supabase client
-let _sb = null;
-function sb() {
-  if (!_sb) _sb = supabase.createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_ANON_KEY);
-  return _sb;
+function sbFetch(path, options = {}) {
+const url = `${CONFIG.SUPABASE_URL}/rest/v1/${path}`;
+const headers = {
+‘apikey’:        CONFIG.SUPABASE_ANON_KEY,
+‘Authorization’: `Bearer ${CONFIG.SUPABASE_ANON_KEY}`,
+‘Content-Type’:  ‘application/json’,
+…(options.headers || {}),
+};
+return fetch(url, { …options, headers });
 }
 
 // ── STRAVA ──────────────────────────────────────────────────
 
 const Strava = {
-  // Build OAuth URL
-  getAuthUrl() {
-    const params = new URLSearchParams({
-      client_id:     CONFIG.STRAVA_CLIENT_ID,
-      redirect_uri:  CONFIG.STRAVA_REDIRECT_URI,
-      response_type: 'code',
-      scope:         'read,activity:read_all',
-      approval_prompt: 'auto',
-    });
-    return `https://www.strava.com/oauth/authorize?${params}`;
-  },
+getAuthUrl() {
+const params = new URLSearchParams({
+client_id:       CONFIG.STRAVA_CLIENT_ID,
+redirect_uri:    CONFIG.STRAVA_REDIRECT_URI,
+response_type:   ‘code’,
+scope:           ‘read,activity:read_all’,
+approval_prompt: ‘auto’,
+});
+return `https://www.strava.com/oauth/authorize?${params}`;
+},
 
-  // Exchange code for tokens (calls Supabase Edge Function to keep secret safe)
-  async exchangeCode(code) {
-    const res = await fetch(`${CONFIG.SUPABASE_URL}/functions/v1/strava-auth`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ code }),
-    });
-    if (!res.ok) throw new Error(await res.text());
-    return res.json();
-  },
+async exchangeCode(code) {
+const res = await fetch(`${CONFIG.SUPABASE_URL}/functions/v1/strava-auth`, {
+method:  ‘POST’,
+headers: { ‘Content-Type’: ‘application/json’ },
+body:    JSON.stringify({ code }),
+});
+if (!res.ok) throw new Error(await res.text());
+return res.json();
+},
 
-  // Fetch activities for a member (calls Edge Function)
-  async fetchActivities(athleteId, startDate) {
-    const res = await fetch(`${CONFIG.SUPABASE_URL}/functions/v1/strava-sync`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ athlete_id: athleteId, start_date: startDate || CONFIG.CHALLENGE_START }),
-    });
-    if (!res.ok) throw new Error(await res.text());
-    return res.json();
-  },
+async fetchActivities(athleteId, startDate) {
+const res = await fetch(`${CONFIG.SUPABASE_URL}/functions/v1/strava-sync`, {
+method:  ‘POST’,
+headers: { ‘Content-Type’: ‘application/json’ },
+body:    JSON.stringify({ athlete_id: athleteId, start_date: startDate || CONFIG.CHALLENGE_START }),
+});
+if (!res.ok) throw new Error(await res.text());
+return res.json();
+},
 };
 
 // ── SUPABASE DB ──────────────────────────────────────────────
 
 const DB = {
-  // Members
-  async getMembers() {
-    const { data, error } = await sb().from('members').select('*').order('name');
-    if (error) throw error;
-    return data;
-  },
+async getMembers() {
+const res = await sbFetch(‘members?order=name’);
+if (!res.ok) throw new Error(await res.text());
+return res.json();
+},
 
-  async getMember(athleteId) {
-    const { data, error } = await sb().from('members').select('*').eq('strava_athlete_id', athleteId).single();
-    if (error && error.code !== 'PGRST116') throw error;
-    return data;
-  },
+async getMember(athleteId) {
+const res = await sbFetch(`members?strava_athlete_id=eq.${athleteId}&limit=1`);
+if (!res.ok) throw new Error(await res.text());
+const data = await res.json();
+return data[0] || null;
+},
 
-  async upsertMember(member) {
-    const { data, error } = await sb().from('members').upsert(member, { onConflict: 'strava_athlete_id' }).select().single();
-    if (error) throw error;
-    return data;
-  },
+async getActivities(startDate, endDate) {
+const start = startDate || CONFIG.CHALLENGE_START;
+const end   = endDate   || CONFIG.CHALLENGE_END;
+const res = await sbFetch(
+`activities?start_date=gte.${start}&start_date=lte.${end}T23:59:59&order=start_date.asc`
+);
+if (!res.ok) throw new Error(await res.text());
+return res.json();
+},
 
-  async updateMemberTeam(athleteId, teamId) {
-    const { error } = await sb().from('members').update({ team_id: teamId }).eq('strava_athlete_id', athleteId);
-    if (error) throw error;
-  },
-
-  // Activities
-  async getActivities(startDate, endDate) {
-    const { data, error } = await sb()
-      .from('activities')
-      .select('*')
-      .gte('start_date', startDate)
-      .lte('start_date', endDate + 'T23:59:59')
-      .order('start_date', { ascending: true });
-    if (error) throw error;
-    return data;
-  },
-
-  async upsertActivities(activities) {
-    if (!activities.length) return;
-    const { error } = await sb().from('activities').upsert(activities, { onConflict: 'strava_activity_id' });
-    if (error) throw error;
-  },
-
-  // Leaderboard (computed view from DB, refreshed via Edge Function)
-  async getLeaderboard(startDate, endDate) {
-    const start = startDate || CONFIG.CHALLENGE_START;
-    const end   = endDate   || CONFIG.CHALLENGE_END;
-    const [members, activities] = await Promise.all([
-      DB.getMembers(),
-      DB.getActivities(start, end),
-    ]);
-    const leaderboard = Scoring.calcLeaderboard(members, activities);
-    const teams       = Scoring.calcTeamStats(leaderboard);
-    return { leaderboard, teams };
-  },
+async getLeaderboard(startDate, endDate) {
+const start = startDate || CONFIG.CHALLENGE_START;
+const end   = endDate   || CONFIG.CHALLENGE_END;
+const [members, activities] = await Promise.all([
+DB.getMembers(),
+DB.getActivities(start, end),
+]);
+const leaderboard = Scoring.calcLeaderboard(members, activities);
+const teams       = Scoring.calcTeamStats(leaderboard);
+return { leaderboard, teams };
+},
 };
 
 // ── SESSION ──────────────────────────────────────────────────
 
 const Session = {
-  get() {
-    try { return JSON.parse(localStorage.getItem('athlete') || 'null'); } catch { return null; }
-  },
-  set(athlete) {
-    localStorage.setItem('athlete', JSON.stringify(athlete));
-  },
-  clear() {
-    localStorage.removeItem('athlete');
-  },
+get() {
+try { return JSON.parse(localStorage.getItem(‘athlete’) || ‘null’); } catch { return null; }
+},
+set(athlete) {
+localStorage.setItem(‘athlete’, JSON.stringify(athlete));
+},
+clear() {
+localStorage.removeItem(‘athlete’);
+},
 };
