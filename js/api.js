@@ -68,11 +68,20 @@ const DB = {
   async getActivities(startDate, endDate) {
     const start = startDate || CONFIG.CHALLENGE_START;
     const end   = endDate   || CONFIG.CHALLENGE_END;
+    // Subtract 1 day from start to account for UTC offset (WIB = UTC+7)
+    const startDt = new Date(start);
+    startDt.setDate(startDt.getDate() - 1);
+    const startAdj = startDt.toISOString().slice(0, 10);
     const res = await sbFetch(
-      `activities?start_date=gte.${start}&start_date=lte.${end}T23:59:59&order=start_date.asc`
+      `activities?start_date=gte.${startAdj}&start_date=lte.${end}T23:59:59&order=start_date.asc`
     );
     if (!res.ok) throw new Error(await res.text());
-    return res.json();
+    // Filter client-side to correct date range (local date)
+    const data = await res.json();
+    return data.filter(a => {
+      const localDate = new Date(a.start_date).toLocaleDateString('en-CA'); // YYYY-MM-DD
+      return localDate >= start && localDate <= end;
+    });
   },
 
   async getLeaderboard(startDate, endDate) {

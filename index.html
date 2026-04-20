@@ -239,7 +239,7 @@ function rHA(){
   }else{
     el.innerHTML=`<div class="apill"><img src="${a.profile_medium||''}" alt="" onerror="this.style.display='none'"/><span>${a.firstname} ${a.lastname}</span></div>
     <button class="btn btn-p" id="sbtn" id="sync-btn-el">Sync</button>
-    <button class="btn btn-g" id="logout-btn-el">Sign out</button>`;
+    <button class="btn btn-g" id="logout-btn">Sign out</button>`;
   }
 }
 async function syncNow(){
