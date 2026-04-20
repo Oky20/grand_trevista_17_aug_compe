@@ -10,11 +10,23 @@ const Scoring = (() => {
     return CONFIG.MIN_DURATION[sportType] ?? CONFIG.MIN_DURATION['DEFAULT'];
   }
 
-  // Check if activity is valid (meets minimum duration)
+  // Check if activity is valid (meets minimum duration + calories/min check)
   function isValidActivity(activity) {
     const minMinutes = getMinDuration(activity.sport_type);
-    const actualMinutes = activity.moving_time / 60;
-    return actualMinutes >= minMinutes;
+    const actualMinutes = (activity.moving_time || 0) / 60;
+
+    // Must meet minimum duration
+    if (actualMinutes < minMinutes) return false;
+
+    // Calorie efficiency check — skip if calories not recorded (0)
+    const calories = activity.calories || 0;
+    if (calories > 0) {
+      const calPerMin = calories / actualMinutes;
+      const minCalPerMin = CONFIG.SCORING.MIN_CAL_PER_MIN ?? 4;
+      if (calPerMin < minCalPerMin) return false;
+    }
+
+    return true;
   }
 
   // Calculate points for a single activity
@@ -136,11 +148,10 @@ const Scoring = (() => {
       }
       if (day !== lastDay) lastActiveDateMap[act.athlete_id] = day;
 
-      // Check if top calorie for the day in their team
-      const teamMembers = members.filter(x => x.team_id === m.team_id).map(x => x.strava_athlete_id);
-      const teamDayCals = teamMembers.map(id => dailyCalMap[day]?.[id] || 0);
-      const maxTeamCal = Math.max(...teamDayCals);
-      const isDailyTop = (dailyCalMap[day]?.[act.athlete_id] || 0) >= maxTeamCal && maxTeamCal > 0;
+      // Check if top calorie for the day — overall across ALL athletes
+      const allDayCals = Object.values(dailyCalMap[day] || {});
+      const maxOverallCal = allDayCals.length > 0 ? Math.max(...allDayCals) : 0;
+      const isDailyTop = maxOverallCal > 0 && (dailyCalMap[day]?.[act.athlete_id] || 0) >= maxOverallCal;
 
       const result = calcActivityPoints(act, {
         currentStreak: m.currentStreak,
