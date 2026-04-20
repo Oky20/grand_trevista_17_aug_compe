@@ -52,7 +52,7 @@ const CONFIG = {
     CALORIES_BONUS:        5,   // points per threshold
     DISTANCE_PER:        2.5,   // every X km
     DISTANCE_BONUS:        5,   // points per threshold
-    DURATION_BASE:        30,   // minutes before bonus starts
+    DURATION_BASE:        45,   // minutes before bonus starts
     DURATION_STEP:        30,   // every X minutes above base
     DURATION_BONUS:        5,   // points per step
     MIN_CAL_PER_MIN:       4,   // min calories/minute for valid activity (skipped if calories=0)
