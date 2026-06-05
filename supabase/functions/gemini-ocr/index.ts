@@ -20,7 +20,7 @@ Return ONLY valid JSON (no markdown, no code fences):
   "duration_minutes": number or null,
   "date": "YYYY-MM-DD" or null,
   "activity_name": string or null,
-  "sport_type": "Run"|"Walk"|"Ride"|"VirtualRide"|"Swim"|"Padel"|"Tennis"|"Badminton"|"WeightTraining"|"Workout"|"Yoga"|"Pilates"|"Hike"|null
+  "sport_type": "Run"|"Walk"|"Ride"|"Cycling"|"VirtualRide"|"Swim"|"Padel"|"Tennis"|"Badminton"|"WeightTraining"|"Workout"|"Yoga"|"Pilates"|"Hike"|"Basketball"|"Soccer"|"Rowing"|"CrossFit"|"Elliptical"|"StairStepper"|"Boxing"|null
 }
 
 Rules:
@@ -32,7 +32,7 @@ Rules:
 - sport_type: guess from activity name, icon, or type displayed. Map common names:
   "lari"/"run"/"running" → "Run"
   "jalan"/"walk"/"walking" → "Walk"
-  "sepeda"/"cycle"/"bike"/"cycling" → "Ride"
+  "sepeda"/"cycle"/"bike"/"cycling"/"gowes" → "Cycling"
   "renang"/"swim"/"swimming" → "Swim"
   "badminton"/"bulutangkis" → "Badminton"
   "tennis"/"tenis" → "Tennis"
@@ -41,6 +41,13 @@ Rules:
   "yoga" → "Yoga"
   "pilates" → "Pilates"
   "hike"/"hiking"/"mendaki" → "Hike"
+  "basket"/"basketball" → "Basketball"
+  "sepakbola"/"football"/"soccer"/"futsal" → "Soccer"
+  "dayung"/"rowing"/"row" → "Rowing"
+  "crossfit"/"cross fit" → "CrossFit"
+  "elliptical"/"eliptical" → "Elliptical"
+  "stair"/"stepper"/"tangga" → "StairStepper"
+  "boxing"/"tinju"/"box" → "Boxing"
   general fitness class → "Workout"
 - Leave null for any field not visible in the screenshot`;
 
