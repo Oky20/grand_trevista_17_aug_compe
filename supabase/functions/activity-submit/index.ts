@@ -11,9 +11,11 @@ const CORS = {
 };
 
 const VALID_SPORT_TYPES = [
-  "Run", "Walk", "Ride", "VirtualRide", "Swim",
+  "Run", "Walk", "Ride", "Cycling", "VirtualRide", "Swim",
   "Padel", "Tennis", "Badminton", "WeightTraining",
   "Workout", "Yoga", "Pilates", "Hike",
+  "Basketball", "Soccer", "Rowing", "CrossFit",
+  "Elliptical", "StairStepper", "Boxing",
 ];
 
 serve(async (req) => {

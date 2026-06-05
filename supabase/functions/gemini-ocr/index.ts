@@ -11,7 +11,7 @@ const CORS = {
 
 const GEMINI_API_KEY = Deno.env.get("GEMINI_API_KEY")!;
 
-const PROMPT = `Extract workout/fitness activity data from this screenshot.
+const PROMPT = `We are in year 2026. Extract workout/fitness activity data from this screenshot.
 Return ONLY valid JSON (no markdown, no code fences):
 
 {
@@ -20,19 +20,19 @@ Return ONLY valid JSON (no markdown, no code fences):
   "duration_minutes": number or null,
   "date": "YYYY-MM-DD" or null,
   "activity_name": string or null,
-  "sport_type": "Run"|"Walk"|"Ride"|"VirtualRide"|"Swim"|"Padel"|"Tennis"|"Badminton"|"WeightTraining"|"Workout"|"Yoga"|"Pilates"|"Hike"|null
+  "sport_type": "Run"|"Walk"|"Ride"|"Cycling"|"VirtualRide"|"Swim"|"Padel"|"Tennis"|"Badminton"|"WeightTraining"|"Workout"|"Yoga"|"Pilates"|"Hike"|"Basketball"|"Soccer"|"Rowing"|"CrossFit"|"Elliptical"|"StairStepper"|"Boxing"|null
 }
 
 Rules:
 - calories: total calories as integer
 - distance_km: total distance in kilometers as float
 - duration_minutes: total duration in minutes as float
-- date: ISO date from the screenshot (if not found use today)
+- date: ISO date from the screenshot. If the year is not clearly visible, assume 2026 (the current year). Do NOT guess 2023 or earlier.
 - activity_name: the name/title of the activity
 - sport_type: guess from activity name, icon, or type displayed. Map common names:
   "lari"/"run"/"running" → "Run"
   "jalan"/"walk"/"walking" → "Walk"
-  "sepeda"/"cycle"/"bike"/"cycling" → "Ride"
+  "sepeda"/"cycle"/"bike"/"cycling"/"gowes" → "Cycling"
   "renang"/"swim"/"swimming" → "Swim"
   "badminton"/"bulutangkis" → "Badminton"
   "tennis"/"tenis" → "Tennis"
@@ -41,6 +41,13 @@ Rules:
   "yoga" → "Yoga"
   "pilates" → "Pilates"
   "hike"/"hiking"/"mendaki" → "Hike"
+  "basket"/"basketball" → "Basketball"
+  "sepakbola"/"football"/"soccer"/"futsal" → "Soccer"
+  "dayung"/"rowing"/"row" → "Rowing"
+  "crossfit"/"cross fit" → "CrossFit"
+  "elliptical"/"eliptical" → "Elliptical"
+  "stair"/"stepper"/"tangga" → "StairStepper"
+  "boxing"/"tinju"/"box" → "Boxing"
   general fitness class → "Workout"
 - Leave null for any field not visible in the screenshot`;
 
