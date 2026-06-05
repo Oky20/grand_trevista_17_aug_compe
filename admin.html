@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Admin — GTR Fest 17</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<script src="js/config.js"></script>
+<style>
+:root{--bg:#111116;--card:#1c1c25;--card2:#21212c;--border:#2a2a38;--border2:#333345;--text:#f0f0f5;--muted:#888899;--dim:#555566;--orange:#FC5200;--orange2:#ff6a1a;--red:#e24b4a;--green:#2ecc71;--r:8px;--rlg:12px;}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;font-size:14px;line-height:1.5;min-height:100vh;}
+.wrap{max-width:1000px;margin:0 auto;padding:32px 20px 60px;}
+header{display:flex;align-items:center;justify-content:space-between;margin-bottom:32px;padding-bottom:16px;border-bottom:1px solid var(--border);}
+.logo{font-size:18px;font-weight:600;}.logo span{color:var(--red);font-size:12px;font-family:'JetBrains Mono',monospace;margin-left:8px;}
+.btn{padding:8px 16px;border-radius:var(--r);border:none;font-family:'Inter',sans-serif;font-size:13px;font-weight:500;cursor:pointer;transition:all .15s;display:inline-flex;align-items:center;gap:6px;}
+.btn-p{background:var(--orange);color:#fff;}.btn-p:hover{background:var(--orange2);}.btn-p:disabled{opacity:.5;cursor:not-allowed;}
+.btn-g{background:transparent;color:var(--muted);border:0.5px solid var(--border2);}.btn-g:hover{color:var(--text);border-color:var(--muted);}
+.btn-r{background:transparent;color:var(--red);border:0.5px solid rgba(226,75,74,.4);}.btn-r:hover{background:rgba(226,75,74,.1);}
+
+/* Login */
+.login-card{max-width:360px;margin:80px auto;background:var(--card);border:0.5px solid var(--border);border-radius:var(--rlg);padding:36px;text-align:center;}
+.login-card h2{font-size:20px;font-weight:600;margin-bottom:4px;}
+.login-card .ls{font-size:12px;color:var(--muted);font-family:'JetBrains Mono',monospace;margin-bottom:24px;}
+.login-card input{width:100%;background:var(--bg);border:0.5px solid var(--border2);border-radius:var(--r);padding:10px 14px;color:var(--text);font-size:14px;font-family:'Inter',sans-serif;outline:none;margin-bottom:12px;transition:border-color .15s;}
+.login-card input:focus{border-color:var(--orange);}
+.login-card .lerr{font-size:12px;color:var(--red);font-family:'JetBrains Mono',monospace;margin-bottom:8px;min-height:18px;}
+
+.tabs{display:flex;border-bottom:1px solid var(--border);overflow-x:auto;margin-bottom:24px;}
+.tab{padding:11px 18px;font-size:13px;font-weight:500;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap;transition:all .15s;background:none;border-top:none;border-left:none;border-right:none;font-family:'Inter',sans-serif;margin-bottom:-1px;}
+.tab:hover{color:var(--text);}.tab.active{color:var(--orange);border-bottom-color:var(--orange);}
+.panel{display:none;}.panel.active{display:block;animation:fu .2s ease;}
+@keyframes fu{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+
+/* Tables */
+.lw{background:var(--card);border:0.5px solid var(--border);border-radius:var(--rlg);overflow:hidden;margin-top:16px;}
+table{width:100%;border-collapse:collapse;}
+thead tr{background:var(--card2);}
+thead th{padding:10px 14px;font-size:10px;font-weight:500;color:var(--dim);text-align:left;font-family:'JetBrains Mono',monospace;text-transform:uppercase;letter-spacing:.5px;white-space:nowrap;}
+.lr{border-top:0.5px solid var(--border);}.lr:hover{background:rgba(252,82,0,.04);}
+.lr td{padding:10px 14px;vertical-align:middle;font-size:13px;}
+
+/* Forms */
+.form-card{background:var(--card);border:0.5px solid var(--border);border-radius:var(--rlg);padding:20px;}
+.form-card h4{font-size:14px;font-weight:600;margin-bottom:16px;}
+.frow{display:flex;gap:10px;margin-bottom:12px;flex-wrap:wrap;}
+.fcol{flex:1;min-width:140px;}
+.fcol label{display:block;font-size:10px;color:var(--dim);font-family:'JetBrains Mono',monospace;text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px;}
+.fcol input,.fcol select{width:100%;background:var(--bg);border:0.5px solid var(--border2);border-radius:var(--r);padding:8px 12px;color:var(--text);font-size:13px;font-family:'Inter',sans-serif;outline:none;transition:border-color .15s;}
+.fcol input:focus,.fcol select:focus{border-color:var(--orange);}
+.fcol select{appearance:auto;}
+.frow-actions{display:flex;gap:8px;margin-top:16px;}
+
+.badge{display:inline-block;padding:2px 8px;border-radius:4px;font-size:10px;font-family:'JetBrains Mono',monospace;font-weight:500;}
+.badge-ocr{background:rgba(46,204,113,.15);color:var(--green);}
+.badge-manual{background:rgba(252,82,0,.15);color:var(--orange);}
+.badge-ok{background:rgba(252,82,0,.1);color:var(--orange);}
+
+.empty{text-align:center;padding:48px 20px;color:var(--muted);font-size:13px;}
+
+#toast{position:fixed;bottom:20px;right:20px;background:var(--card);border:0.5px solid var(--border2);border-radius:var(--r);padding:12px 18px;font-size:13px;max-width:300px;transform:translateY(80px);opacity:0;transition:all .25s;z-index:999;}
+#toast.show{transform:none;opacity:1;}#toast.success{border-color:var(--orange);color:var(--orange);}#toast.error{border-color:#e24b4a;color:#e24b4a;}
+
+@media(max-width:600px){.frow{flex-direction:column;}}
+</style>
+</head>
+<body>
+
+<!-- LOGIN SCREEN -->
+<div id="login-screen">
+  <div class="login-card">
+    <h2>Admin Panel</h2>
+    <div class="ls">GTR Fest 17</div>
+    <input type="password" id="admin-password" placeholder="Password" autocomplete="off"/>
+    <div class="lerr" id="login-err"></div>
+    <button class="btn btn-p" id="login-btn" style="width:100%;justify-content:center;">Login</button>
+  </div>
+</div>
+
+<!-- ADMIN PANEL (hidden initially) -->
+<div id="admin-panel" style="display:none;">
+  <div class="wrap">
+    <header>
+      <div class="logo">Admin <span>GTR Fest 17</span></div>
+      <button class="btn btn-g" id="admin-logout">Logout</button>
+    </header>
+
+    <div class="tabs">
+      <button class="tab active" data-tab="manual">Manual Entry</button>
+      <button class="tab" data-tab="codes">Invite Codes</button>
+      <button class="tab" data-tab="review">Review Submissions</button>
+    </div>
+
+    <!-- Manual Entry -->
+    <div class="panel active" id="panel-manual">
+      <div class="form-card">
+        <h4>Add Activity Manually</h4>
+        <div class="frow">
+          <div class="fcol"><label>User</label><select id="me-user"><option value="">Select user...</option></select></div>
+          <div class="fcol"><label>Sport Type</label><select id="me-sport"></select></div>
+        </div>
+        <div class="frow">
+          <div class="fcol"><label>Activity Name</label><input type="text" id="me-name" placeholder="e.g. Evening Ride"/></div>
+          <div class="fcol"><label>Date</label><input type="date" id="me-date"/></div>
+        </div>
+        <div class="frow">
+          <div class="fcol"><label>Calories (kcal)</label><input type="number" id="me-cal" placeholder="0" step="1"/></div>
+          <div class="fcol"><label>Distance (km)</label><input type="number" id="me-dist" placeholder="0" step="0.01"/></div>
+          <div class="fcol"><label>Duration (minutes)</label><input type="number" id="me-dur" placeholder="0" step="1"/></div>
+        </div>
+        <div class="frow-actions">
+          <button class="btn btn-p" id="me-submit">Submit Activity</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Invite Codes -->
+    <div class="panel" id="panel-codes">
+      <div class="form-card" style="margin-bottom:16px;">
+        <h4>Generate New Code</h4>
+        <div class="frow">
+          <div class="fcol"><label>Code</label><input type="text" id="ic-code" placeholder="e.g. Z1-FOXTROT"/></div>
+          <div class="fcol"><label>Team</label><select id="ic-team"></select></div>
+          <div class="fcol"><label>Max Uses</label><input type="number" id="ic-max" value="50" step="1" min="1"/></div>
+        </div>
+        <button class="btn btn-p" id="ic-add">Generate</button>
+      </div>
+      <div id="codes-table"></div>
+    </div>
+
+    <!-- Review -->
+    <div class="panel" id="panel-review">
+      <div id="review-table"></div>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+const SPORT_TYPES = ['Run','Walk','Ride','VirtualRide','Swim','Padel','Tennis','Badminton','WeightTraining','Workout','Yoga','Pilates','Hike'];
+let allUsers = [];
+
+// ── LOGIN ──
+document.getElementById('login-btn').addEventListener('click', doLogin);
+document.getElementById('admin-password').addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
+document.getElementById('admin-logout').addEventListener('click', doLogout);
+
+async function doLogin() {
+  const pw = document.getElementById('admin-password').value;
+  const errEl = document.getElementById('login-err');
+  errEl.textContent = '';
+  if (!pw) { errEl.textContent = 'Enter password.'; return; }
+  const btn = document.getElementById('login-btn');
+  btn.disabled = true; btn.textContent = 'Logging in...';
+  try {
+    const res = await fetch(`${CONFIG.SUPABASE_URL}/functions/v1/admin-auth`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'login', password: pw }),
+    });
+    if (!res.ok) { const e = await res.json(); throw new Error(e.error || 'Login failed'); }
+    const data = await res.json();
+    sessionStorage.setItem('admin_token', data.token);
+    document.getElementById('login-screen').style.display = 'none';
+    document.getElementById('admin-panel').style.display = 'block';
+    initAdmin();
+  } catch (e) { errEl.textContent = e.message; }
+  finally { btn.disabled = false; btn.textContent = 'Login'; }
+}
+
+function doLogout() {
+  sessionStorage.removeItem('admin_token');
+  document.getElementById('admin-panel').style.display = 'none';
+  document.getElementById('login-screen').style.display = 'block';
+  document.getElementById('admin-password').value = '';
+}
+
+// Check existing session
+if (sessionStorage.getItem('admin_token')) {
+  document.getElementById('login-screen').style.display = 'none';
+  document.getElementById('admin-panel').style.display = 'block';
+  initAdmin();
+}
+
+// ── INIT ──
+async function initAdmin() {
+  // Tabs
+  document.querySelectorAll('.tab').forEach(b => b.addEventListener('click', () => {
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+    b.classList.add('active');
+    document.getElementById('panel-' + b.dataset.tab).classList.add('active');
+  }));
+
+  // Manual entry setup
+  document.getElementById('me-date').value = new Date().toISOString().slice(0, 10);
+  document.getElementById('me-sport').innerHTML = SPORT_TYPES.map(s => `<option value="${s}">${s}</option>`).join('');
+  document.getElementById('me-submit').addEventListener('click', submitManual);
+
+  // Load users
+  try {
+    const res = await fetch(`${CONFIG.SUPABASE_URL}/rest/v1/users?order=name`, {
+      headers: { 'apikey': CONFIG.SUPABASE_ANON_KEY, 'Authorization': `Bearer ${CONFIG.SUPABASE_ANON_KEY}` }
+    });
+    allUsers = await res.json();
+    document.getElementById('me-user').innerHTML = '<option value="">Select user...</option>' +
+      allUsers.map(u => `<option value="${u.id}">${u.name} (Team ${u.team_id})</option>`).join('');
+  } catch (e) { console.error(e); }
+
+  // Invite codes
+  document.getElementById('ic-team').innerHTML = CONFIG.TEAMS.map(t => `<option value="${t.id}">${t.emoji} ${t.name}</option>`).join('');
+  document.getElementById('ic-add').addEventListener('click', addCode);
+  loadCodes();
+
+  // Review
+  loadReview();
+}
+
+// ── ASK SUPABASE ──
+async function askAdmin(action, body = {}) {
+  const res = await fetch(`${CONFIG.SUPABASE_URL}/functions/v1/admin-auth`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ action, ...body }),
+  });
+  if (!res.ok) { const e = await res.json(); throw new Error(e.error || 'Request failed'); }
+  return res.json();
+}
+
+async function askSubmit(data) {
+  const res = await fetch(`${CONFIG.SUPABASE_URL}/functions/v1/activity-submit`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
+  });
+  if (!res.ok) { const e = await res.json(); throw new Error(e.error || 'Submit failed'); }
+  return res.json();
+}
+
+// ── MANUAL ENTRY ──
+async function submitManual() {
+  const userId = document.getElementById('me-user').value;
+  const sport = document.getElementById('me-sport').value;
+  const name = document.getElementById('me-name').value.trim();
+  const date = document.getElementById('me-date').value;
+  const cal = parseFloat(document.getElementById('me-cal').value) || 0;
+  const dist = parseFloat(document.getElementById('me-dist').value) || 0;
+  const dur = parseFloat(document.getElementById('me-dur').value) || 0;
+
+  if (!userId) return toast('Select a user.', 'error');
+  if (!date) return toast('Date is required.', 'error');
+
+  const btn = document.getElementById('me-submit');
+  btn.disabled = true; btn.textContent = 'Submitting...';
+  try {
+    await askSubmit({
+      user_id: userId,
+      name: name || sport,
+      sport_type: sport,
+      distance: dist * 1000,
+      moving_time: Math.round(dur * 60),
+      calories: Math.round(cal),
+      start_date: date,
+      image_path: null,
+    });
+    toast('Activity added!', 'success');
+    document.getElementById('me-name').value = '';
+    document.getElementById('me-cal').value = '';
+    document.getElementById('me-dist').value = '';
+    document.getElementById('me-dur').value = '';
+    loadReview();
+  } catch (e) { toast(e.message, 'error'); }
+  finally { btn.disabled = false; btn.textContent = 'Submit Activity'; }
+}
+
+// ── INVITE CODES ──
+async function loadCodes() {
+  try {
+    const data = await askAdmin('list_codes');
+    updateCodesTable(data.codes || []);
+  } catch (e) { document.getElementById('codes-table').innerHTML = `<div class="empty">Failed to load codes.</div>`; }
+}
+
+function updateCodesTable(codes) {
+  if (!codes.length) {
+    document.getElementById('codes-table').innerHTML = '<div class="empty">No invite codes found.</div>';
+    return;
+  }
+  const tb = {}; CONFIG.TEAMS.forEach(t => tb[t.id] = t);
+  const rows = codes.map(c => {
+    const team = tb[c.team_id] || {};
+    return `<tr class="lr">
+      <td><code style="color:var(--orange);font-family:'JetBrains Mono',monospace;font-size:13px;">${c.code}</code></td>
+      <td>${team.emoji||''} ${team.name||'?'}</td>
+      <td>${c.used_count} / ${c.max_uses}</td>
+      <td>
+        <button class="btn btn-g" style="padding:4px 10px;font-size:11px;" data-reset="${c.id}">Reset</button>
+        <button class="btn btn-r" style="padding:4px 10px;font-size:11px;" data-del="${c.id}">Del</button>
+      </td>
+    </tr>`;
+  }).join('');
+  const html = `<div class="lw"><table><thead><tr><th>Code</th><th>Team</th><th>Usage</th><th style="width:120px">Actions</th></tr></thead><tbody>${rows}</tbody></table></div>`;
+  document.getElementById('codes-table').innerHTML = html;
+
+  document.querySelectorAll('[data-reset]').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      if (!confirm('Reset usage count?')) return;
+      try { await askAdmin('reset_code', { invite_code_id: parseInt(btn.dataset.reset) }); loadCodes(); toast('Code reset.', 'success'); }
+      catch (e) { toast(e.message, 'error'); }
+    });
+  });
+  document.querySelectorAll('[data-del]').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      if (!confirm('Delete this invite code?')) return;
+      try { await askAdmin('delete_code', { invite_code_id: parseInt(btn.dataset.del) }); loadCodes(); toast('Code deleted.', 'success'); }
+      catch (e) { toast(e.message, 'error'); }
+    });
+  });
+}
+
+async function addCode() {
+  const code = document.getElementById('ic-code').value.trim();
+  const teamId = parseInt(document.getElementById('ic-team').value);
+  const maxUses = parseInt(document.getElementById('ic-max').value) || 50;
+  if (!code) return toast('Enter a code.', 'error');
+  try {
+    await askAdmin('add_code', { code, team_id: teamId, max_uses: maxUses });
+    loadCodes();
+    document.getElementById('ic-code').value = '';
+    toast('Code added!', 'success');
+  } catch (e) { toast(e.message, 'error'); }
+}
+
+// ── REVIEW ──
+async function loadReview() {
+  try {
+    const [actRes, userRes] = await Promise.all([
+      fetch(`${CONFIG.SUPABASE_URL}/rest/v1/activities?order=start_date.desc&limit=100`, {
+        headers: { 'apikey': CONFIG.SUPABASE_ANON_KEY, 'Authorization': `Bearer ${CONFIG.SUPABASE_ANON_KEY}` }
+      }),
+      fetch(`${CONFIG.SUPABASE_URL}/rest/v1/users?order=name`, {
+        headers: { 'apikey': CONFIG.SUPABASE_ANON_KEY, 'Authorization': `Bearer ${CONFIG.SUPABASE_ANON_KEY}` }
+      }),
+    ]);
+    const acts = await actRes.json();
+    const users = await userRes.json();
+    const userMap = {}; users.forEach(u => userMap[u.id] = u);
+    const tb = {}; CONFIG.TEAMS.forEach(t => tb[t.id] = t);
+
+    if (!acts.length) {
+      document.getElementById('review-table').innerHTML = '<div class="empty">No activities yet.</div>';
+      return;
+    }
+
+    const rows = acts.map(a => {
+      const u = userMap[a.user_id] || { name: 'Unknown', team_id: 0 };
+      const team = tb[u.team_id] || {};
+      const date = new Date(a.start_date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+      const methodBadge = a.submission_method === 'manual' ? '<span class="badge badge-manual">Manual</span>' : '<span class="badge badge-ocr">OCR</span>';
+      const corrected = a.user_corrected ? '<span class="badge badge-ok">Edited</span>' : '';
+      return `<tr class="lr">
+        <td>${date}</td>
+        <td>${u.name} <span style="color:${team.color||'#555'};font-size:11px;">${team.name||'?'}</span></td>
+        <td>${a.name||a.sport_type}</td>
+        <td>${a.sport_type||'-'}</td>
+        <td>${Math.round((a.moving_time||0)/60)}m</td>
+        <td>${((a.distance||0)/1000).toFixed(1)}km</td>
+        <td>${Math.round(a.calories||0)}kcal</td>
+        <td>${methodBadge} ${corrected}</td>
+      </tr>`;
+    }).join('');
+
+    document.getElementById('review-table').innerHTML = `<div class="lw"><table><thead><tr>
+      <th>Date</th><th>User</th><th>Name</th><th>Sport</th><th>Time</th><th>Dist</th><th>Cal</th><th>Type</th>
+    </tr></thead><tbody>${rows}</tbody></table></div>`;
+  } catch (e) { document.getElementById('review-table').innerHTML = `<div class="empty">Failed to load activities.</div>`; }
+}
+
+function toast(msg, type = '') {
+  const el = document.getElementById('toast'); el.textContent = msg; el.className = 'show ' + (type || '');
+  clearTimeout(toast._t); toast._t = setTimeout(() => el.className = '', 3200);
+}
+</script>
+</body>
+</html>

@@ -1,6 +1,5 @@
 // ============================================================
-// API HELPERS - Supabase REST API (no JS client needed)
-// Compatible with new sb_publishable_ key format
+// API HELPERS — Supabase REST + OCR + Auth
 // ============================================================
 
 function sbFetch(path, options = {}) {
@@ -14,52 +13,62 @@ function sbFetch(path, options = {}) {
   return fetch(url, { ...options, headers });
 }
 
-// -- STRAVA --------------------------------------------------
+// -- OCR (Gemini via Edge Function) ---------------------------
 
-const Strava = {
-  getAuthUrl() {
-    const params = new URLSearchParams({
-      client_id:       CONFIG.STRAVA_CLIENT_ID,
-      redirect_uri:    CONFIG.STRAVA_REDIRECT_URI,
-      response_type:   'code',
-      scope:           'read,activity:read_all',
-      approval_prompt: 'auto',
-    });
-    return `https://www.strava.com/oauth/authorize?${params}`;
-  },
-
-  async exchangeCode(code) {
-    const res = await fetch(`${CONFIG.SUPABASE_URL}/functions/v1/strava-auth`, {
-      method:  'POST',
+const OCR = {
+  async analyzeImage(base64) {
+    const res = await fetch(`${CONFIG.SUPABASE_URL}/functions/v1/gemini-ocr`, {
+      method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body:    JSON.stringify({ code }),
+      body: JSON.stringify({ image_base64: base64 }),
     });
     if (!res.ok) throw new Error(await res.text());
     return res.json();
   },
 
-  async fetchActivities(athleteId, startDate) {
-    const res = await fetch(`${CONFIG.SUPABASE_URL}/functions/v1/strava-sync`, {
-      method:  'POST',
+  async submitActivity(data) {
+    const res = await fetch(`${CONFIG.SUPABASE_URL}/functions/v1/activity-submit`, {
+      method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body:    JSON.stringify({ athlete_id: athleteId, start_date: startDate || CONFIG.CHALLENGE_START }),
+      body: JSON.stringify(data),
     });
     if (!res.ok) throw new Error(await res.text());
     return res.json();
   },
 };
 
+// -- AUTH (Invite Code) ---------------------------------------
+
+const Auth = {
+  async register(code, name) {
+    const res = await fetch(`${CONFIG.SUPABASE_URL}/functions/v1/invite-code`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ code, name }),
+    });
+    if (!res.ok) {
+      const err = await res.json();
+      throw new Error(err.error || 'Registration failed');
+    }
+    const data = await res.json();
+    Session.set(data.user);
+    return data.user;
+  },
+
+
+};
+
 // -- SUPABASE DB ----------------------------------------------
 
 const DB = {
-  async getMembers() {
-    const res = await sbFetch('members?order=name');
+  async getUsers() {
+    const res = await sbFetch('users?order=name');
     if (!res.ok) throw new Error(await res.text());
     return res.json();
   },
 
-  async getMember(athleteId) {
-    const res = await sbFetch(`members?strava_athlete_id=eq.${athleteId}&limit=1`);
+  async getUser(userId) {
+    const res = await sbFetch(`users?id=eq.${userId}&limit=1`);
     if (!res.ok) throw new Error(await res.text());
     const data = await res.json();
     return data[0] || null;
@@ -68,7 +77,6 @@ const DB = {
   async getActivities(startDate, endDate) {
     const start = startDate || CONFIG.CHALLENGE_START;
     const end   = endDate   || CONFIG.CHALLENGE_END;
-    // Subtract 1 day from start to account for UTC offset (WIB = UTC+7)
     const startDt = new Date(start);
     startDt.setDate(startDt.getDate() - 1);
     const startAdj = startDt.toISOString().slice(0, 10);
@@ -76,10 +84,9 @@ const DB = {
       `activities?start_date=gte.${startAdj}&start_date=lte.${end}T23:59:59&order=start_date.asc`
     );
     if (!res.ok) throw new Error(await res.text());
-    // Filter client-side to correct date range (local date)
     const data = await res.json();
     return data.filter(a => {
-      const localDate = new Date(a.start_date).toLocaleDateString('en-CA'); // YYYY-MM-DD
+      const localDate = new Date(a.start_date).toLocaleDateString('en-CA');
       return localDate >= start && localDate <= end;
     });
   },
@@ -87,11 +94,11 @@ const DB = {
   async getLeaderboard(startDate, endDate) {
     const start = startDate || CONFIG.CHALLENGE_START;
     const end   = endDate   || CONFIG.CHALLENGE_END;
-    const [members, activities] = await Promise.all([
-      DB.getMembers(),
+    const [users, activities] = await Promise.all([
+      DB.getUsers(),
       DB.getActivities(start, end),
     ]);
-    const leaderboard = Scoring.calcLeaderboard(members, activities);
+    const leaderboard = Scoring.calcLeaderboard(users, activities);
     const teams       = Scoring.calcTeamStats(leaderboard);
     return { leaderboard, teams };
   },
@@ -101,12 +108,12 @@ const DB = {
 
 const Session = {
   get() {
-    try { return JSON.parse(localStorage.getItem('athlete') || 'null'); } catch { return null; }
+    try { return JSON.parse(localStorage.getItem('user') || 'null'); } catch { return null; }
   },
-  set(athlete) {
-    localStorage.setItem('athlete', JSON.stringify(athlete));
+  set(user) {
+    localStorage.setItem('user', JSON.stringify(user));
   },
   clear() {
-    localStorage.removeItem('athlete');
+    localStorage.removeItem('user');
   },
 };
