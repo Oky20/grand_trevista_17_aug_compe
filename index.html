@@ -310,10 +310,18 @@ function cdown() {
 
 async function loadData() {
   try {
+    console.log('loadData: fetching with aS=', aS, 'aE=', aE);
     const [lb, acts] = await Promise.all([DB.getLeaderboard(aS, aE), DB.getActivities(aS, aE)]);
+    console.log('loadData: users=', lb.leaderboard.length, 'activities=', acts.length, 'teams=', lb.teams.length);
+    if (lb.leaderboard.length > 0) {
+      console.log('loadData: first user sample=', JSON.stringify({id:lb.leaderboard[0].id, name:lb.leaderboard[0].name, team_id:lb.leaderboard[0].team_id, totalPoints:lb.leaderboard[0].totalPoints, activityCount:lb.leaderboard[0].activityCount}));
+      if (lb.leaderboard[0].activities.length > 0) {
+        console.log('loadData: first activity sample=', JSON.stringify({user_id:lb.leaderboard[0].activities[0].user_id, sport:lb.leaderboard[0].activities[0].sport_type, points:lb.leaderboard[0].activities[0].points}));
+      }
+    }
     LB = lb.leaderboard; TEAMS = lb.teams; AACTS = acts; PG = { overall: 1, individual: 1, acts: 1 };
     rOStats(); rOLB(); rTeams(); rInd(); rActs(); rChips();
-  } catch (e) { console.error(e); toast('Failed to load data.', 'error'); }
+  } catch (e) { console.error('loadData ERROR:', e); toast('Failed to load data.', 'error'); }
 }
 
 // ── HEADER ────────────────────────────────────────────────────

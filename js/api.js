@@ -122,6 +122,9 @@ const DB = {
       DB.getUsers(),
       DB.getActivities(start, end),
     ]);
+    console.log('getLeaderboard: users count=', users.length, 'activities count=', activities.length);
+    if (users.length > 0) console.log('getLeaderboard: first user=', JSON.stringify({id:users[0].id, name:users[0].name, team_id:users[0].team_id}));
+    if (activities.length > 0) console.log('getLeaderboard: first activity=', JSON.stringify({user_id:activities[0].user_id, sport_type:activities[0].sport_type, start_date:activities[0].start_date, calories:activities[0].calories}));
     const leaderboard = Scoring.calcLeaderboard(users, activities);
     const teams       = Scoring.calcTeamStats(leaderboard);
     return { leaderboard, teams };
