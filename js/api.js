@@ -55,7 +55,16 @@ const Auth = {
     return data.user;
   },
 
-
+  async login(name, teamId) {
+    const users = await DB.getUsers();
+    const user = users.find(u =>
+      u.name.toLowerCase() === name.toLowerCase().trim() &&
+      u.team_id === teamId
+    );
+    if (!user) throw new Error('No user found with that name in this team. Try registering first.');
+    Session.set(user);
+    return user;
+  },
 };
 
 // -- SUPABASE DB ----------------------------------------------
