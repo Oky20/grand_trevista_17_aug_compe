@@ -21,12 +21,9 @@ h1{font-size:22px;font-weight:600;margin-bottom:6px;}
 .card{background:var(--card);border:0.5px solid var(--border);border-radius:var(--rlg);overflow:hidden;}
 .contact-item{display:flex;align-items:center;gap:14px;padding:16px 20px;border-bottom:0.5px solid var(--border);transition:background .15s;}
 .contact-item:last-child{border-bottom:none;}
-.contact-item.clickable:hover{background:var(--card2);}
-.contact-item a{text-decoration:none;color:inherit;display:flex;align-items:center;gap:14px;width:100%;}
 .contact-icon{width:38px;height:38px;border-radius:var(--r);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;background:var(--card2);border:0.5px solid var(--border2);}
 .contact-label{font-size:11px;color:var(--muted);font-family:var(--mono);margin-bottom:2px;}
 .contact-val{font-size:14px;font-weight:500;color:var(--text);}
-.contact-arrow{margin-left:auto;color:var(--dim);font-size:16px;}
 .faq-item{padding:18px 20px;border-bottom:0.5px solid var(--border);}
 .faq-item:last-child{border-bottom:none;}
 .faq-q{font-weight:500;font-size:14px;margin-bottom:6px;}
@@ -36,7 +33,6 @@ h1{font-size:22px;font-weight:600;margin-bottom:6px;}
 .step{display:flex;gap:14px;padding:16px 20px;border-bottom:0.5px solid var(--border);}
 .step:last-child{border-bottom:none;}
 .step-num{width:26px;height:26px;border-radius:50%;background:rgba(252,82,0,.15);color:var(--orange);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;flex-shrink:0;margin-top:1px;font-family:var(--mono);}
-.step-body{}
 .step-title{font-weight:500;font-size:14px;margin-bottom:3px;}
 .step-desc{font-size:13px;color:var(--muted);line-height:1.5;}
 footer{text-align:center;padding:24px 20px;border-top:1px solid var(--border);margin-top:40px;}
@@ -52,18 +48,18 @@ footer{text-align:center;padding:24px 20px;border-top:1px solid var(--border);ma
   </header>
 
   <h1>Support</h1>
-  <p class="subtitle">Having trouble connecting Strava or joining the challenge? We're here to help.</p>
+  <p class="subtitle">Having trouble submitting your activities? We're here to help.</p>
 
   <!-- CONTACT -->
   <div class="section">
     <div class="section-title">Contact Panitia</div>
     <div class="card">
       <div class="contact-item">
-          <div class="contact-icon">💬</div>
-          <div>
-            <div class="contact-label">WhatsApp Group</div>
-            <div class="contact-val">Warga Trevista</div>
-          </div>
+        <div class="contact-icon">💬</div>
+        <div>
+          <div class="contact-label">WhatsApp Group</div>
+          <div class="contact-val">Warga Trevista</div>
+        </div>
       </div>
     </div>
   </div>
@@ -75,29 +71,29 @@ footer{text-align:center;padding:24px 20px;border-top:1px solid var(--border);ma
       <div class="step">
         <div class="step-num">1</div>
         <div class="step-body">
-          <div class="step-title">Register via Google Form</div>
-          <div class="step-desc">Make sure you have submitted the registration form with your Strava profile link. Only registered participants can join.</div>
+          <div class="step-title">Get your invite code</div>
+          <div class="step-desc">Contact the admin (panitia) to receive your team's invite code. Each team has a unique code.</div>
         </div>
       </div>
       <div class="step">
         <div class="step-num">2</div>
         <div class="step-body">
-          <div class="step-title">Connect your Strava account</div>
-          <div class="step-desc">Click "Connect with Strava" on the leaderboard page and authorize the app. Your team will be assigned automatically based on your registration.</div>
+          <div class="step-title">Register</div>
+          <div class="step-desc">Click <strong>Register</strong> on the leaderboard page. Enter your invite code and name to join.</div>
         </div>
       </div>
       <div class="step">
         <div class="step-num">3</div>
         <div class="step-body">
-          <div class="step-title">Sync your activities</div>
-          <div class="step-desc">After connecting, click "Sync" to pull your activities from Strava. Data syncs automatically every day at midnight.</div>
+          <div class="step-title">Submit your activities</div>
+          <div class="step-desc">Go to the <strong>Submit</strong> tab. Upload a screenshot of your workout from any fitness app (Strava, Garmin, Coros, Apple Health, Suunto, Huawei, etc). The AI will read the stats automatically.</div>
         </div>
       </div>
       <div class="step">
         <div class="step-num">4</div>
         <div class="step-body">
-          <div class="step-title">Check the leaderboard</div>
-          <div class="step-desc">Your points will appear on the leaderboard after syncing. Check the Scoring Guide tab to see how points are calculated.</div>
+          <div class="step-title">Review & Confirm</div>
+          <div class="step-desc">Double-check the extracted data (calories, distance, duration, date). Fix any mistakes, then click <strong>Confirm</strong>. Your points will appear on the leaderboard.</div>
         </div>
       </div>
     </div>
@@ -108,28 +104,38 @@ footer{text-align:center;padding:24px 20px;border-top:1px solid var(--border);ma
     <div class="section-title">Frequently Asked Questions</div>
     <div class="card">
       <div class="faq-item">
-        <div class="faq-q">I get "Not Registered" when connecting Strava.</div>
-        <div class="faq-a">Your Strava ID is not in the participant list yet. Make sure you submitted the registration form, then contact admin to get added. Share your Strava profile URL (e.g. <code>strava.com/athletes/12345678</code>).</div>
+        <div class="faq-q">What fitness apps are supported?</div>
+        <div class="faq-a">Any app that shows calorie, distance, duration, and date information. This includes Strava, Garmin Connect, Coros, Apple Health, Suunto, Huawei Health, Nike Run Club, and more.
+
+          <br/><br/>Tip: Take a clear screenshot showing the full activity summary for best results.</div>
       </div>
       <div class="faq-item">
-        <div class="faq-q">My activities are not showing up.</div>
-        <div class="faq-a">Click the "Sync" button after connecting. If activities still don't appear, make sure your Strava activities are set to Public or Followers. Private activities cannot be accessed.</div>
+        <div class="faq-q">The AI read my stats wrong. What do I do?</div>
+        <div class="faq-a">After the AI analyzes your screenshot, you'll see a review form. You can edit any field (calories, distance, duration, date, activity name, sport type) before confirming. Double-check all numbers before submitting.</div>
       </div>
       <div class="faq-item">
-        <div class="faq-q">My points seem incorrect.</div>
-        <div class="faq-a">Check the Activities tab to see point breakdown per activity. Note that activities below the minimum duration for your sport type, or with less than 4 kcal/min, do not earn points.</div>
+        <div class="faq-q">I don't have a screenshot. Can I still submit?</div>
+        <div class="faq-a">Screenshots help verify activities, but if you can't provide one, contact the admin via WhatsApp for manual entry.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">"Invite code limit reached" — what now?</div>
+        <div class="faq-a">Each invite code has a limited number of uses. If yours is full, ask the admin (panitia) to generate a new code or reset the existing one.</div>
       </div>
       <div class="faq-item">
         <div class="faq-q">I'm in the wrong team.</div>
-        <div class="faq-a">Team assignment is based on your registration data. If there's an error, contact the admin to correct it.</div>
+        <div class="faq-a">Your team is determined by the invite code you used. If there's an error, contact the admin to correct it.</div>
       </div>
       <div class="faq-item">
-        <div class="faq-q">How often is the leaderboard updated?</div>
-        <div class="faq-a">Automatically every day at midnight (WIB). You can also manually sync anytime by clicking the "Sync" button after logging in.</div>
+        <div class="faq-q">How are points calculated?</div>
+        <div class="faq-a">Check the <strong>Scoring Guide</strong> tab on the leaderboard for a full breakdown. Points are based on calories, distance, duration, streaks, and daily calorie rankings.</div>
       </div>
       <div class="faq-item">
-        <div class="faq-q">Can I disconnect my Strava account?</div>
-        <div class="faq-a">Yes — click "Sign out" on the leaderboard. To fully revoke access, go to your Strava settings → My Apps, and remove GTR Fest 17. Contact admin if you want your data deleted.</div>
+        <div class="faq-q">What makes an activity valid?</div>
+        <div class="faq-a">Your activity must meet the minimum duration for its sport type (e.g. 20 min for Run, 30 min for Ride). If calories are recorded, it must also have at least 4 kcal/min. Invalid activities don't earn points.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">Can I delete an activity?</div>
+        <div class="faq-a">Activities cannot be deleted from the app. If you submitted wrong data, contact the admin (panitia) for correction.</div>
       </div>
     </div>
   </div>
@@ -138,9 +144,8 @@ footer{text-align:center;padding:24px 20px;border-top:1px solid var(--border);ma
 
 <footer>
   <div class="footer-text">
-    GTR Fest 17 · Powered by Strava<br/>
-    Not affiliated with or endorsed by Strava.<br/>
-    Community Application under the Strava API Agreement.
+    GTR Fest 17 · Community Fitness Challenge<br/>
+    Powered by Gemini AI
   </div>
 </footer>
 

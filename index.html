@@ -10,7 +10,7 @@
 <script src="js/scoring.js"></script>
 <script src="js/api.js"></script>
 <style>
-:root{--bg:#111116;--surface:#17171e;--card:#1c1c25;--card2:#21212c;--border:#2a2a38;--border2:#333345;--text:#f0f0f5;--muted:#888899;--dim:#555566;--orange:#FC5200;--orange2:#ff6a1a;--gold:#f5a623;--silver:#b0b0c0;--bronze:#c87c3e;--r:8px;--rlg:12px;--sans:'Inter',sans-serif;--mono:'JetBrains Mono',monospace;}
+:root{--bg:#111116;--surface:#17171e;--card:#1c1c25;--card2:#21212c;--border:#2a2a38;--border2:#333345;--text:#f0f0f5;--muted:#888899;--dim:#555566;--orange:#FC5200;--orange2:#ff6a1a;--gold:#f5a623;--silver:#b0b0c0;--bronze:#c87c3e;--red:#e24b4a;--green:#2ecc71;--r:8px;--rlg:12px;--sans:'Inter',sans-serif;--mono:'JetBrains Mono',monospace;}
 *{margin:0;padding:0;box-sizing:border-box;}
 body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14px;line-height:1.5;min-height:100vh;}
 a{color:inherit;text-decoration:none;}
@@ -22,8 +22,8 @@ header{padding:28px 0 20px;display:flex;align-items:center;justify-content:space
 .btn{padding:8px 16px;border-radius:var(--r);border:none;font-family:var(--sans);font-size:13px;font-weight:500;cursor:pointer;transition:all .15s;display:inline-flex;align-items:center;gap:6px;}
 .btn-p{background:var(--orange);color:#fff;}.btn-p:hover{background:var(--orange2);}.btn-p:disabled{opacity:.5;cursor:not-allowed;}
 .btn-g{background:transparent;color:var(--muted);border:0.5px solid var(--border2);}.btn-g:hover{color:var(--text);border-color:var(--muted);}
+.btn-r{background:transparent;color:var(--red);border:0.5px solid rgba(226,75,74,.4);}.btn-r:hover{background:rgba(226,75,74,.1);}
 .apill{background:var(--card);border:0.5px solid var(--border);border-radius:var(--r);padding:6px 12px;font-size:13px;display:flex;align-items:center;gap:8px;}
-.apill img{width:22px;height:22px;border-radius:50%;object-fit:cover;}
 .dbar{display:flex;align-items:center;gap:10px;padding:14px 0;border-bottom:1px solid var(--border);flex-wrap:wrap;}
 .dbar label{font-size:10px;color:var(--dim);font-family:var(--mono);text-transform:uppercase;letter-spacing:.5px;}
 .di{background:var(--card);border:0.5px solid var(--border2);border-radius:var(--r);padding:6px 10px;color:var(--text);font-family:var(--mono);font-size:12px;outline:none;transition:border-color .15s;cursor:pointer;}
@@ -49,8 +49,7 @@ thead th.r{text-align:right;}
 .rk{width:26px;height:26px;border-radius:6px;display:inline-flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;}
 .rk1{background:var(--orange);color:#fff;}.rk2{background:#2a2a35;color:var(--silver);}.rk3{background:#2a2a35;color:var(--bronze);}.rkn{background:#1e1e28;color:var(--dim);font-family:var(--mono);}
 .mrow{display:flex;align-items:center;gap:10px;}
-.mrow img,.av{width:34px;height:34px;border-radius:50%;object-fit:cover;flex-shrink:0;}
-.av{display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:500;background:var(--card2);color:var(--muted);border:0.5px solid var(--border2);}
+.av{display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:500;background:var(--card2);color:var(--muted);border:0.5px solid var(--border2);width:34px;height:34px;border-radius:50%;flex-shrink:0;}
 .mn{font-weight:500;font-size:14px;}.mm{font-size:11px;color:var(--muted);font-family:var(--mono);margin-top:1px;}
 .td{display:inline-block;width:7px;height:7px;border-radius:50%;margin-right:4px;vertical-align:middle;}
 .stk{display:inline-flex;align-items:center;background:rgba(252,82,0,.15);color:var(--orange);border-radius:4px;padding:1px 7px;font-size:10px;font-family:var(--mono);margin-left:6px;}
@@ -77,7 +76,7 @@ thead th.r{text-align:right;}
 .tfb:hover{color:var(--text);}.tfb.active{background:var(--orange);color:#fff;border-color:var(--orange);}
 .achips{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:14px;}
 .achip{display:flex;align-items:center;gap:7px;padding:5px 12px 5px 8px;border-radius:20px;border:0.5px solid var(--border2);background:var(--card);cursor:pointer;transition:all .15s;font-size:12px;}
-.achip img{width:20px;height:20px;border-radius:50%;object-fit:cover;}.achip:hover{border-color:var(--muted);}
+.achip:hover{border-color:var(--muted);}
 .achip.sel{background:rgba(252,82,0,.12);border-color:var(--orange);color:var(--orange);}
 .alist{display:flex;flex-direction:column;gap:8px;}
 .acard{background:var(--card);border:0.5px solid var(--border);border-radius:var(--r);padding:14px 16px;display:flex;align-items:flex-start;gap:12px;transition:border-color .15s;}
@@ -85,7 +84,8 @@ thead th.r{text-align:right;}
 .aico{width:38px;height:38px;border-radius:var(--r);background:var(--card2);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;border:0.5px solid var(--border);}
 .abody{flex:1;min-width:0;}
 .awho{display:flex;align-items:center;gap:7px;margin-bottom:4px;}
-.awho img{width:18px;height:18px;border-radius:50%;object-fit:cover;}.awn{font-size:11px;color:var(--muted);font-family:var(--mono);}
+.awn{font-size:11px;color:var(--muted);font-family:var(--mono);}.awtag{font-size:10px;padding:1px 6px;border-radius:3px;margin-left:6px;font-family:var(--mono);}
+.awtag.ocr{background:rgba(46,204,113,.15);color:var(--green);}.awtag.manual{background:rgba(252,82,0,.15);color:var(--orange);}
 .aname{font-weight:500;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .adate{font-size:11px;color:var(--dim);font-family:var(--mono);margin-top:2px;}
 .astats{display:flex;gap:14px;margin-top:6px;flex-wrap:wrap;}
@@ -104,7 +104,40 @@ thead th.r{text-align:right;}
 #toast{position:fixed;bottom:20px;right:20px;background:var(--card);border:0.5px solid var(--border2);border-radius:var(--r);padding:12px 18px;font-size:13px;max-width:300px;transform:translateY(80px);opacity:0;transition:all .25s;z-index:999;}
 #toast.show{transform:none;opacity:1;}#toast.success{border-color:var(--orange);color:var(--orange);}#toast.error{border-color:#e24b4a;color:#e24b4a;}
 footer{text-align:center;padding:24px 20px 36px;border-top:1px solid var(--border);margin-top:40px;}
-@media(max-width:600px){.hm{display:none;}}
+
+/* --- Modal --- */
+.moverlay{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.7);z-index:1000;align-items:center;justify-content:center;}
+.moverlay.show{display:flex;}
+.modal{background:var(--card);border:0.5px solid var(--border);border-radius:var(--rlg);padding:32px;max-width:420px;width:90%;}
+.modal h3{font-size:18px;font-weight:600;margin-bottom:4px;}
+.modal .ms{font-size:12px;color:var(--muted);font-family:var(--mono);margin-bottom:20px;}
+.modal input{width:100%;background:var(--bg);border:0.5px solid var(--border2);border-radius:var(--r);padding:10px 14px;color:var(--text);font-size:14px;font-family:var(--sans);outline:none;margin-bottom:12px;transition:border-color .15s;}
+.modal input:focus{border-color:var(--orange);}
+.modal .mbtns{display:flex;gap:8px;justify-content:flex-end;margin-top:4px;}
+.modal .merr{font-size:12px;color:var(--red);font-family:var(--mono);margin-bottom:8px;min-height:18px;}
+
+/* --- Submit Panel --- */
+.upload-zone{border:2px dashed var(--border2);border-radius:var(--rlg);padding:48px 20px;text-align:center;cursor:pointer;transition:all .2s;margin-bottom:16px;}
+.upload-zone:hover,.upload-zone.drag{border-color:var(--orange);background:rgba(252,82,0,.04);}
+.upload-zone .uz-icon{font-size:40px;margin-bottom:12px;}
+.upload-zone .uz-text{font-size:14px;color:var(--muted);}
+.upload-zone .uz-hint{font-size:11px;color:var(--dim);font-family:var(--mono);margin-top:4px;}
+.upload-zone.has-image{border-style:solid;border-color:var(--border);padding:16px;}
+.upload-zone.has-image img{max-width:100%;max-height:300px;border-radius:var(--r);object-fit:contain;}
+.upload-zone input[type=file]{display:none;}
+.review-form{background:var(--card);border:0.5px solid var(--border);border-radius:var(--rlg);padding:20px;}
+.review-form h4{font-size:14px;font-weight:600;margin-bottom:16px;}
+.frow{display:flex;gap:10px;margin-bottom:12px;flex-wrap:wrap;}
+.fcol{flex:1;min-width:140px;}
+.fcol label{display:block;font-size:10px;color:var(--dim);font-family:var(--mono);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px;}
+.fcol input,.fcol select{width:100%;background:var(--bg);border:0.5px solid var(--border2);border-radius:var(--r);padding:8px 12px;color:var(--text);font-size:13px;font-family:var(--sans);outline:none;transition:border-color .15s;}
+.fcol input:focus,.fcol select:focus{border-color:var(--orange);}
+.fcol select{appearance:auto;}
+.fcol input.edited{border-color:var(--orange);}
+.rft{margin-top:16px;display:flex;align-items:center;gap:12px;justify-content:space-between;flex-wrap:wrap;}
+.help-link{font-size:12px;color:var(--dim);font-family:var(--mono);cursor:pointer;transition:color .15s;}
+.help-link:hover{color:var(--red);}
+@media(max-width:600px){.hm{display:none;}.frow{flex-direction:column;}}
 </style>
 </head>
 <body>
@@ -126,6 +159,7 @@ footer{text-align:center;padding:24px 20px 36px;border-top:1px solid var(--borde
   <button class="tab" data-tab="teams">Teams</button>
   <button class="tab" data-tab="individual">Individual</button>
   <button class="tab" data-tab="activities">Activities</button>
+  <button class="tab" data-tab="submit">Submit</button>
   <button class="tab" data-tab="scoring">Scoring Guide</button>
 </div>
 <div class="panel active" id="panel-overall">
@@ -155,23 +189,38 @@ footer{text-align:center;padding:24px 20px 36px;border-top:1px solid var(--borde
   <div class="achips" id="achips"></div>
   <div id="acontent"></div>
 </div>
+<div class="panel" id="panel-submit">
+  <div id="submit-content"></div>
+</div>
 <div class="panel" id="panel-scoring">
   <div class="sgrid" id="sgrid"></div>
 </div>
 </div>
+
+<!-- Register Modal -->
+<div class="moverlay" id="register-modal">
+  <div class="modal">
+    <h3>Register</h3>
+    <div class="ms">Enter your invite code and name to join the challenge.</div>
+    <input type="text" id="reg-code" placeholder="Invite code (e.g. Z1-ALPHA)" autocomplete="off"/>
+    <input type="text" id="reg-name" placeholder="Your name" autocomplete="off"/>
+    <div class="merr" id="reg-err"></div>
+    <div class="mbtns">
+      <button class="btn btn-g" id="reg-cancel">Cancel</button>
+      <button class="btn btn-p" id="reg-submit">Register</button>
+    </div>
+  </div>
+</div>
+
 <div id="toast"></div>
 <footer>
-  <a href="https://www.strava.com" target="_blank" rel="noopener">
-    <img src="api_logo_pwrdBy_strava_horiz_white.png" alt="Powered by Strava" style="height:26px;width:auto;opacity:.55;"
-      onerror="this.style.display='none';this.nextElementSibling.style.display='inline'"/>
-    <span style="display:none;color:var(--orange);font-weight:500;font-size:13px;">Powered by Strava</span>
-  </a>
-  <p style="margin-top:8px;font-size:11px;color:var(--dim);font-family:var(--mono);">GTR Fest 17 is not affiliated with or endorsed by Strava.</p>
-  <p style="margin-top:4px;font-size:11px;color:var(--dim);font-family:var(--mono);">GTR Fest 17 is a Community Application under the Strava API Agreement, used exclusively for organizing group fitness activities.</p>
+  <p style="font-size:12px;color:var(--muted);">Powered by Gemini AI</p>
+  <p style="margin-top:4px;font-size:11px;color:var(--dim);font-family:var(--mono);">GTR Fest 17 — Community Fitness Challenge</p>
   <p style="margin-top:8px;font-size:11px;font-family:var(--mono);">
     <a href="support.html" style="color:var(--orange);text-decoration:none;">Support & FAQ</a>
   </p>
 </footer>
+
 <script>
 let LB=[],TEAMS=[],AACTS=[];
 let aMet='points';
@@ -182,105 +231,147 @@ let aTm='all',aSrch='',selA=null;
 let PG={overall:1,individual:1,acts:1};
 const PS=15;
 const SICO={Run:'🏃',Walk:'🚶',Ride:'🚴',VirtualRide:'🚴',Swim:'🏊',Padel:'🏸',Tennis:'🎾',Badminton:'🏸',WeightTraining:'💪',Workout:'💪',Yoga:'🧘',Pilates:'🧘',Hike:'🥾'};
+const SPORT_TYPES=['Run','Walk','Ride','VirtualRide','Swim','Padel','Tennis','Badminton','WeightTraining','Workout','Yoga','Pilates','Hike'];
+let ocrResult=null, ocrImage=null, ocrLoading=false;
 
 document.addEventListener('click', e => {
-  // Pagination
   const pg = e.target.dataset && e.target.dataset.pg;
   if (pg) { const [key, p] = pg.split(':'); gp(key, Number(p)); return; }
-  // Athlete chips
-  const aidEl = e.target.closest('[data-aid]'); const aid = aidEl && aidEl.dataset && aidEl.dataset.aid;
-  if (aid) { selAth(Number(aid)); return; }
-  // Sync & logout buttons (dynamic, re-created by rHA)
-  if (e.target.id === 'sbtn')      { syncNow(); return; }
+  const uidEl = e.target.closest('[data-uid]'); const uid = uidEl && uidEl.dataset && uidEl.dataset.uid;
+  if (uid) { selAth(uid); return; }
   if (e.target.id === 'logout-btn'){ doLogout(); return; }
 });
 
-document.addEventListener('DOMContentLoaded',async()=>{
-  document.querySelectorAll('.tab').forEach(b=>b.addEventListener('click',()=>{
-    document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
-    document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
-    b.classList.add('active');document.getElementById('panel-'+b.dataset.tab).classList.add('active');
+document.addEventListener('DOMContentLoaded', async () => {
+  document.querySelectorAll('.tab').forEach(b => b.addEventListener('click', () => {
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+    b.classList.add('active');
+    const panelId = 'panel-' + b.dataset.tab;
+    document.getElementById(panelId).classList.add('active');
+    if (b.dataset.tab === 'submit') rSubmit();
   }));
-  document.querySelectorAll('.mt').forEach(b=>b.addEventListener('click',()=>{
-    document.querySelectorAll('.mt').forEach(t=>t.classList.remove('active'));
-    b.classList.add('active');aMet=b.dataset.metric;PG.individual=1;rInd();
+  document.querySelectorAll('.mt').forEach(b => b.addEventListener('click', () => {
+    document.querySelectorAll('.mt').forEach(t => t.classList.remove('active'));
+    b.classList.add('active'); aMet = b.dataset.metric; PG.individual = 1; rInd();
   }));
-  document.getElementById('asrch').addEventListener('input',e=>{
-    aSrch=e.target.value.toLowerCase();selA=null;rChips();if(!aSrch)rActs();
+  document.getElementById('asrch').addEventListener('input', e => {
+    aSrch = e.target.value.toLowerCase(); selA = null; rChips(); if (!aSrch) rActs();
   });
-  document.getElementById('rs').value=aS;
-  document.getElementById('re').value=aE;
+  document.getElementById('rs').value = aS;
+  document.getElementById('re').value = aE;
   document.getElementById('apply-btn').addEventListener('click', applyRange);
   document.getElementById('tf-all').addEventListener('click', e => filterTeam('all', e.currentTarget));
-  updDlbl();cdown();setInterval(cdown,60000);
-  initTF();rHA();rScoring();await loadData();
+
+  // Register modal
+  document.getElementById('reg-submit').addEventListener('click', handleRegister);
+  document.getElementById('reg-cancel').addEventListener('click', () => document.getElementById('register-modal').classList.remove('show'));
+  document.getElementById('register-modal').addEventListener('click', e => { if (e.target === e.currentTarget) e.currentTarget.classList.remove('show'); });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') document.getElementById('register-modal').classList.remove('show'); });
+  document.getElementById('reg-code').addEventListener('keydown', e => { if (e.key === 'Enter') handleRegister(); });
+  document.getElementById('reg-name').addEventListener('keydown', e => { if (e.key === 'Enter') handleRegister(); });
+
+  updDlbl(); cdown(); setInterval(cdown, 60000);
+  initTF(); rHA(); rScoring(); await loadData();
 });
 
-function cdown(){
-  const el=document.getElementById('countdown');if(!el)return;
-  const now=new Date(),s=new Date(aS),e=new Date(aE+'T23:59:59');
-  if(now<s){const d=Math.floor((s-now)/86400000),h=Math.floor((s-now)%86400000/3600000);el.textContent=`Starts in ${d}d ${h}h`;}
-  else if(now>e){el.textContent='Challenge ended';}
-  else{const df=e-now,d=Math.floor(df/86400000),h=Math.floor(df%86400000/3600000),m=Math.floor(df%3600000/60000);el.textContent=`${d}d ${h}h ${m}m remaining`;}
+function cdown() {
+  const el = document.getElementById('countdown'); if (!el) return;
+  const now = new Date(), s = new Date(aS), e = new Date(aE + 'T23:59:59');
+  if (now < s) { const d = Math.floor((s - now) / 86400000), h = Math.floor((s - now) % 86400000 / 3600000); el.textContent = `Starts in ${d}d ${h}h`; }
+  else if (now > e) { el.textContent = 'Challenge ended'; }
+  else { const df = e - now, d = Math.floor(df / 86400000), h = Math.floor(df % 86400000 / 3600000), m = Math.floor(df % 3600000 / 60000); el.textContent = `${d}d ${h}h ${m}m remaining`; }
 }
 
-async function loadData(){
-  try{
-    const[lb,acts]=await Promise.all([DB.getLeaderboard(aS,aE),DB.getActivities(aS,aE)]);
-    LB=lb.leaderboard;TEAMS=lb.teams;AACTS=acts;PG={overall:1,individual:1,acts:1};
-    rOStats();rOLB();rTeams();rInd();rActs();rChips();
-  }catch(e){console.error(e);toast('Failed to load data.','error');}
+async function loadData() {
+  try {
+    const [lb, acts] = await Promise.all([DB.getLeaderboard(aS, aE), DB.getActivities(aS, aE)]);
+    LB = lb.leaderboard; TEAMS = lb.teams; AACTS = acts; PG = { overall: 1, individual: 1, acts: 1 };
+    rOStats(); rOLB(); rTeams(); rInd(); rActs(); rChips();
+  } catch (e) { console.error(e); toast('Failed to load data.', 'error'); }
 }
 
-function rHA(){
-  const a=Session.get(),el=document.getElementById('ha');
-  if(!a){
-    el.innerHTML=`<a href="${Strava.getAuthUrl()}" style="display:inline-block;line-height:0;"><img src="btn_strava_connect_with_orange.png" alt="Connect with Strava" style="height:44px;width:auto;" onerror="this.outerHTML='<a href=\''+Strava.getAuthUrl()+'\' class=\'btn btn-p\'>Connect with Strava</a>'"/></a>`;
-  }else{
-    el.innerHTML=`<div class="apill"><img src="${a.profile_medium||''}" alt="" onerror="this.style.display='none'"/><span>${a.firstname} ${a.lastname}</span></div>
-    <button class="btn btn-p" id="sbtn" id="sync-btn-el">Sync</button>
+// ── HEADER ────────────────────────────────────────────────────
+
+function rHA() {
+  const u = Session.get(), el = document.getElementById('ha');
+  if (!u) {
+    el.innerHTML = `<button class="btn btn-p" id="register-btn">Register</button>`;
+    document.getElementById('register-btn').addEventListener('click', openRegister);
+  } else {
+    const team = CONFIG.TEAMS.find(t => t.id === u.team_id) || {};
+    el.innerHTML = `<div class="apill"><span class="td" style="background:${team.color||'#555'};width:8px;height:8px;"></span><span>${u.name} · ${team.emoji||''} ${team.name||'No Team'}</span></div>
+    <button class="btn btn-p" id="submit-btn">Submit Activity</button>
     <button class="btn btn-g" id="logout-btn">Sign out</button>`;
+    document.getElementById('submit-btn').addEventListener('click', () => {
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+      document.querySelector('[data-tab="submit"]').classList.add('active');
+      document.getElementById('panel-submit').classList.add('active');
+      rSubmit();
+    });
   }
 }
-async function syncNow(){
-  const btn=document.getElementById('sbtn'),a=Session.get();if(!a)return;
-  const syncStart=document.getElementById('rs').value||aS;
-  btn.disabled=true;btn.textContent='Syncing...';
-  try{await Strava.fetchActivities(a.id,syncStart);await loadData();toast('Sync complete!','success');}
-  catch(e){toast('Sync failed: '+e.message,'error');}
-  finally{btn.disabled=false;btn.textContent='Sync';}
-}
-function doLogout(){Session.clear();rHA();toast('Signed out.');}
 
-function applyRange(){
-  const s=document.getElementById('rs').value,e=document.getElementById('re').value;
-  if(!s||!e)return toast('Pick start and end date.','error');
-  if(s<'2026-04-01'){document.getElementById('rs').value='2026-04-01';return toast('Start date minimum 1 Apr 2026.','error');}
-  if(s>e)return toast('Start must be before end.','error');
-  aS=s;aE=e;window.aS=s;window.aE=e;
-  console.log('applyRange: aS=',aS,'aE=',aE);
-  updDlbl();cdown();loadData();
-}
-function updDlbl(){
-  const s=new Date(aS).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'});
-  const e=new Date(aE).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'});
-  const el=document.getElementById('dlbl');if(el)el.textContent=`${s} — ${e}`;
+function openRegister() {
+  document.getElementById('reg-code').value = '';
+  document.getElementById('reg-name').value = '';
+  document.getElementById('reg-err').textContent = '';
+  document.getElementById('register-modal').classList.add('show');
+  document.getElementById('reg-code').focus();
 }
 
-function rOStats(){
-  const tp=LB.reduce((s,m)=>s+m.totalPoints,0),tc=LB.reduce((s,m)=>s+m.totalCalories,0),
-    tk=LB.reduce((s,m)=>s+m.totalDistanceKm,0),ta=LB.reduce((s,m)=>s+m.activityCount,0);
-  document.getElementById('ostats').innerHTML=[
-    ['Athletes',LB.length,'connected'],['Calories',fmt(Math.round(tc)),'kcal burned'],
-    ['Distance',fmt(Math.round(tk)),'km total'],['Activities',ta,'valid workouts'],['Points',fmt(tp),'combined'],
-  ].map(([l,v,u])=>`<div class="sc"><div class="sl">${l}</div><div class="sv">${v}</div><div class="su">${u}</div></div>`).join('');
+async function handleRegister() {
+  const code = document.getElementById('reg-code').value.trim();
+  const name = document.getElementById('reg-name').value.trim();
+  const errEl = document.getElementById('reg-err');
+  errEl.textContent = '';
+  if (!code) { errEl.textContent = 'Enter your invite code.'; return; }
+  if (!name) { errEl.textContent = 'Enter your name.'; return; }
+  const btn = document.getElementById('reg-submit');
+  btn.disabled = true; btn.textContent = 'Registering...';
+  try {
+    await Auth.register(code, name);
+    document.getElementById('register-modal').classList.remove('show');
+    rHA(); toast('Registered! Welcome, ' + name + '.', 'success');
+  } catch (e) {
+    errEl.textContent = e.message;
+  } finally { btn.disabled = false; btn.textContent = 'Register'; }
 }
-function rOLB(){document.getElementById('olb').innerHTML=bTable(LB,'points','overall');}
 
-function rTeams(){
-  document.getElementById('tgrid').innerHTML=TEAMS.map((t,i)=>`
-    <div class="tc" style="--tc:${t.color}"><div class="tcr">#${i+1}</div>
-    <div class="tcn">${t.emoji} ${t.name}</div><div class="tcc">${t.memberCount} member${t.memberCount!==1?'s':''}</div>
+function doLogout() { Session.clear(); rHA(); toast('Signed out.'); }
+
+// ── DATE RANGE ─────────────────────────────────────────────────
+
+function applyRange() {
+  const s = document.getElementById('rs').value, e = document.getElementById('re').value;
+  if (!s || !e) return toast('Pick start and end date.', 'error');
+  if (s < '2026-04-01') { document.getElementById('rs').value = '2026-04-01'; return toast('Start date minimum 1 Apr 2026.', 'error'); }
+  if (s > e) return toast('Start must be before end.', 'error');
+  aS = s; aE = e; window.aS = s; window.aE = e; updDlbl(); cdown(); loadData();
+}
+function updDlbl() {
+  const s = new Date(aS).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+  const e = new Date(aE).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+  const el = document.getElementById('dlbl'); if (el) el.textContent = `${s} — ${e}`;
+}
+
+// ── OVERALL ────────────────────────────────────────────────────
+
+function rOStats() {
+  const tp = LB.reduce((s, m) => s + m.totalPoints, 0), tc = LB.reduce((s, m) => s + m.totalCalories, 0),
+    tk = LB.reduce((s, m) => s + m.totalDistanceKm, 0), ta = LB.reduce((s, m) => s + m.activityCount, 0);
+  document.getElementById('ostats').innerHTML = [
+    ['Athletes', LB.length, 'registered'], ['Calories', fmt(Math.round(tc)), 'kcal burned'],
+    ['Distance', fmt(Math.round(tk)), 'km total'], ['Activities', ta, 'valid workouts'], ['Points', fmt(tp), 'combined'],
+  ].map(([l, v, u]) => `<div class="sc"><div class="sl">${l}</div><div class="sv">${v}</div><div class="su">${u}</div></div>`).join('');
+}
+function rOLB() { document.getElementById('olb').innerHTML = bTable(LB, 'points', 'overall'); }
+
+function rTeams() {
+  document.getElementById('tgrid').innerHTML = TEAMS.map((t, i) => `
+    <div class="tc" style="--tc:${t.color}"><div class="tcr">#${i + 1}</div>
+    <div class="tcn">${t.emoji} ${t.name}</div><div class="tcc">${t.memberCount} member${t.memberCount !== 1 ? 's' : ''}</div>
     <div class="tcs">
       <div><div class="tsl">Points</div><div class="tsv big">${fmt(t.totalPoints)}</div></div>
       <div><div class="tsl">Activities</div><div class="tsv">${t.activityCount}</div></div>
@@ -289,39 +380,39 @@ function rTeams(){
     </div></div>`).join('');
 }
 
-function rInd(){
-  let s=[...LB];
-  if(aMet==='calories')s.sort((a,b)=>b.totalCalories-a.totalCalories);
-  if(aMet==='distance')s.sort((a,b)=>b.totalDistanceKm-a.totalDistanceKm);
-  if(aMet==='duration')s.sort((a,b)=>b.totalDurationMin-a.totalDurationMin);
-  if(aMet==='activities')s.sort((a,b)=>b.activityCount-a.activityCount);
-  document.getElementById('ilb').innerHTML=bTable(s,aMet,'individual');
+function rInd() {
+  let s = [...LB];
+  if (aMet === 'calories') s.sort((a, b) => b.totalCalories - a.totalCalories);
+  if (aMet === 'distance') s.sort((a, b) => b.totalDistanceKm - a.totalDistanceKm);
+  if (aMet === 'duration') s.sort((a, b) => b.totalDurationMin - a.totalDurationMin);
+  if (aMet === 'activities') s.sort((a, b) => b.activityCount - a.activityCount);
+  document.getElementById('ilb').innerHTML = bTable(s, aMet, 'individual');
 }
 
-function bTable(members,metric,pgKey){
-  if(!members.length)return`<div class="empty">No data yet.</div>`;
-  const tb={};CONFIG.TEAMS.forEach(t=>tb[t.id]=t);
-  const p=PG[pgKey]||1,tot=members.length,pages=Math.ceil(tot/PS);
-  const sl=members.slice((p-1)*PS,p*PS);
-  const ML={points:'Points',calories:'Calories',distance:'Distance',duration:'Duration',activities:'Activities'};
-  const rows=sl.map((m,i)=>{
-    const rank=(p-1)*PS+i+1;
-    const rc=rank===1?'rk1':rank===2?'rk2':rank===3?'rk3':'rkn';
-    const team=tb[m.team_id]||{name:'No Team',color:'#555',emoji:'⚪'};
-    const streak=m.currentStreak>=2?`<span class="stk">${m.currentStreak}d</span>`:'';
-    const init=m.name.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
-    let pri='';
-    switch(metric){
-      case'points':pri=`<span class="pc">${m.totalPoints}</span>`;break;
-      case'calories':pri=`<span class="mc">${fmt(Math.round(m.totalCalories))} kcal</span>`;break;
-      case'distance':pri=`<span class="mc">${m.totalDistanceKm.toFixed(1)} km</span>`;break;
-      case'duration':pri=`<span class="mc">${fmtDur(m.totalDurationMin)}</span>`;break;
-      case'activities':pri=`<span class="mc">${m.activityCount}</span>`;break;
+function bTable(members, metric, pgKey) {
+  if (!members.length) return `<div class="empty">No data yet.</div>`;
+  const tb = {}; CONFIG.TEAMS.forEach(t => tb[t.id] = t);
+  const p = PG[pgKey] || 1, tot = members.length, pages = Math.ceil(tot / PS);
+  const sl = members.slice((p - 1) * PS, p * PS);
+  const ML = { points: 'Points', calories: 'Calories', distance: 'Distance', duration: 'Duration', activities: 'Activities' };
+  const rows = sl.map((m, i) => {
+    const rank = (p - 1) * PS + i + 1;
+    const rc = rank === 1 ? 'rk1' : rank === 2 ? 'rk2' : rank === 3 ? 'rk3' : 'rkn';
+    const team = tb[m.team_id] || { name: 'No Team', color: '#555', emoji: '⚪' };
+    const streak = m.currentStreak >= 2 ? `<span class="stk">${m.currentStreak}d</span>` : '';
+    const init = m.name.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase();
+    let pri = '';
+    switch (metric) {
+      case 'points': pri = `<span class="pc">${m.totalPoints}</span>`; break;
+      case 'calories': pri = `<span class="mc">${fmt(Math.round(m.totalCalories))} kcal</span>`; break;
+      case 'distance': pri = `<span class="mc">${m.totalDistanceKm.toFixed(1)} km</span>`; break;
+      case 'duration': pri = `<span class="mc">${fmtDur(m.totalDurationMin)}</span>`; break;
+      case 'activities': pri = `<span class="mc">${m.activityCount}</span>`; break;
     }
-    return`<tr class="lr">
+    return `<tr class="lr">
       <td><span class="rk ${rc}">${rank}</span></td>
       <td><div class="mrow">
-        ${m.profile_pic?`<img src="${m.profile_pic}" alt="" onerror="this.outerHTML='<div class=\\'av\\'>${init}</div>'" loading="lazy"/>`:`<div class="av">${init}</div>`}
+        <div class="av">${init}</div>
         <div><div class="mn">${m.name}${streak}</div><div class="mm"><span class="td" style="background:${team.color}"></span>${team.name}</div></div>
       </div></td>
       <td class="r">${pri}</td>
@@ -331,125 +422,303 @@ function bTable(members,metric,pgKey){
       <td class="r mc hm">${m.activityCount}</td>
     </tr>`;
   }).join('');
-  return`<div class="lw"><table><thead><tr>
-    <th style="width:44px">#</th><th>Athlete</th><th class="r">${ML[metric]||metric}</th>
+  return `<div class="lw"><table><thead><tr>
+    <th style="width:44px">#</th><th>Athlete</th><th class="r">${ML[metric] || metric}</th>
     <th class="r hm">Calories</th><th class="r hm">Distance</th><th class="r hm">Duration</th><th class="r hm">Acts</th>
-  </tr></thead><tbody>${rows}</tbody></table>${pages>1?pgr(p,pages,tot,pgKey):''}</div>`;
+  </tr></thead><tbody>${rows}</tbody></table>${pages > 1 ? pgr(p, pages, tot, pgKey) : ''}</div>`;
 }
 
-function pgr(p,pages,tot,key){
-  const s=(p-1)*PS+1,e=Math.min(p*PS,tot);
-  let b=`<button class="pbn" ${p<=1?'disabled':''} data-pg="${key}:${p-1}">←</button>`;
-  for(let i=1;i<=pages;i++){
-    if(pages>7&&i>2&&i<pages-1&&Math.abs(i-p)>1){if(i===3||i===pages-2)b+=`<span style="color:var(--dim);padding:0 2px;font-family:var(--mono)">…</span>`;continue;}
-    b+=`<button class="pbn ${i===p?'on':''}" data-pg="${key}:${i}">${i}</button>`;
+function pgr(p, pages, tot, key) {
+  const s = (p - 1) * PS + 1, e = Math.min(p * PS, tot);
+  let b = `<button class="pbn" ${p <= 1 ? 'disabled' : ''} data-pg="${key}:${p - 1}">←</button>`;
+  for (let i = 1; i <= pages; i++) {
+    if (pages > 7 && i > 2 && i < pages - 1 && Math.abs(i - p) > 1) { if (i === 3 || i === pages - 2) b += `<span style="color:var(--dim);padding:0 2px;font-family:var(--mono)">…</span>`; continue; }
+    b += `<button class="pbn ${i === p ? 'on' : ''}" data-pg="${key}:${i}">${i}</button>`;
   }
-  b+=`<button class="pbn" ${p>=pages?'disabled':''} data-pg="${key}:${p+1}">→</button>`;
-  return`<div class="pgr"><span class="pi">${s}–${e} of ${tot}</span><div class="pb">${b}</div></div>`;
+  b += `<button class="pbn" ${p >= pages ? 'disabled' : ''} data-pg="${key}:${p + 1}">→</button>`;
+  return `<div class="pgr"><span class="pi">${s}–${e} of ${tot}</span><div class="pb">${b}</div></div>`;
 }
 
-function gp(key,p){
-  PG[key]=p;
-  if(key==='overall')rOLB();if(key==='individual')rInd();if(key==='acts')rActs();
-  const pid=key==='acts'?'activities':key;
-  document.getElementById('panel-'+pid)?.scrollIntoView({behavior:'smooth',block:'start'});
+function gp(key, p) {
+  PG[key] = p;
+  if (key === 'overall') rOLB(); if (key === 'individual') rInd(); if (key === 'acts') rActs();
+  const pid = key === 'acts' ? 'activities' : key;
+  document.getElementById('panel-' + pid)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
-function initTF(){
-  const w=document.getElementById('tfbtns');
-  CONFIG.TEAMS.forEach(t=>{
-    const b=document.createElement('button');b.className='tfb';b.dataset.team=t.id;
-    b.textContent=`${t.emoji} ${t.name}`;b.dataset.team=t.id;b.addEventListener('click',e=>filterTeam(t.id,e.currentTarget));w.appendChild(b);
+// ── ACTIVITIES PANEL ────────────────────────────────────────────
+
+function initTF() {
+  const w = document.getElementById('tfbtns');
+  CONFIG.TEAMS.forEach(t => {
+    const b = document.createElement('button'); b.className = 'tfb'; b.dataset.team = t.id;
+    b.textContent = `${t.emoji} ${t.name}`; b.addEventListener('click', e => filterTeam(t.id, e.currentTarget)); w.appendChild(b);
   });
 }
-function filterTeam(id,btn){
-  aTm=id==='all'?'all':Number(id);
-  document.querySelectorAll('.tfb').forEach(b=>b.classList.remove('active'));btn.classList.add('active');
-  selA=null;aSrch='';document.getElementById('asrch').value='';PG.acts=1;rChips();rActs();
+function filterTeam(id, btn) {
+  aTm = id === 'all' ? 'all' : Number(id);
+  document.querySelectorAll('.tfb').forEach(b => b.classList.remove('active')); btn.classList.add('active');
+  selA = null; aSrch = ''; document.getElementById('asrch').value = ''; PG.acts = 1; rChips(); rActs();
 }
-function rChips(){
-  const tb={};CONFIG.TEAMS.forEach(t=>tb[t.id]=t);const el=document.getElementById('achips');
-  if(!aSrch){el.innerHTML='';return;}
-  let f=[...LB];if(aTm!=='all')f=f.filter(m=>m.team_id===aTm);
-  f=f.filter(m=>m.name.toLowerCase().includes(aSrch));
-  if(!f.length){el.innerHTML=`<span style="font-size:12px;color:var(--dim);font-family:var(--mono)">No athletes found.</span>`;return;}
-  el.innerHTML=f.map(m=>{
-    const team=tb[m.team_id]||{color:'#555'};const sel=m.strava_athlete_id===selA?'sel':'';
-    return`<div class="achip ${sel}" data-aid="${m.strava_athlete_id}">
+function rChips() {
+  const tb = {}; CONFIG.TEAMS.forEach(t => tb[t.id] = t); const el = document.getElementById('achips');
+  if (!aSrch) { el.innerHTML = ''; return; }
+  let f = [...LB]; if (aTm !== 'all') f = f.filter(m => m.team_id === aTm);
+  f = f.filter(m => m.name.toLowerCase().includes(aSrch));
+  if (!f.length) { el.innerHTML = `<span style="font-size:12px;color:var(--dim);font-family:var(--mono)">No athletes found.</span>`; return; }
+  el.innerHTML = f.map(m => {
+    const team = tb[m.team_id] || { color: '#555' }; const sel = m.id === selA ? 'sel' : '';
+    return `<div class="achip ${sel}" data-uid="${m.id}">
       <span class="td" style="background:${team.color};width:6px;height:6px;"></span>
-      ${m.profile_pic?`<img src="${m.profile_pic}" alt="" onerror="this.style.display='none'">`:''}
       <span>${m.name}</span></div>`;
   }).join('');
 }
-function selAth(id){selA=id;aSrch='';document.getElementById('asrch').value='';PG.acts=1;rChips();rActs();}
+function selAth(id) { selA = id; aSrch = ''; document.getElementById('asrch').value = ''; PG.acts = 1; rChips(); rActs(); }
 
-function rActs(){
-  const tb={};CONFIG.TEAMS.forEach(t=>tb[t.id]=t);
-  let members=[...LB];
-  if(aTm!=='all')members=members.filter(m=>m.team_id===aTm);
-  if(selA)members=members.filter(m=>m.strava_athlete_id===selA);
-  const all=[];
-  members.forEach(m=>{
-    const team=tb[m.team_id]||{color:'#555',name:'No Team',emoji:'⚪'};
-    (m.activities||[]).forEach(a=>all.push({...a,member:m,team}));
+function rActs() {
+  const tb = {}; CONFIG.TEAMS.forEach(t => tb[t.id] = t);
+  let members = [...LB];
+  if (aTm !== 'all') members = members.filter(m => m.team_id === aTm);
+  if (selA) members = members.filter(m => m.id === selA);
+  const all = [];
+  members.forEach(m => {
+    const team = tb[m.team_id] || { color: '#555', name: 'No Team', emoji: '⚪' };
+    (m.activities || []).forEach(a => all.push({ ...a, member: m, team }));
   });
-  all.sort((a,b)=>new Date(b.start_date)-new Date(a.start_date));
-  if(!all.length){document.getElementById('acontent').innerHTML=`<div class="empty">No activities found.</div>`;return;}
-  const p=PG.acts,tot=all.length,pages=Math.ceil(tot/PS);
-  const sl=all.slice((p-1)*PS,p*PS);const showWho=!selA;
-  const cards=sl.map(a=>{
-    const icon=SICO[a.sport_type]||'🏅';
-    const dk=((a.distance||0)/1000).toFixed(1),dm=Math.round((a.moving_time||0)/60),cal=Math.round(a.calories||0);
-    const date=new Date(a.start_date).toLocaleDateString('en-GB',{weekday:'short',day:'numeric',month:'short',year:'numeric'});
-    const pts=a.points||0,bd=a.breakdown||{};
-    const bn=[];
-    if(bd.base)bn.push(`+${bd.base} base`);if(bd.calories)bn.push(`+${bd.calories} cal`);
-    if(bd.distance)bn.push(`+${bd.distance} dist`);if(bd.duration)bn.push(`+${bd.duration} dur`);
-    if(bd.dailyTop)bn.push(`+${bd.dailyTop} top`);if(bd.streak)bn.push(`+${bd.streak} streak`);
-    return`<div class="acard${bd.valid===false?' ainv':''}">
+  all.sort((a, b) => new Date(b.start_date) - new Date(a.start_date));
+  if (!all.length) { document.getElementById('acontent').innerHTML = `<div class="empty">No activities found.</div>`; return; }
+  const p = PG.acts, tot = all.length, pages = Math.ceil(tot / PS);
+  const sl = all.slice((p - 1) * PS, p * PS); const showWho = !selA;
+  const cards = sl.map(a => {
+    const icon = SICO[a.sport_type] || '🏅';
+    const dk = ((a.distance || 0) / 1000).toFixed(1), dm = Math.round((a.moving_time || 0) / 60), cal = Math.round(a.calories || 0);
+    const date = new Date(a.start_date).toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' });
+    const pts = a.points || 0, bd = a.breakdown || {};
+    const bn = [];
+    if (bd.base) bn.push(`+${bd.base} base`); if (bd.calories) bn.push(`+${bd.calories} cal`);
+    if (bd.distance) bn.push(`+${bd.distance} dist`); if (bd.duration) bn.push(`+${bd.duration} dur`);
+    if (bd.dailyTop) bn.push(`+${bd.dailyTop} top`); if (bd.streak) bn.push(`+${bd.streak} streak`);
+    const methodTag = a.submission_method === 'manual' ? '<span class="awtag manual">Manual</span>' : '<span class="awtag ocr">OCR</span>';
+    return `<div class="acard${bd.valid === false ? ' ainv' : ''}">
       <div class="aico">${icon}</div>
       <div class="abody">
-        ${showWho?`<div class="awho">${a.member.profile_pic?`<img src="${a.member.profile_pic}" alt="" onerror="this.style.display='none'">`:''}
-          <span class="awn">${a.member.name} <span style="color:${a.team.color}">${a.team.emoji} ${a.team.name}</span></span></div>`:''}
-        <div class="aname">${a.name||a.sport_type}</div>
+        ${showWho ? `<div class="awho"><span class="awn">${a.member.name} <span style="color:${a.team.color}">${a.team.emoji} ${a.team.name}</span></span>${methodTag}</div>` : ''}
+        <div class="aname">${a.name || a.sport_type}</div>
         <div class="adate">${date} · ${a.sport_type}</div>
         <div class="astats">
           <div class="astat">⏱ <b>${dm}m</b></div>
-          ${dk>0?`<div class="astat">📏 <b>${dk} km</b></div>`:''}
-          ${cal>0?`<div class="astat">🔥 <b>${cal} kcal</b></div>`:''}
-          ${bd.valid===false?`<div class="astat" style="color:#e24b4a">Below min duration</div>`:''}
+          ${dk > 0 ? `<div class="astat">📏 <b>${dk} km</b></div>` : ''}
+          ${cal > 0 ? `<div class="astat">🔥 <b>${cal} kcal</b></div>` : ''}
+          ${bd.valid === false ? `<div class="astat" style="color:#e24b4a">Below min duration</div>` : ''}
         </div>
-        ${bn.length?`<div class="abns">${bn.map(x=>`<span class="abn">${x}</span>`).join('')}</div>`:''}
+        ${bn.length ? `<div class="abns">${bn.map(x => `<span class="abn">${x}</span>`).join('')}</div>` : ''}
       </div>
       <div class="apts"><div class="apv">${pts}</div><div class="apl">pts</div></div>
     </div>`;
   }).join('');
-  document.getElementById('acontent').innerHTML=`<div class="alist">${cards}</div>${pages>1?pgr(p,pages,tot,'acts'):''}`;
+  document.getElementById('acontent').innerHTML = `<div class="alist">${cards}</div>${pages > 1 ? pgr(p, pages, tot, 'acts') : ''}`;
 }
 
-function rScoring(){
-  const S=CONFIG.SCORING;
-  const rules=[
-    ['✅','Valid Activity',`Min duration met + ≥${S.MIN_CAL_PER_MIN??4} kcal/min (if calories recorded).`,`+${S.BASE_ACTIVITY}`],
-    ['🔥','Calorie Bonus',`+${S.CALORIES_BONUS} per ${S.CALORIES_PER} kcal. Unlimited.`,`+${S.CALORIES_BONUS}/${S.CALORIES_PER}`],
-    ['📏','Distance Bonus',`+${S.DISTANCE_BONUS} per ${S.DISTANCE_PER} km. Unlimited.`,`+${S.DISTANCE_BONUS}/${S.DISTANCE_PER}km`],
-    ['⏱️','Duration Bonus',`Above ${S.DURATION_BASE} min: +${S.DURATION_BONUS} per ${S.DURATION_STEP} min.`,`+${S.DURATION_BONUS}/${S.DURATION_STEP}m`],
-    ['🏆','Daily Top Cal',`Highest calories burned across ALL athletes that day.`,`+${S.DAILY_TOP_CALORIES}`],
-    ['🎯','Streak M1','3 consecutive days. Once per challenge.',`+${S.STREAK_MILESTONES[0]}`],
-    ['🎯','Streak M2','6 consecutive days. Once per challenge.',`+${S.STREAK_MILESTONES[1]}`],
-    ['🎯','Streak M3','9 consecutive days. Once per challenge.',`+${S.STREAK_MILESTONES[2]}`],
-    ['🎯','Streak M4+','12+ days. Max streak bonus = 100 pts.',`+${S.STREAK_MILESTONES[3]}`],
+// ── SUBMIT PANEL ─────────────────────────────────────────────────
+
+function rSubmit() {
+  const u = Session.get();
+  const el = document.getElementById('submit-content');
+  if (!u) {
+    el.innerHTML = `<div class="empty" style="padding:64px 20px;">
+      <div style="font-size:48px;margin-bottom:16px;">🔒</div>
+      <div style="font-size:16px;font-weight:600;margin-bottom:6px;">Register to Submit</div>
+      <div style="margin-bottom:16px;">You need an invite code to submit activities.</div>
+      <button class="btn btn-p" onclick="openRegister()">Register Now</button>
+    </div>`;
+    return;
+  }
+  el.innerHTML = `
+  <div class="upload-zone" id="upload-zone">
+    <div class="uz-icon">📸</div>
+    <div class="uz-text">Drop screenshot here or click to browse</div>
+    <div class="uz-hint">Supports Strava, Garmin, Coros, Apple Health, Suunto, Huawei screenshots</div>
+    <input type="file" id="file-input" accept="image/*"/>
+    <canvas id="img-canvas" style="display:none"></canvas>
+  </div>
+  <div id="review-area" style="display:none;">
+    <div class="review-form">
+      <h4>Review & Confirm</h4>
+      <div class="frow">
+        <div class="fcol"><label>Activity Name</label><input type="text" id="rf-name" placeholder="e.g. Morning Run"/></div>
+        <div class="fcol"><label>Sport Type</label><select id="rf-sport">${SPORT_TYPES.map(s => `<option value="${s}" ${s==='Run'?'selected':''}>${s}</option>`).join('')}</select></div>
+      </div>
+      <div class="frow">
+        <div class="fcol"><label>Calories (kcal)</label><input type="number" id="rf-cal" placeholder="0" step="1"/></div>
+        <div class="fcol"><label>Distance (km)</label><input type="number" id="rf-dist" placeholder="0" step="0.01"/></div>
+        <div class="fcol"><label>Duration (minutes)</label><input type="number" id="rf-dur" placeholder="0" step="1"/></div>
+      </div>
+      <div class="frow">
+        <div class="fcol"><label>Date</label><input type="date" id="rf-date" value="${new Date().toISOString().slice(0,10)}"/></div>
+      </div>
+      <div class="rft">
+        <div style="display:flex;gap:8px;">
+          <button class="btn btn-p" id="confirm-btn">Confirm Activity</button>
+          <button class="btn btn-g" id="reupload-btn">Upload Again</button>
+        </div>
+        <span class="help-link" id="help-link">Something wrong? Request Admin Help</span>
+      </div>
+    </div>
+  </div>`;
+
+  setupUpload();
+  document.getElementById('help-link').addEventListener('click', () => {
+    toast('Contact panitia via WhatsApp for manual entry.', '');
+  });
+  document.getElementById('reupload-btn').addEventListener('click', resetUpload);
+  document.getElementById('confirm-btn').addEventListener('click', confirmActivity);
+
+  // Mark fields as edited
+  ['rf-name','rf-cal','rf-dist','rf-dur','rf-date','rf-sport'].forEach(id => {
+    document.getElementById(id).addEventListener('input', function() { this.classList.add('edited'); });
+  });
+}
+
+function setupUpload() {
+  const zone = document.getElementById('upload-zone');
+  const input = document.getElementById('file-input');
+  if (!zone || !input) return;
+  if (zone._setup) return;
+  zone._setup = true;
+  zone.addEventListener('click', () => input.click());
+  zone.addEventListener('dragover', e => { e.preventDefault(); zone.classList.add('drag'); });
+  zone.addEventListener('dragleave', () => zone.classList.remove('drag'));
+  zone.addEventListener('drop', e => { e.preventDefault(); zone.classList.remove('drag'); handleFile(e.dataTransfer.files[0]); });
+  input.addEventListener('change', () => handleFile(input.files[0]));
+}
+
+function handleFile(file) {
+  if (!file) return;
+  if (!file.type.startsWith('image/')) { toast('Please upload an image file.', 'error'); return; }
+  const reader = new FileReader();
+  reader.onload = e => {
+    ocrImage = e.target.result;
+    const zone = document.getElementById('upload-zone');
+    zone.classList.add('has-image');
+    zone.innerHTML = `<img src="${ocrImage}" alt="Preview"/>`;
+    showAnalyzeButton();
+  };
+  reader.readAsDataURL(file);
+}
+
+function showAnalyzeButton() {
+  const zone = document.getElementById('upload-zone');
+  const div = document.createElement('div');
+  div.style.cssText = 'margin-top:12px;display:flex;gap:8px;justify-content:center;';
+  div.innerHTML = `
+    <button class="btn btn-p" id="analyze-btn">🔍 Analyze</button>
+    <button class="btn btn-g" id="change-img-btn">Change Image</button>
+  `;
+  zone.appendChild(div);
+  document.getElementById('analyze-btn').addEventListener('click', analyzeImage);
+  document.getElementById('change-img-btn').addEventListener('click', resetUpload);
+}
+
+function resetUpload() {
+  ocrResult = null; ocrImage = null;
+  const zone = document.getElementById('upload-zone');
+  zone.classList.remove('has-image');
+  zone._setup = false;
+  zone.innerHTML = `<div class="uz-icon">📸</div>
+    <div class="uz-text">Drop screenshot here or click to browse</div>
+    <div class="uz-hint">Supports Strava, Garmin, Coros, Apple Health, Suunto, Huawei screenshots</div>
+    <input type="file" id="file-input" accept="image/*"/>`;
+  setupUpload();
+  document.getElementById('review-area').style.display = 'none';
+}
+
+async function analyzeImage() {
+  if (ocrLoading) return;
+  ocrLoading = true;
+  const btn = document.getElementById('analyze-btn');
+  btn.disabled = true; btn.textContent = 'Analyzing...';
+  try {
+    ocrResult = await OCR.analyzeImage(ocrImage);
+    fillReviewForm(ocrResult);
+    document.getElementById('review-area').style.display = 'block';
+    document.getElementById('review-area').scrollIntoView({ behavior: 'smooth' });
+  } catch (e) {
+    toast('OCR failed: ' + e.message, 'error');
+  } finally { btn.disabled = false; btn.textContent = '🔍 Analyze'; ocrLoading = false; }
+}
+
+function fillReviewForm(data) {
+  if (data.activity_name) document.getElementById('rf-name').value = data.activity_name;
+  if (data.sport_type && SPORT_TYPES.includes(data.sport_type)) document.getElementById('rf-sport').value = data.sport_type;
+  if (data.calories != null) document.getElementById('rf-cal').value = Math.round(data.calories);
+  if (data.distance_km != null) document.getElementById('rf-dist').value = data.distance_km;
+  if (data.duration_minutes != null) document.getElementById('rf-dur').value = Math.round(data.duration_minutes);
+  if (data.date) document.getElementById('rf-date').value = data.date;
+}
+
+async function confirmActivity() {
+  const u = Session.get();
+  if (!u) return toast('Please register first.', 'error');
+
+  const name = document.getElementById('rf-name').value.trim();
+  const sportType = document.getElementById('rf-sport').value;
+  const calories = parseFloat(document.getElementById('rf-cal').value) || 0;
+  const distanceKm = parseFloat(document.getElementById('rf-dist').value) || 0;
+  const durationMin = parseFloat(document.getElementById('rf-dur').value) || 0;
+  const date = document.getElementById('rf-date').value;
+  if (!date) return toast('Date is required.', 'error');
+
+  const userCorrected = ['rf-name','rf-cal','rf-dist','rf-dur','rf-date','rf-sport'].some(id => document.getElementById(id).classList.contains('edited'));
+
+  const btn = document.getElementById('confirm-btn');
+  btn.disabled = true; btn.textContent = 'Submitting...';
+  try {
+    await OCR.submitActivity({
+      user_id: u.id,
+      name: name || sportType,
+      sport_type: sportType,
+      distance: distanceKm * 1000,
+      moving_time: Math.round(durationMin * 60),
+      calories: Math.round(calories),
+      start_date: date,
+      image_path: ocrImage ? date : null,
+    });
+    toast('Activity submitted!', 'success');
+    resetUpload();
+    document.getElementById('review-area').style.display = 'none';
+    await loadData();
+  } catch (e) {
+    toast('Failed: ' + e.message, 'error');
+  } finally { btn.disabled = false; btn.textContent = 'Confirm Activity'; }
+}
+
+// ── SCORING GUIDE ───────────────────────────────────────────────
+
+function rScoring() {
+  const S = CONFIG.SCORING;
+  const rules = [
+    ['✅', 'Valid Activity', `Min duration met + ≥${S.MIN_CAL_PER_MIN ?? 4} kcal/min (if calories recorded).`, `+${S.BASE_ACTIVITY}`],
+    ['🔥', 'Calorie Bonus', `+${S.CALORIES_BONUS} per ${S.CALORIES_PER} kcal. Unlimited.`, `+${S.CALORIES_BONUS}/${S.CALORIES_PER}`],
+    ['📏', 'Distance Bonus', `+${S.DISTANCE_BONUS} per ${S.DISTANCE_PER} km. Unlimited.`, `+${S.DISTANCE_BONUS}/${S.DISTANCE_PER}km`],
+    ['⏱️', 'Duration Bonus', `Above ${S.DURATION_BASE} min: +${S.DURATION_BONUS} per ${S.DURATION_STEP} min.`, `+${S.DURATION_BONUS}/${S.DURATION_STEP}m`],
+    ['🏆', 'Daily Top Cal', `Highest calories burned across ALL athletes that day.`, `+${S.DAILY_TOP_CALORIES}`],
+    ['🎯', 'Streak M1', '3 consecutive days. Once per challenge.', `+${S.STREAK_MILESTONES[0]}`],
+    ['🎯', 'Streak M2', '6 consecutive days. Once per challenge.', `+${S.STREAK_MILESTONES[1]}`],
+    ['🎯', 'Streak M3', '9 consecutive days. Once per challenge.', `+${S.STREAK_MILESTONES[2]}`],
+    ['🎯', 'Streak M4+', '12+ days. Max streak bonus = 100 pts.', `+${S.STREAK_MILESTONES[3]}`],
   ];
-  document.getElementById('sgrid').innerHTML=rules.map(([i,t,d,p])=>`
+  document.getElementById('sgrid').innerHTML = rules.map(([i, t, d, p]) => `
     <div class="sr"><div class="si">${i}</div><div><div class="stt">${t}</div><div class="sd">${d}</div></div><div class="spts">${p}</div></div>`).join('');
 }
 
-function fmt(n){return Number(n).toLocaleString('en-US');}
-function fmtDur(m){const h=Math.floor(m/60),mn=Math.round(m%60);return h>0?`${h}h ${mn}m`:`${mn}m`;}
+// ── UTILS ───────────────────────────────────────────────────────
+
+function fmt(n) { return Number(n).toLocaleString('en-US'); }
+function fmtDur(m) { const h = Math.floor(m / 60), mn = Math.round(m % 60); return h > 0 ? `${h}h ${mn}m` : `${mn}m`; }
 let _tt;
-function toast(msg,type=''){
-  const el=document.getElementById('toast');el.textContent=msg;el.className='show '+(type||'');
-  clearTimeout(_tt);_tt=setTimeout(()=>el.className='',3200);
+function toast(msg, type = '') {
+  const el = document.getElementById('toast'); el.textContent = msg; el.className = 'show ' + (type || '');
+  clearTimeout(_tt); _tt = setTimeout(() => el.className = '', 3200);
 }
 </script>
 </body>
