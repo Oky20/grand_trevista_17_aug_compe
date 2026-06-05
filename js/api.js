@@ -95,24 +95,21 @@ const DB = {
   async getActivities(startDate, endDate) {
     const start = startDate || CONFIG.CHALLENGE_START;
     const end   = endDate   || CONFIG.CHALLENGE_END;
-    const startDt = new Date(start);
-    startDt.setDate(startDt.getDate() - 1);
-    const startAdj = startDt.toISOString().slice(0, 10);
-    const endNext = new Date(end);
-    endNext.setDate(endNext.getDate() + 1);
-    const endAdj = endNext.toISOString().slice(0, 10);
-    const res = await sbFetch(
-      `activities?start_date=gte.${startAdj}&start_date=lt.${endAdj}&order=start_date.asc`
-    );
+    const res = await sbFetch('activities?order=start_date.asc');
     if (!res.ok) throw new Error(await res.text());
     const data = await res.json();
-    return data.filter(a => {
+    console.log('getActivities: fetched', data.length, 'total activities from DB');
+    const filtered = data.filter(a => {
+      if (!a.start_date) return false;
       const d = new Date(a.start_date);
       const localDate = d.getFullYear() + '-' +
         String(d.getMonth() + 1).padStart(2, '0') + '-' +
         String(d.getDate()).padStart(2, '0');
       return localDate >= start && localDate <= end;
     });
+    console.log('getActivities: after date filter (' + start + ' to ' + end + '):', filtered.length);
+    if (data.length > 0) console.log('getActivities: first raw activity=', JSON.stringify(data[0]));
+    return filtered;
   },
 
   async getLeaderboard(startDate, endDate) {
