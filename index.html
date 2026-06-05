@@ -640,7 +640,7 @@ function setupUpload() {
   if (!zone || !input) return;
   if (zone._setup) return;
   zone._setup = true;
-  zone.addEventListener('click', () => input.click());
+  zone.addEventListener('click', (e) => { if (e.target.closest('button')) return; input.click(); });
   zone.addEventListener('dragover', e => { e.preventDefault(); zone.classList.add('drag'); });
   zone.addEventListener('dragleave', () => zone.classList.remove('drag'));
   zone.addEventListener('drop', e => { e.preventDefault(); zone.classList.remove('drag'); handleFile(e.dataTransfer.files[0]); });

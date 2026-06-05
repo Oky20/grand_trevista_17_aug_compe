@@ -19,7 +19,10 @@ const OCR = {
   async analyzeImage(base64) {
     const res = await fetch(`${CONFIG.SUPABASE_URL}/functions/v1/gemini-ocr`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${CONFIG.SUPABASE_ANON_KEY}`,
+      },
       body: JSON.stringify({ image_base64: base64 }),
     });
     if (!res.ok) throw new Error(await res.text());
@@ -29,7 +32,10 @@ const OCR = {
   async submitActivity(data) {
     const res = await fetch(`${CONFIG.SUPABASE_URL}/functions/v1/activity-submit`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${CONFIG.SUPABASE_ANON_KEY}`,
+      },
       body: JSON.stringify(data),
     });
     if (!res.ok) throw new Error(await res.text());
@@ -43,7 +49,10 @@ const Auth = {
   async register(code, name) {
     const res = await fetch(`${CONFIG.SUPABASE_URL}/functions/v1/invite-code`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${CONFIG.SUPABASE_ANON_KEY}`,
+      },
       body: JSON.stringify({ code, name }),
     });
     if (!res.ok) {
