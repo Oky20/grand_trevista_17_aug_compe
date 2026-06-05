@@ -648,7 +648,7 @@ function setupUpload() {
   if (!zone || !input) return;
   if (zone._setup) return;
   zone._setup = true;
-  zone.addEventListener('click', (e) => { if (e.target.closest('button')) return; input.click(); });
+  zone.addEventListener('click', (e) => { if (e.target.closest('button, img')) return; input.click(); });
   zone.addEventListener('dragover', e => { e.preventDefault(); zone.classList.add('drag'); });
   zone.addEventListener('dragleave', () => zone.classList.remove('drag'));
   zone.addEventListener('drop', e => { e.preventDefault(); zone.classList.remove('drag'); handleFile(e.dataTransfer.files[0]); });
@@ -715,8 +715,15 @@ function fillReviewForm(data) {
   if (data.sport_type && SPORT_TYPES.includes(data.sport_type)) document.getElementById('rf-sport').value = data.sport_type;
   if (data.calories != null) document.getElementById('rf-cal').value = Math.round(data.calories);
   if (data.distance_km != null) document.getElementById('rf-dist').value = data.distance_km;
-  if (data.duration_minutes != null) document.getElementById('rf-dur').value = data.duration_minutes;
-  if (data.date) document.getElementById('rf-date').value = data.date;
+  if (data.duration_minutes != null) document.getElementById('rf-dur').value = Math.round(data.duration_minutes);
+  const today = new Date().toISOString().slice(0, 10);
+  const cs = CONFIG.CHALLENGE_START || '2026-06-01';
+  const ce = CONFIG.CHALLENGE_END || '2026-06-30';
+  if (data.date && data.date >= cs && data.date <= ce) {
+    document.getElementById('rf-date').value = data.date;
+  } else {
+    document.getElementById('rf-date').value = today;
+  }
 }
 
 async function confirmActivity() {
