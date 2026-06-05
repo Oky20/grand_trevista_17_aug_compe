@@ -11,7 +11,7 @@ const CORS = {
 
 const GEMINI_API_KEY = Deno.env.get("GEMINI_API_KEY")!;
 
-const PROMPT = `Extract workout/fitness activity data from this screenshot.
+const PROMPT = `We are in year 2026. Extract workout/fitness activity data from this screenshot.
 Return ONLY valid JSON (no markdown, no code fences):
 
 {
@@ -27,7 +27,7 @@ Rules:
 - calories: total calories as integer
 - distance_km: total distance in kilometers as float
 - duration_minutes: total duration in minutes as float
-- date: ISO date from the screenshot (if not found use today)
+- date: ISO date from the screenshot. If the year is not clearly visible, assume 2026 (the current year). Do NOT guess 2023 or earlier.
 - activity_name: the name/title of the activity
 - sport_type: guess from activity name, icon, or type displayed. Map common names:
   "lari"/"run"/"running" → "Run"
