@@ -98,13 +98,19 @@ const DB = {
     const startDt = new Date(start);
     startDt.setDate(startDt.getDate() - 1);
     const startAdj = startDt.toISOString().slice(0, 10);
+    const endNext = new Date(end);
+    endNext.setDate(endNext.getDate() + 1);
+    const endAdj = endNext.toISOString().slice(0, 10);
     const res = await sbFetch(
-      `activities?start_date=gte.${startAdj}&start_date=lte.${end}T23:59:59&order=start_date.asc`
+      `activities?start_date=gte.${startAdj}&start_date=lt.${endAdj}&order=start_date.asc`
     );
     if (!res.ok) throw new Error(await res.text());
     const data = await res.json();
     return data.filter(a => {
-      const localDate = new Date(a.start_date).toLocaleDateString('en-CA');
+      const d = new Date(a.start_date);
+      const localDate = d.getFullYear() + '-' +
+        String(d.getMonth() + 1).padStart(2, '0') + '-' +
+        String(d.getDate()).padStart(2, '0');
       return localDate >= start && localDate <= end;
     });
   },
