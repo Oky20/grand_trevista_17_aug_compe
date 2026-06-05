@@ -716,7 +716,14 @@ function fillReviewForm(data) {
   if (data.calories != null) document.getElementById('rf-cal').value = Math.round(data.calories);
   if (data.distance_km != null) document.getElementById('rf-dist').value = data.distance_km;
   if (data.duration_minutes != null) document.getElementById('rf-dur').value = Math.round(data.duration_minutes);
-  if (data.date) document.getElementById('rf-date').value = data.date;
+  const today = new Date().toISOString().slice(0, 10);
+  const challengeStart = CONFIG.CHALLENGE_START || '2026-06-01';
+  const challengeEnd = CONFIG.CHALLENGE_END || '2026-06-30';
+  if (data.date && data.date >= challengeStart && data.date <= challengeEnd) {
+    document.getElementById('rf-date').value = data.date;
+  } else {
+    document.getElementById('rf-date').value = today;
+  }
 }
 
 async function confirmActivity() {
