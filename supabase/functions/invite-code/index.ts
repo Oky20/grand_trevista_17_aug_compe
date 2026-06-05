@@ -20,7 +20,7 @@ serve(async (req) => {
 
     const sb = createClient(
       Deno.env.get("SUPABASE_URL")!,
-      Deno.env.get("DB_SERVICE_ROLE_KEY")!
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
     );
 
     // Validate invite code
@@ -47,7 +47,13 @@ serve(async (req) => {
       .limit(1);
 
     if (existing && existing.length > 0) {
-      return json({ error: "A user with this name already exists in your team" }, 409);
+      const { data: existingUser } = await sb
+        .from("users")
+        .select("*")
+        .eq("name", name.trim())
+        .eq("team_id", inviteCode.team_id)
+        .single();
+      return json({ success: true, user: existingUser, already_registered: true });
     }
 
     // Create user

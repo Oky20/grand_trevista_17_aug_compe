@@ -212,6 +212,22 @@ footer{text-align:center;padding:24px 20px 36px;border-top:1px solid var(--borde
   </div>
 </div>
 
+<!-- Login Modal -->
+<div class="moverlay" id="login-modal">
+  <div class="modal">
+    <h3>Login</h3>
+    <div class="ms">Already registered? Enter your name and team.</div>
+    <input type="text" id="login-name" placeholder="Your name" autocomplete="off"/>
+    <select id="login-team" style="width:100%;background:var(--bg);border:0.5px solid var(--border2);border-radius:var(--r);padding:10px 14px;color:var(--text);font-size:14px;font-family:var(--sans);outline:none;margin-bottom:12px;cursor:pointer;appearance:auto;">
+    </select>
+    <div class="merr" id="login-err"></div>
+    <div class="mbtns">
+      <button class="btn btn-g" id="login-cancel">Cancel</button>
+      <button class="btn btn-p" id="login-submit">Login</button>
+    </div>
+  </div>
+</div>
+
 <div id="toast"></div>
 <footer>
   <p style="font-size:12px;color:var(--muted);">Powered by Gemini AI</p>
@@ -267,7 +283,16 @@ document.addEventListener('DOMContentLoaded', async () => {
   document.getElementById('reg-submit').addEventListener('click', handleRegister);
   document.getElementById('reg-cancel').addEventListener('click', () => document.getElementById('register-modal').classList.remove('show'));
   document.getElementById('register-modal').addEventListener('click', e => { if (e.target === e.currentTarget) e.currentTarget.classList.remove('show'); });
-  document.addEventListener('keydown', e => { if (e.key === 'Escape') document.getElementById('register-modal').classList.remove('show'); });
+
+  // Login modal
+  document.getElementById('login-submit').addEventListener('click', handleLogin);
+  document.getElementById('login-cancel').addEventListener('click', () => document.getElementById('login-modal').classList.remove('show'));
+  document.getElementById('login-modal').addEventListener('click', e => { if (e.target === e.currentTarget) e.currentTarget.classList.remove('show'); });
+  document.getElementById('login-team').innerHTML = '<option value="">Select your team...</option>' +
+    CONFIG.TEAMS.map(t => `<option value="${t.id}">${t.emoji} ${t.name}</option>`).join('');
+  document.getElementById('login-name').addEventListener('keydown', e => { if (e.key === 'Enter') handleLogin(); });
+
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') { document.getElementById('register-modal').classList.remove('show'); document.getElementById('login-modal').classList.remove('show'); }});
   document.getElementById('reg-code').addEventListener('keydown', e => { if (e.key === 'Enter') handleRegister(); });
   document.getElementById('reg-name').addEventListener('keydown', e => { if (e.key === 'Enter') handleRegister(); });
 
@@ -296,8 +321,10 @@ async function loadData() {
 function rHA() {
   const u = Session.get(), el = document.getElementById('ha');
   if (!u) {
-    el.innerHTML = `<button class="btn btn-p" id="register-btn">Register</button>`;
+    el.innerHTML = `<button class="btn btn-p" id="register-btn">Register</button>
+    <button class="btn btn-g" id="login-btn">Login</button>`;
     document.getElementById('register-btn').addEventListener('click', openRegister);
+    document.getElementById('login-btn').addEventListener('click', openLogin);
   } else {
     const team = CONFIG.TEAMS.find(t => t.id === u.team_id) || {};
     el.innerHTML = `<div class="apill"><span class="td" style="background:${team.color||'#555'};width:8px;height:8px;"></span><span>${u.name} · ${team.emoji||''} ${team.name||'No Team'}</span></div>
@@ -340,6 +367,34 @@ async function handleRegister() {
 }
 
 function doLogout() { Session.clear(); rHA(); toast('Signed out.'); }
+
+// ── LOGIN ──────────────────────────────────────────────────────
+
+function openLogin() {
+  document.getElementById('login-name').value = '';
+  document.getElementById('login-team').value = '';
+  document.getElementById('login-err').textContent = '';
+  document.getElementById('login-modal').classList.add('show');
+  document.getElementById('login-name').focus();
+}
+
+async function handleLogin() {
+  const name = document.getElementById('login-name').value.trim();
+  const teamId = parseInt(document.getElementById('login-team').value);
+  const errEl = document.getElementById('login-err');
+  errEl.textContent = '';
+  if (!name) { errEl.textContent = 'Enter your name.'; return; }
+  if (!teamId) { errEl.textContent = 'Select your team.'; return; }
+  const btn = document.getElementById('login-submit');
+  btn.disabled = true; btn.textContent = 'Logging in...';
+  try {
+    await Auth.login(name, teamId);
+    document.getElementById('login-modal').classList.remove('show');
+    rHA(); loadData(); toast('Welcome back, ' + name + '!', 'success');
+  } catch (e) {
+    errEl.textContent = e.message;
+  } finally { btn.disabled = false; btn.textContent = 'Login'; }
+}
 
 // ── DATE RANGE ─────────────────────────────────────────────────
 
