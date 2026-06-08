@@ -31,6 +31,7 @@ CREATE TABLE IF NOT EXISTS activities (
   distance          FLOAT DEFAULT 0,
   moving_time       INTEGER DEFAULT 0,
   calories          FLOAT DEFAULT 0,
+  elevation_gain    FLOAT DEFAULT 0,
   start_date        TIMESTAMPTZ NOT NULL,
   image_path        TEXT,
   image_hash        TEXT,

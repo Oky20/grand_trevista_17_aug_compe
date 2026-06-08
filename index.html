@@ -619,6 +619,7 @@ function rSubmit() {
       </div>
       <div class="frow">
         <div class="fcol"><label>Date</label><input type="date" id="rf-date" value="${new Date().toISOString().slice(0,10)}"/></div>
+        <div class="fcol"><label>Elevation Gain (m)</label><input type="number" id="rf-elev" placeholder="0" step="1"/></div>
       </div>
       <div class="rft">
         <div style="display:flex;gap:8px;">
@@ -638,7 +639,7 @@ function rSubmit() {
   document.getElementById('confirm-btn').addEventListener('click', confirmActivity);
 
   // Mark fields as edited
-  ['rf-name','rf-cal','rf-dist','rf-dur','rf-date','rf-sport'].forEach(id => {
+  ['rf-name','rf-cal','rf-dist','rf-dur','rf-date','rf-sport','rf-elev'].forEach(id => {
     document.getElementById(id).addEventListener('input', function() { this.classList.add('edited'); });
   });
 }
@@ -717,6 +718,7 @@ function fillReviewForm(data) {
   if (data.calories != null) document.getElementById('rf-cal').value = Math.round(data.calories);
   if (data.distance_km != null) document.getElementById('rf-dist').value = data.distance_km;
   if (data.duration_minutes != null) document.getElementById('rf-dur').value = Math.round(data.duration_minutes);
+  if (data.elevation_gain_m != null) document.getElementById('rf-elev').value = Math.round(data.elevation_gain_m);
   const today = new Date().toISOString().slice(0, 10);
   const cs = CONFIG.CHALLENGE_START || '2026-06-01';
   const ce = CONFIG.CHALLENGE_END || '2026-06-30';
@@ -778,10 +780,11 @@ async function confirmActivity() {
   const calories = parseFloat(document.getElementById('rf-cal').value) || 0;
   const distanceKm = parseFloat(document.getElementById('rf-dist').value) || 0;
   const durationMin = parseFloat(document.getElementById('rf-dur').value) || 0;
+  const elevationGain = parseFloat(document.getElementById('rf-elev').value) || 0;
   const date = document.getElementById('rf-date').value;
   if (!date) return toast('Date is required.', 'error');
 
-  const userCorrected = ['rf-name','rf-cal','rf-dist','rf-dur','rf-date','rf-sport'].some(id => document.getElementById(id).classList.contains('edited'));
+  const userCorrected = ['rf-name','rf-cal','rf-dist','rf-dur','rf-date','rf-sport','rf-elev'].some(id => document.getElementById(id).classList.contains('edited'));
 
   let imageHash = null, dhash = null;
   if (ocrImage) {
@@ -807,6 +810,7 @@ async function confirmActivity() {
       image_path: ocrImage ? date : null,
       image_hash: imageHash,
       dhash: dhash,
+      elevation_gain: elevationGain,
     });
     toast('Activity submitted!', 'success');
     resetUpload();
@@ -824,7 +828,8 @@ function rScoring() {
   const rules = [
     ['✅', 'Valid Activity', `Min duration met + ≥${S.MIN_CAL_PER_MIN ?? 4} kcal/min (if calories recorded).`, `+${S.BASE_ACTIVITY}`],
     ['🔥', 'Calorie Bonus', `+${S.CALORIES_BONUS} per ${S.CALORIES_PER} kcal. Unlimited.`, `+${S.CALORIES_BONUS}/${S.CALORIES_PER}`],
-    ['📏', 'Distance Bonus', `+${S.DISTANCE_BONUS} per ${S.DISTANCE_PER} km. Unlimited.`, `+${S.DISTANCE_BONUS}/${S.DISTANCE_PER}km`],
+    ['📏', 'Distance Bonus', 'Varies by sport (Run: +5/2.5km, Cycling: +5/10km, Swim: +5/0.5km). Unlimited.', ''],
+    ['⛰️', 'Elevation Bonus', 'Trail/Hike/Climb: +5/100m, Cycling: +5/200m, eBike: +3/300m.', ''],
     ['⏱️', 'Duration Bonus', `Above ${S.DURATION_BASE} min: +${S.DURATION_BONUS} per ${S.DURATION_STEP} min.`, `+${S.DURATION_BONUS}/${S.DURATION_STEP}m`],
     ['🏆', 'Daily Top Cal', `Highest calories burned across ALL athletes that day.`, `+${S.DAILY_TOP_CALORIES}`],
     ['🎯', 'Streak M1', '3 consecutive days. Once per challenge.', `+${S.STREAK_MILESTONES[0]}`],

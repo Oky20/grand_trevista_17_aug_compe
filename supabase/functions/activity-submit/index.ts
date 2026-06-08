@@ -55,7 +55,7 @@ serve(async (req) => {
 
   try {
     const body = await req.json();
-    const { user_id, name, sport_type, distance, moving_time, calories, start_date, image_path, image_hash, dhash } = body;
+    const { user_id, name, sport_type, distance, moving_time, calories, start_date, image_path, image_hash, dhash, elevation_gain } = body;
 
     if (!user_id) return json({ error: "Missing user_id" }, 400);
     if (!start_date) return json({ error: "Missing start_date" }, 400);
@@ -132,6 +132,7 @@ serve(async (req) => {
         image_path: image_path || null,
         image_hash: image_hash || null,
         dhash: dhash || null,
+        elevation_gain: elevation_gain || 0,
         submission_method,
         user_corrected: false,
       })

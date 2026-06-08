@@ -108,6 +108,9 @@ thead th{padding:10px 14px;font-size:10px;font-weight:500;color:var(--dim);text-
           <div class="fcol"><label>Distance (km)</label><input type="number" id="me-dist" placeholder="0" step="0.01"/></div>
           <div class="fcol"><label>Duration (minutes)</label><input type="number" id="me-dur" placeholder="0" step="1"/></div>
         </div>
+        <div class="frow">
+          <div class="fcol"><label>Elevation Gain (m)</label><input type="number" id="me-elev" placeholder="0" step="1"/></div>
+        </div>
         <div class="frow-actions">
           <button class="btn btn-p" id="me-submit">Submit Activity</button>
         </div>
@@ -248,6 +251,7 @@ async function submitManual() {
   const cal = parseFloat(document.getElementById('me-cal').value) || 0;
   const dist = parseFloat(document.getElementById('me-dist').value) || 0;
   const dur = parseFloat(document.getElementById('me-dur').value) || 0;
+  const elev = parseFloat(document.getElementById('me-elev').value) || 0;
 
   if (!userId) return toast('Select a user.', 'error');
   if (!date) return toast('Date is required.', 'error');
@@ -264,12 +268,14 @@ async function submitManual() {
       calories: Math.round(cal),
       start_date: date,
       image_path: null,
+      elevation_gain: elev,
     });
     toast('Activity added!', 'success');
     document.getElementById('me-name').value = '';
     document.getElementById('me-cal').value = '';
     document.getElementById('me-dist').value = '';
     document.getElementById('me-dur').value = '';
+    document.getElementById('me-elev').value = '';
     loadReview();
   } catch (e) { toast(e.message, 'error'); }
   finally { btn.disabled = false; btn.textContent = 'Submit Activity'; }

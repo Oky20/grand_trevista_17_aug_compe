@@ -83,17 +83,82 @@ const CONFIG = {
     BASE_ACTIVITY:        10,
     CALORIES_PER:        250,
     CALORIES_BONUS:        5,
-    DISTANCE_PER:        2.5,
-    DISTANCE_BONUS:        5,
     DURATION_BASE:        45,
     DURATION_STEP:        30,
     DURATION_BONUS:        5,
     MIN_CAL_PER_MIN:       4,
     DAILY_TOP_CALORIES:    5,
     STREAK_MILESTONES:  [10, 20, 30, 40],
+    // Distance bonus per sport: { per: km, bonus: points per step }
+    DISTANCE: {
+      // Running
+      'Road Running':       { per: 2.5, bonus: 5 },
+      'Trail Running':      { per: 2.5, bonus: 5 },
+      'Track Running':      { per: 2.5, bonus: 5 },
+      'Treadmill Running':  { per: 2.5, bonus: 5 },
+      'Virtual Running':    { per: 2.5, bonus: 5 },
+      // Cycling
+      'Road Cycling':              { per: 10, bonus: 5 },
+      'Mountain Biking (MTB)':     { per: 10, bonus: 5 },
+      'Gravel Cycling':            { per: 10, bonus: 5 },
+      'Indoor Cycling':            { per: 10, bonus: 5 },
+      'eBike':                     { per: 15, bonus: 3 },
+      // Swimming
+      'Pool Swimming':       { per: 0.5, bonus: 5 },
+      'Open Water Swimming': { per: 0.5, bonus: 5 },
+      // Triathlon
+      'Triathlon':           { per: 5, bonus: 5 },
+      // Hiking & Outdoor
+      'Hiking':   { per: 3, bonus: 5 },
+      'Walking':  { per: 3, bonus: 5 },
+      'Climbing': { per: 0, bonus: 0 },
+      // Gym & Fitness
+      'Strength Training': { per: 0, bonus: 0 },
+      'HIIT':              { per: 0, bonus: 0 },
+      'Cardio':            { per: 0, bonus: 0 },
+      'Yoga':              { per: 0, bonus: 0 },
+      'Pilates':           { per: 0, bonus: 0 },
+      'Elliptical':        { per: 5, bonus: 5 },
+      'Stair Stepper':     { per: 0, bonus: 0 },
+      'Indoor Rowing':     { per: 2, bonus: 5 },
+      // Paddling
+      'Rowing': { per: 2, bonus: 5 },
+      'Kayaking': { per: 2, bonus: 5 },
+      'Stand-Up Paddleboarding (SUP)': { per: 2, bonus: 5 },
+      // Racket Sports
+      'Badminton':    { per: 0, bonus: 0 },
+      'Tennis':       { per: 0, bonus: 0 },
+      'Padel':        { per: 0, bonus: 0 },
+      'Table Tennis': { per: 0, bonus: 0 },
+      // Team Sports
+      'Basketball':     { per: 0, bonus: 0 },
+      'Volleyball':     { per: 0, bonus: 0 },
+      'Soccer/Football': { per: 0, bonus: 0 },
+      'Futsal':         { per: 0, bonus: 0 },
+      // Martial Arts
+      'Boxing':       { per: 0, bonus: 0 },
+      'Martial Arts': { per: 0, bonus: 0 },
+      // Golf
+      'Golf': { per: 3, bonus: 5 },
+      'DEFAULT': { per: 5, bonus: 5 },
+    },
+    // Elevation bonus per sport: { per: meters, bonus: points per step }
+    ELEVATION: {
+      'Trail Running':  { per: 100, bonus: 5 },
+      'Hiking':         { per: 100, bonus: 5 },
+      'Walking':        { per: 100, bonus: 5 },
+      'Climbing':       { per: 100, bonus: 5 },
+      'Road Cycling':              { per: 200, bonus: 5 },
+      'Mountain Biking (MTB)':     { per: 200, bonus: 5 },
+      'Gravel Cycling':            { per: 200, bonus: 5 },
+      'eBike':                     { per: 300, bonus: 3 },
+      'DEFAULT': { per: 0, bonus: 0 },
+    },
   },
 };
 
 Object.freeze(CONFIG);
 Object.freeze(CONFIG.SCORING);
+Object.freeze(CONFIG.SCORING.DISTANCE);
+Object.freeze(CONFIG.SCORING.ELEVATION);
 Object.freeze(CONFIG.MIN_DURATION);
