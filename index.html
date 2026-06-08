@@ -246,8 +246,9 @@ let aS=window.aS,aE=window.aE;
 let aTm='all',aSrch='',selA=null;
 let PG={overall:1,individual:1,acts:1};
 const PS=15;
-const SICO={Run:'🏃',Walk:'🚶',Ride:'🚴',Cycling:'🚴',VirtualRide:'🚴',Swim:'🏊',Padel:'🏸',Tennis:'🎾',Badminton:'🏸',WeightTraining:'💪',Workout:'💪',Yoga:'🧘',Pilates:'🧘',Hike:'🥾',Basketball:'🏀',Soccer:'⚽',Rowing:'🚣',CrossFit:'🏋️',Elliptical:'🔄',StairStepper:'🪜',Boxing:'🥊'};
-const SPORT_TYPES=['Run','Walk','Ride','Cycling','VirtualRide','Swim','Padel','Tennis','Badminton','WeightTraining','Workout','Yoga','Pilates','Hike','Basketball','Soccer','Rowing','CrossFit','Elliptical','StairStepper','Boxing'];
+const SICO={'Road Running':'🏃','Trail Running':'🏃','Track Running':'🏃','Treadmill Running':'🏃','Virtual Running':'🏃','Road Cycling':'🚴','Mountain Biking (MTB)':'🚵','Gravel Cycling':'🚴','Indoor Cycling':'🚴','eBike':'🚴','Pool Swimming':'🏊','Open Water Swimming':'🏊','Triathlon':'🏊','Hiking':'🥾','Walking':'🚶','Climbing':'🧗','Strength Training':'🏋️','HIIT':'🔥','Cardio':'💓','Yoga':'🧘','Pilates':'🧘','Elliptical':'🔄','Stair Stepper':'🪜','Indoor Rowing':'🚣','Rowing':'🚣','Kayaking':'🛶','Stand-Up Paddleboarding (SUP)':'🏄','Badminton':'🏸','Tennis':'🎾','Padel':'🎾','Table Tennis':'🏓','Basketball':'🏀','Volleyball':'🏐','Soccer/Football':'⚽','Futsal':'⚽','Boxing':'🥊','Martial Arts':'🥋','Golf':'⛳'};
+const SPORT_GROUPS=[{label:'🏃 Running',options:['Road Running','Trail Running','Track Running','Treadmill Running','Virtual Running']},{label:'🚴 Cycling',options:['Road Cycling','Mountain Biking (MTB)','Gravel Cycling','Indoor Cycling','eBike']},{label:'🏊 Swimming',options:['Pool Swimming','Open Water Swimming']},{label:'🏊 Triathlon & Multisport',options:['Triathlon']},{label:'🥾 Hiking & Outdoor',options:['Hiking','Walking','Climbing']},{label:'💪 Gym & Fitness',options:['Strength Training','HIIT','Cardio','Yoga','Pilates','Elliptical','Stair Stepper','Indoor Rowing']},{label:'🚣 Paddling',options:['Rowing','Kayaking','Stand-Up Paddleboarding (SUP)']},{label:'🏸 Racket Sports',options:['Badminton','Tennis','Padel','Table Tennis']},{label:'⚽ Team Sports',options:['Basketball','Volleyball','Soccer/Football','Futsal']},{label:'🥊 Martial Arts',options:['Boxing','Martial Arts']},{label:'⛳ Golf',options:['Golf']}];
+const SPORT_TYPES=SPORT_GROUPS.flatMap(g=>g.options);
 let ocrResult=null, ocrImage=null, ocrLoading=false;
 
 document.addEventListener('click', e => {
@@ -609,7 +610,7 @@ function rSubmit() {
       <h4>Review & Confirm</h4>
       <div class="frow">
         <div class="fcol"><label>Activity Name</label><input type="text" id="rf-name" placeholder="e.g. Morning Run"/></div>
-        <div class="fcol"><label>Sport Type</label><select id="rf-sport">${SPORT_TYPES.map(s => `<option value="${s}" ${s==='Run'?'selected':''}>${s}</option>`).join('')}</select></div>
+        <div class="fcol"><label>Sport Type</label><select id="rf-sport">${SPORT_GROUPS.map(g => `<optgroup label="${g.label}">${g.options.map(s => `<option value="${s}" ${s==='Road Running'?'selected':''}>${s}</option>`).join('')}</optgroup>`).join('')}</select></div>
       </div>
       <div class="frow">
         <div class="fcol"><label>Calories (kcal)</label><input type="number" id="rf-cal" placeholder="0" step="1"/></div>
