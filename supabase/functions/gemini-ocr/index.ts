@@ -20,7 +20,7 @@ Return ONLY valid JSON (no markdown, no code fences):
   "duration_minutes": number or null,
   "date": "YYYY-MM-DD" or null,
   "activity_name": string or null,
-  "sport_type": "Run"|"Walk"|"Ride"|"Cycling"|"VirtualRide"|"Swim"|"Padel"|"Tennis"|"Badminton"|"WeightTraining"|"Workout"|"Yoga"|"Pilates"|"Hike"|"Basketball"|"Soccer"|"Rowing"|"CrossFit"|"Elliptical"|"StairStepper"|"Boxing"|null
+  "sport_type": "Road Running"|"Trail Running"|"Track Running"|"Treadmill Running"|"Virtual Running"|"Road Cycling"|"Mountain Biking (MTB)"|"Gravel Cycling"|"Indoor Cycling"|"eBike"|"Pool Swimming"|"Open Water Swimming"|"Triathlon"|"Hiking"|"Walking"|"Climbing"|"Strength Training"|"HIIT"|"Cardio"|"Yoga"|"Pilates"|"Elliptical"|"Stair Stepper"|"Indoor Rowing"|"Rowing"|"Kayaking"|"Stand-Up Paddleboarding (SUP)"|"Badminton"|"Tennis"|"Padel"|"Table Tennis"|"Basketball"|"Volleyball"|"Soccer/Football"|"Futsal"|"Boxing"|"Martial Arts"|"Golf"|null
 }
 
 Rules:
@@ -30,25 +30,45 @@ Rules:
 - date: ISO date from the screenshot. If the year is not clearly visible, assume 2026 (the current year). Do NOT guess 2023 or earlier.
 - activity_name: the name/title of the activity
 - sport_type: guess from activity name, icon, or type displayed. Map common names:
-  "lari"/"run"/"running" → "Run"
-  "jalan"/"walk"/"walking" → "Walk"
-  "sepeda"/"cycle"/"bike"/"cycling"/"gowes" → "Cycling"
-  "renang"/"swim"/"swimming" → "Swim"
-  "badminton"/"bulutangkis" → "Badminton"
-  "tennis"/"tenis" → "Tennis"
-  "padel" → "Padel"
-  "gym"/"angkat beban"/"weight" → "WeightTraining"
+  "lari"/"run"/"running"/"jogging" → "Road Running"
+  "trail"/"trail run"/"trail running" → "Trail Running"
+  "track"/"sprint"/"track running" → "Track Running"
+  "treadmill"/"treadmil" → "Treadmill Running"
+  "virtual run"/"zwift run"/"virtual running" → "Virtual Running"
+  "sepeda"/"cycle"/"bike"/"gowes"/"cycling"/"road bike" → "Road Cycling"
+  "mtb"/"mountain bike"/"sepeda gunung"/"mountain biking" → "Mountain Biking (MTB)"
+  "gravel"/"gravel bike"/"gravel cycling" → "Gravel Cycling"
+  "indoor cycle"/"spin"/"sepeda statis"/"indoor cycling"/"peloton" → "Indoor Cycling"
+  "ebike"/"e-bike"/"electric bike"/"sepeda listrik" → "eBike"
+  "renang"/"swim"/"swimming"/"berenang"/"pool swim" → "Pool Swimming"
+  "open water"/"renang laut"/"renang danau"/"open water swim" → "Open Water Swimming"
+  "triathlon"/"triatlon"/"tri" → "Triathlon"
+  "hike"/"hiking"/"mendaki"/"naik gunung"/"trekking" → "Hiking"
+  "jalan"/"walk"/"walking"/"jalan kaki"/"jalan santai" → "Walking"
+  "climbing"/"panjat"/"climb"/"panjat tebing" → "Climbing"
+  "gym"/"angkat beban"/"weight"/"strength"/"strength training"/"weight training" → "Strength Training"
+  "hiit"/"high intensity"/"interval" → "HIIT"
+  "cardio"/"kardio" → "Cardio"
   "yoga" → "Yoga"
   "pilates" → "Pilates"
-  "hike"/"hiking"/"mendaki" → "Hike"
-  "basket"/"basketball" → "Basketball"
-  "sepakbola"/"football"/"soccer"/"futsal" → "Soccer"
-  "dayung"/"rowing"/"row" → "Rowing"
-  "crossfit"/"cross fit" → "CrossFit"
   "elliptical"/"eliptical" → "Elliptical"
-  "stair"/"stepper"/"tangga" → "StairStepper"
-  "boxing"/"tinju"/"box" → "Boxing"
-  general fitness class → "Workout"
+  "stair"/"stepper"/"tangga"/"stair stepper" → "Stair Stepper"
+  "indoor row"/"row machine"/"erg"/"rowing machine"/"indoor rowing" → "Indoor Rowing"
+  "dayung"/"rowing"/"row"/"mendayung" → "Rowing"
+  "kayak"/"kayaking"/"berkayak" → "Kayaking"
+  "sup"/"paddleboard"/"paddle"/"stand up paddle" → "Stand-Up Paddleboarding (SUP)"
+  "badminton"/"bulutangkis" → "Badminton"
+  "tennis"/"tenis"/"tenis lapangan" → "Tennis"
+  "padel"/"padel tennis" → "Padel"
+  "table tennis"/"pingpong"/"ping pong"/"tenis meja" → "Table Tennis"
+  "basket"/"basketball"/"bola basket" → "Basketball"
+  "volleyball"/"voli"/"volley"/"bola voli" → "Volleyball"
+  "sepakbola"/"football"/"soccer"/"sepak bola" → "Soccer/Football"
+  "futsal"/"fut sal"/"indoor soccer" → "Futsal"
+  "boxing"/"tinju"/"box"/"boxe" → "Boxing"
+  "martial arts"/"bela diri"/"karate"/"taekwondo"/"silat"/"judo"/"jiu jitsu"/"aikido"/"muay thai" → "Martial Arts"
+  "golf"/"golfing" → "Golf"
+  general fitness class / uncategorized workout → "Cardio"
 - Leave null for any field not visible in the screenshot`;
 
 serve(async (req) => {

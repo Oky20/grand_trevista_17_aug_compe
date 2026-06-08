@@ -138,7 +138,8 @@ thead th{padding:10px 14px;font-size:10px;font-weight:500;color:var(--dim);text-
 <div id="toast"></div>
 
 <script>
-const SPORT_TYPES = ['Run','Walk','Ride','Cycling','VirtualRide','Swim','Padel','Tennis','Badminton','WeightTraining','Workout','Yoga','Pilates','Hike','Basketball','Soccer','Rowing','CrossFit','Elliptical','StairStepper','Boxing'];
+const SPORT_GROUPS=[{label:'🏃 Running',options:['Road Running','Trail Running','Track Running','Treadmill Running','Virtual Running']},{label:'🚴 Cycling',options:['Road Cycling','Mountain Biking (MTB)','Gravel Cycling','Indoor Cycling','eBike']},{label:'🏊 Swimming',options:['Pool Swimming','Open Water Swimming']},{label:'🏊 Triathlon & Multisport',options:['Triathlon']},{label:'🥾 Hiking & Outdoor',options:['Hiking','Walking','Climbing']},{label:'💪 Gym & Fitness',options:['Strength Training','HIIT','Cardio','Yoga','Pilates','Elliptical','Stair Stepper','Indoor Rowing']},{label:'🚣 Paddling',options:['Rowing','Kayaking','Stand-Up Paddleboarding (SUP)']},{label:'🏸 Racket Sports',options:['Badminton','Tennis','Padel','Table Tennis']},{label:'⚽ Team Sports',options:['Basketball','Volleyball','Soccer/Football','Futsal']},{label:'🥊 Martial Arts',options:['Boxing','Martial Arts']},{label:'⛳ Golf',options:['Golf']}];
+const SPORT_TYPES=SPORT_GROUPS.flatMap(g=>g.options);
 let allUsers = [];
 
 // ── LOGIN ──
@@ -195,7 +196,7 @@ async function initAdmin() {
 
   // Manual entry setup
   document.getElementById('me-date').value = new Date().toISOString().slice(0, 10);
-  document.getElementById('me-sport').innerHTML = SPORT_TYPES.map(s => `<option value="${s}">${s}</option>`).join('');
+  document.getElementById('me-sport').innerHTML = SPORT_GROUPS.map(g => `<optgroup label="${g.label}">${g.options.map(s => `<option value="${s}">${s}</option>`).join('')}</optgroup>`).join('');
   document.getElementById('me-submit').addEventListener('click', submitManual);
 
   // Load users
