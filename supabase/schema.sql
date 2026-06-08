@@ -34,6 +34,7 @@ CREATE TABLE IF NOT EXISTS activities (
   start_date        TIMESTAMPTZ NOT NULL,
   image_path        TEXT,
   image_hash        TEXT,
+  dhash             TEXT,
   submission_method TEXT DEFAULT 'image_ocr',
   user_corrected    BOOLEAN DEFAULT FALSE,
   created_at        TIMESTAMPTZ DEFAULT NOW()
@@ -51,6 +52,7 @@ CREATE INDEX IF NOT EXISTS idx_activities_user       ON activities(user_id);
 CREATE INDEX IF NOT EXISTS idx_activities_start_date ON activities(start_date);
 CREATE INDEX IF NOT EXISTS idx_activities_sport_type ON activities(sport_type);
 CREATE INDEX IF NOT EXISTS idx_activities_image_hash ON activities(image_hash);
+CREATE INDEX IF NOT EXISTS idx_activities_dhash     ON activities(dhash);
 CREATE INDEX IF NOT EXISTS idx_users_team_id         ON users(team_id);
 CREATE INDEX IF NOT EXISTS idx_invite_codes_code     ON invite_codes(code);
 

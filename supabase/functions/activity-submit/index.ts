@@ -36,12 +36,26 @@ const VALID_SPORT_TYPES = [
   "Golf",
 ];
 
+function hammingDistance(h1: string, h2: string): number {
+  let b1 = BigInt("0x" + h1);
+  let b2 = BigInt("0x" + h2);
+  let xor = b1 ^ b2;
+  let count = 0;
+  while (xor > 0n) {
+    count++;
+    xor &= xor - 1n;
+  }
+  return count;
+}
+
+const DHASH_THRESHOLD = 5;
+
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: CORS });
 
   try {
     const body = await req.json();
-    const { user_id, name, sport_type, distance, moving_time, calories, start_date, image_path, image_hash } = body;
+    const { user_id, name, sport_type, distance, moving_time, calories, start_date, image_path, image_hash, dhash } = body;
 
     if (!user_id) return json({ error: "Missing user_id" }, 400);
     if (!start_date) return json({ error: "Missing start_date" }, 400);
@@ -54,7 +68,7 @@ serve(async (req) => {
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
     );
 
-    // Check for duplicate image
+    // Check for exact duplicate image (SHA-256)
     if (image_hash) {
       const { data: existingByHash } = await sb
         .from("activities")
@@ -62,7 +76,25 @@ serve(async (req) => {
         .eq("image_hash", image_hash)
         .limit(1);
       if (existingByHash && existingByHash.length > 0) {
-        return json({ error: "This image has already been submitted by someone else." }, 409);
+        return json({ error: "This image has already been submitted (exact match)." }, 409);
+      }
+    }
+
+    // Check for perceptual duplicate (dHash)
+    if (dhash) {
+      const { data: existingDh } = await sb
+        .from("activities")
+        .select("id, dhash")
+        .not("dhash", "is", null)
+        .limit(5000);
+      if (existingDh) {
+        for (const act of existingDh) {
+          if (act.dhash && hammingDistance(dhash, act.dhash) <= DHASH_THRESHOLD) {
+            return json({
+              error: "This image appears visually similar to an existing submission. If this is a different activity, please contact admin.",
+            }, 409);
+          }
+        }
       }
     }
 
@@ -99,6 +131,7 @@ serve(async (req) => {
         start_date,
         image_path: image_path || null,
         image_hash: image_hash || null,
+        dhash: dhash || null,
         submission_method,
         user_corrected: false,
       })
