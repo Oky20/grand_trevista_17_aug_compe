@@ -726,6 +726,48 @@ function fillReviewForm(data) {
   }
 }
 
+async function computeDHash(dataUrl) {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.onload = () => {
+      try {
+        const canvas = document.createElement('canvas');
+        canvas.width = 9; canvas.height = 8;
+        const ctx = canvas.getContext('2d');
+        if (!ctx) { resolve(null); return; }
+        const cropRatio = 0.08;
+        const sx = img.width * cropRatio;
+        const sy = img.height * cropRatio;
+        const sw = img.width * (1 - 2 * cropRatio);
+        const sh = img.height * (1 - 2 * cropRatio);
+        ctx.drawImage(img, sx, sy, sw, sh, 0, 0, 9, 8);
+        const imageData = ctx.getImageData(0, 0, 9, 8);
+        const p = imageData.data;
+        const gray = [];
+        for (let y = 0; y < 8; y++) {
+          for (let x = 0; x < 9; x++) {
+            const i = (y * 9 + x) * 4;
+            gray.push(Math.round(0.299 * p[i] + 0.587 * p[i + 1] + 0.114 * p[i + 2]));
+          }
+        }
+        let hash = 0n;
+        let bitIdx = 0;
+        for (let y = 0; y < 8; y++) {
+          for (let x = 0; x < 8; x++) {
+            if (gray[y * 9 + x + 1] > gray[y * 9 + x]) {
+              hash |= (1n << BigInt(63 - bitIdx));
+            }
+            bitIdx++;
+          }
+        }
+        resolve(hash.toString(16).padStart(16, '0'));
+      } catch (e) { resolve(null); }
+    };
+    img.onerror = () => resolve(null);
+    img.src = dataUrl;
+  });
+}
+
 async function confirmActivity() {
   const u = Session.get();
   if (!u) return toast('Please register first.', 'error');
@@ -740,6 +782,16 @@ async function confirmActivity() {
 
   const userCorrected = ['rf-name','rf-cal','rf-dist','rf-dur','rf-date','rf-sport'].some(id => document.getElementById(id).classList.contains('edited'));
 
+  let imageHash = null, dhash = null;
+  if (ocrImage) {
+    try {
+      const base64Data = ocrImage.includes(',') ? ocrImage.split(',')[1] : ocrImage;
+      const hashBuffer = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(base64Data));
+      imageHash = Array.from(new Uint8Array(hashBuffer)).map(b => b.toString(16).padStart(2, '0')).join('');
+      dhash = await computeDHash(ocrImage);
+    } catch (e) { imageHash = null; dhash = null; }
+  }
+
   const btn = document.getElementById('confirm-btn');
   btn.disabled = true; btn.textContent = 'Submitting...';
   try {
@@ -752,6 +804,8 @@ async function confirmActivity() {
       calories: Math.round(calories),
       start_date: date,
       image_path: ocrImage ? date : null,
+      image_hash: imageHash,
+      dhash: dhash,
     });
     toast('Activity submitted!', 'success');
     resetUpload();
