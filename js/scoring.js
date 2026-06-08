@@ -38,10 +38,25 @@ const Scoring = (() => {
     breakdown.calories = calMult * S.CALORIES_BONUS;
     total += breakdown.calories;
 
-    const distKm = (activity.distance || 0) / 1000;
-    const distMult = Math.floor(distKm / S.DISTANCE_PER);
-    breakdown.distance = distMult * S.DISTANCE_BONUS;
+    const distCfg = (S.DISTANCE && S.DISTANCE[activity.sport_type]) || S.DISTANCE['DEFAULT'] || { per: 5, bonus: 5 };
+    if (distCfg.per > 0) {
+      const distKm = (activity.distance || 0) / 1000;
+      const distMult = Math.floor(distKm / distCfg.per);
+      breakdown.distance = distMult * distCfg.bonus;
+    } else {
+      breakdown.distance = 0;
+    }
     total += breakdown.distance;
+
+    const elevCfg = (S.ELEVATION && S.ELEVATION[activity.sport_type]) || S.ELEVATION['DEFAULT'] || { per: 0, bonus: 0 };
+    if (elevCfg.per > 0 && (activity.elevation_gain || 0) > 0) {
+      const elevM = activity.elevation_gain || 0;
+      const elevMult = Math.floor(elevM / elevCfg.per);
+      breakdown.elevation = elevMult * elevCfg.bonus;
+    } else {
+      breakdown.elevation = 0;
+    }
+    total += breakdown.elevation;
 
     const durMin = (activity.moving_time || 0) / 60;
     const durSteps = Math.max(0, Math.floor((durMin - S.DURATION_BASE) / S.DURATION_STEP));
