@@ -38,7 +38,8 @@ const Scoring = (() => {
     breakdown.calories = calMult * S.CALORIES_BONUS;
     total += breakdown.calories;
 
-    const distCfg = (S.DISTANCE && S.DISTANCE[activity.sport_type]) || S.DISTANCE['DEFAULT'] || { per: 5, bonus: 5 };
+    const sportType = (activity.sport_type || '').trim();
+    const distCfg = (S.DISTANCE && S.DISTANCE[sportType]) || S.DISTANCE['DEFAULT'] || { per: 5, bonus: 5 };
     if (distCfg.per > 0) {
       const distKm = (activity.distance || 0) / 1000;
       const distMult = Math.floor(distKm / distCfg.per);
@@ -48,7 +49,7 @@ const Scoring = (() => {
     }
     total += breakdown.distance;
 
-    const elevCfg = (S.ELEVATION && S.ELEVATION[activity.sport_type]) || S.ELEVATION['DEFAULT'] || { per: 0, bonus: 0 };
+    const elevCfg = (S.ELEVATION && S.ELEVATION[sportType]) || S.ELEVATION['DEFAULT'] || { per: 0, bonus: 0 };
     if (elevCfg.per > 0 && (activity.elevation_gain || 0) > 0) {
       const elevM = activity.elevation_gain || 0;
       const elevMult = Math.floor(elevM / elevCfg.per);
