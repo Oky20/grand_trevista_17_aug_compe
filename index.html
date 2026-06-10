@@ -648,13 +648,29 @@ function setupUpload() {
   const zone = document.getElementById('upload-zone');
   const input = document.getElementById('file-input');
   if (!zone || !input) return;
-  if (zone._setup) return;
-  zone._setup = true;
-  zone.addEventListener('click', (e) => { if (e.target.closest('button, img')) return; input.click(); });
-  zone.addEventListener('dragover', e => { e.preventDefault(); zone.classList.add('drag'); });
-  zone.addEventListener('dragleave', () => zone.classList.remove('drag'));
-  zone.addEventListener('drop', e => { e.preventDefault(); zone.classList.remove('drag'); handleFile(e.dataTransfer.files[0]); });
-  input.addEventListener('change', () => handleFile(input.files[0]));
+
+  // Remove previous click handler to avoid stale input references
+  if (zone._clickHandler) zone.removeEventListener('click', zone._clickHandler);
+  if (zone._dragOverHandler) zone.removeEventListener('dragover', zone._dragOverHandler);
+  if (zone._dragLeaveHandler) zone.removeEventListener('dragleave', zone._dragLeaveHandler);
+  if (zone._dropHandler) zone.removeEventListener('drop', zone._dropHandler);
+
+  zone._clickHandler = (e) => {
+    if (e.target.closest('button, img')) return;
+    const fi = document.getElementById('file-input');
+    if (fi) fi.click();
+  };
+  zone._dragOverHandler = (e) => { e.preventDefault(); zone.classList.add('drag'); };
+  zone._dragLeaveHandler = () => zone.classList.remove('drag');
+  zone._dropHandler = (e) => { e.preventDefault(); zone.classList.remove('drag'); handleFile(e.dataTransfer.files[0]); };
+
+  zone.addEventListener('click', zone._clickHandler);
+  zone.addEventListener('dragover', zone._dragOverHandler);
+  zone.addEventListener('dragleave', zone._dragLeaveHandler);
+  zone.addEventListener('drop', zone._dropHandler);
+
+  const changeHandler = () => { const f = document.getElementById('file-input'); if (f && f.files[0]) handleFile(f.files[0]); };
+  input.addEventListener('change', changeHandler);
 }
 
 function handleFile(file) {
@@ -688,7 +704,6 @@ function resetUpload() {
   ocrResult = null; ocrImage = null;
   const zone = document.getElementById('upload-zone');
   zone.classList.remove('has-image');
-  zone._setup = false;
   zone.innerHTML = `<div class="uz-icon">📸</div>
     <div class="uz-text">Drop screenshot here or click to browse</div>
     <div class="uz-hint">Supports Strava, Garmin, Coros, Apple Health, Suunto, Huawei screenshots</div>
