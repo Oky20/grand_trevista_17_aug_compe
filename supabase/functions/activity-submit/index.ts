@@ -48,7 +48,7 @@ function hammingDistance(h1: string, h2: string): number {
   return count;
 }
 
-const DHASH_THRESHOLD = 5;
+const DHASH_THRESHOLD = 2;
 
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: CORS });
