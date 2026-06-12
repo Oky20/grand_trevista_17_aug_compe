@@ -86,6 +86,7 @@ const CONFIG = {
     DURATION_BASE:        45,
     DURATION_STEP:        30,
     DURATION_BONUS:        5,
+    SPORT_BONUS:          15,
     MIN_CAL_PER_MIN:       3,
     DAILY_TOP_CALORIES:    5,
     STREAK_MILESTONES:  [10, 20, 30, 40],

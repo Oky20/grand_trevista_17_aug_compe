@@ -53,6 +53,13 @@ const Scoring = (() => {
     }
     total += breakdown.distance;
 
+    if (distCfg.per === 0) {
+      breakdown.sportBonus = CONFIG.SCORING.SPORT_BONUS || 15;
+      total += breakdown.sportBonus;
+    } else {
+      breakdown.sportBonus = 0;
+    }
+
     const elevCfg = (S.ELEVATION && S.ELEVATION[sportType]) || S.ELEVATION['DEFAULT'] || { per: 0, bonus: 0 };
     if (elevCfg.per > 0 && (activity.elevation_gain || 0) > 0) {
       const elevM = activity.elevation_gain || 0;

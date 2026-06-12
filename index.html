@@ -574,7 +574,7 @@ function rActs() {
     const pts = a.points || 0, bd = a.breakdown || {};
     const bn = [];
     if (bd.base) bn.push(`+${bd.base} base`); if (bd.calories) bn.push(`+${bd.calories} cal`);
-    if (bd.distance) bn.push(`+${bd.distance} dist`); if (bd.duration) bn.push(`+${bd.duration} dur`);
+    if (bd.distance) bn.push(`+${bd.distance} dist`); if (bd.sportBonus) bn.push(`+${bd.sportBonus} sport`); if (bd.duration) bn.push(`+${bd.duration} dur`);
     if (bd.dailyTop) bn.push(`+${bd.dailyTop} top`); if (bd.streak) bn.push(`+${bd.streak} streak`);
     const methodTag = a.submission_method === 'manual' ? '<span class="awtag manual">Manual</span>' : '<span class="awtag ocr">OCR</span>';
     return `<div class="acard${bd.valid === false ? ' ainv' : ''}">
@@ -635,6 +635,7 @@ function rMyActs() {
     if (bd.base) bn.push(`+${bd.base} base`);
     if (bd.calories) bn.push(`+${bd.calories} cal`);
     if (bd.distance) bn.push(`+${bd.distance} dist`);
+    if (bd.sportBonus) bn.push(`+${bd.sportBonus} sport`);
     if (bd.duration) bn.push(`+${bd.duration} dur`);
     if (bd.dailyTop) bn.push(`+${bd.dailyTop} top`);
     if (bd.streak) bn.push(`+${bd.streak} streak`);
@@ -920,6 +921,7 @@ function rScoring() {
   const S = CONFIG.SCORING;
   const rules = [
     ['✅', 'Valid Activity', `Min duration per sport (Run:20m, Cycle:30m, Gym/Yoga/Pilates:30m, Swim:20m) + ≥${S.MIN_CAL_PER_MIN ?? 3} kcal/min for distance-based sports only (run, cycle, swim, hike, etc). Gym & non-distance sports skip cal/min check.`, `+${S.BASE_ACTIVITY}`],
+    ['💪', 'Sport Bonus', `+${CONFIG.SCORING.SPORT_BONUS || 15} for non-distance sports (Gym, Yoga, Pilates, Team & Racket Sports, Martial Arts).`, `+${CONFIG.SCORING.SPORT_BONUS || 15}`],
     ['🔥', 'Calorie Bonus', `+${S.CALORIES_BONUS} per ${S.CALORIES_PER} kcal. Unlimited.`, `+${S.CALORIES_BONUS}/${S.CALORIES_PER}`],
     ['📏', 'Distance Bonus', 'Varies by sport (Run: +5/2.5km, Cycling: +5/10km, Swim: +5/0.5km). Unlimited.', ''],
     ['⛰️', 'Elevation Bonus', 'Trail/Hike/Climb: +5/100m, Cycling: +5/200m, eBike: +3/300m.', ''],
