@@ -15,9 +15,13 @@ const Scoring = (() => {
     if (actualMinutes < minMinutes) return false;
     const calories = activity.calories || 0;
     if (calories > 0) {
-      const calPerMin = calories / actualMinutes;
-      const minCalPerMin = CONFIG.SCORING.MIN_CAL_PER_MIN ?? 4;
-      if (calPerMin < minCalPerMin) return false;
+      const sportType = (activity.sport_type || '').trim();
+      const distCfg = (CONFIG.SCORING.DISTANCE && CONFIG.SCORING.DISTANCE[sportType]) || CONFIG.SCORING.DISTANCE['DEFAULT'] || { per: 5, bonus: 5 };
+      if (distCfg.per > 0) {
+        const calPerMin = calories / actualMinutes;
+        const minCalPerMin = CONFIG.SCORING.MIN_CAL_PER_MIN ?? 4;
+        if (calPerMin < minCalPerMin) return false;
+      }
     }
     return true;
   }

@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>My Activities — GTR Fest 17</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<script src="js/config.js"></script>
+<script src="js/scoring.js"></script>
+<script src="js/api.js"></script>
+<style>
+:root{--bg:#111116;--surface:#17171e;--card:#1c1c25;--card2:#21212c;--border:#2a2a38;--border2:#333345;--text:#f0f0f5;--muted:#888899;--dim:#555566;--orange:#FC5200;--orange2:#ff6a1a;--gold:#f5a623;--silver:#b0b0c0;--bronze:#c87c3e;--red:#e24b4a;--green:#2ecc71;--r:8px;--rlg:12px;--sans:'Inter',sans-serif;--mono:'JetBrains Mono',monospace;}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14px;line-height:1.5;min-height:100vh;}
+a{color:inherit;text-decoration:none;}
+.wrap{max-width:900px;margin:0 auto;padding:0 20px 60px;}
+header{padding:28px 0 20px;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;border-bottom:1px solid var(--border);}
+.ht{font-size:24px;font-weight:600;}
+.hs{font-size:12px;color:var(--muted);font-family:var(--mono);margin-top:3px;}
+.ha{display:flex;gap:8px;align-items:center;flex-wrap:wrap;}
+.btn{padding:8px 16px;border-radius:var(--r);border:none;font-family:var(--sans);font-size:13px;font-weight:500;cursor:pointer;transition:all .15s;display:inline-flex;align-items:center;gap:6px;}
+.btn-p{background:var(--orange);color:#fff;}.btn-p:hover{background:var(--orange2);}.btn-p:disabled{opacity:.5;cursor:not-allowed;}
+.btn-g{background:transparent;color:var(--muted);border:0.5px solid var(--border2);}.btn-g:hover{color:var(--text);border-color:var(--muted);}
+.btn-r{background:transparent;color:var(--red);border:0.5px solid rgba(226,75,74,.4);}.btn-r:hover{background:rgba(226,75,74,.1);}
+.strips{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin:24px 0;}
+.sc{background:var(--card);border:0.5px solid var(--border);border-top:2px solid var(--orange);border-radius:var(--r);padding:14px 16px;}
+.sl{font-size:10px;color:var(--dim);font-family:var(--mono);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px;}
+.sv{font-size:22px;font-weight:600;color:var(--orange);}.su{font-size:11px;color:var(--dim);font-family:var(--mono);margin-top:2px;}
+.alist{display:flex;flex-direction:column;gap:8px;margin-top:20px;}
+.acard{background:var(--card);border:0.5px solid var(--border);border-radius:var(--r);padding:14px 16px;display:flex;align-items:flex-start;gap:12px;transition:border-color .15s;}
+.acard:hover{border-color:var(--border2);}
+.aico{width:38px;height:38px;border-radius:var(--r);background:var(--card2);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;border:0.5px solid var(--border);}
+.abody{flex:1;min-width:0;}
+.awho{display:flex;align-items:center;gap:7px;margin-bottom:4px;}
+.awn{font-size:11px;color:var(--muted);font-family:var(--mono);}
+.awtag{font-size:10px;padding:1px 6px;border-radius:3px;margin-left:6px;font-family:var(--mono);}
+.awtag.ocr{background:rgba(46,204,113,.15);color:var(--green);}.awtag.manual{background:rgba(252,82,0,.15);color:var(--orange);}
+.aname{font-weight:500;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.adate{font-size:11px;color:var(--dim);font-family:var(--mono);margin-top:2px;}
+.astats{display:flex;gap:14px;margin-top:6px;flex-wrap:wrap;}
+.astat{font-size:11px;font-family:var(--mono);color:var(--muted);}.astat b{color:var(--text);font-weight:500;}
+.abns{display:flex;gap:5px;flex-wrap:wrap;margin-top:6px;}
+.abn{background:rgba(252,82,0,.1);color:var(--orange);border-radius:4px;padding:2px 7px;font-size:10px;font-family:var(--mono);}
+.apts{text-align:right;flex-shrink:0;}.apv{font-size:20px;font-weight:600;color:var(--orange);}.apl{font-size:10px;color:var(--dim);font-family:var(--mono);}
+.ainv{opacity:.4;}.ainv .apv{color:var(--dim);}
+.empty{text-align:center;padding:48px 20px;color:var(--muted);font-size:13px;}
+.spin{width:22px;height:22px;border:2px solid var(--border2);border-top-color:var(--orange);border-radius:50%;animation:sp .6s linear infinite;}
+@keyframes sp{to{transform:rotate(360deg)}}
+.sect-title{font-size:16px;font-weight:600;margin-top:28px;margin-bottom:4px;}
+.sect-sub{font-size:12px;color:var(--dim);font-family:var(--mono);margin-bottom:12px;}
+footer{text-align:center;padding:24px 20px 36px;border-top:1px solid var(--border);margin-top:40px;}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <div>
+    <div class="ht"><a href="index.html">←</a> My Activities</div>
+    <div class="hs" id="username-display"></div>
+  </div>
+  <div class="ha" id="ha"></div>
+</header>
+
+<div id="loading" style="text-align:center;padding:64px 20px;"><div class="spin" style="margin:0 auto;"></div></div>
+
+<div id="content" style="display:none;">
+  <div class="strips" id="summary-stats"></div>
+  <div id="acts-container"></div>
+</div>
+
+<div id="not-logged-in" style="display:none;">
+  <div class="empty" style="padding:80px 20px;">
+    <div style="font-size:48px;margin-bottom:16px;">🔒</div>
+    <div style="font-size:16px;font-weight:600;margin-bottom:6px;">Login Required</div>
+    <div style="margin-bottom:16px;">Please log in on the main page first.</div>
+    <a href="index.html" class="btn btn-p">Go to Main Page</a>
+  </div>
+</div>
+
+<footer>
+  <p style="font-size:12px;color:var(--muted);">GTR Fest 17 — Community Fitness Challenge</p>
+</footer>
+</div>
+
+<script>
+const SICO={'Road Running':'🏃','Trail Running':'🏃','Track Running':'🏃','Treadmill Running':'🏃','Virtual Running':'🏃','Road Cycling':'🚴','Mountain Biking (MTB)':'🚵','Gravel Cycling':'🚴','Indoor Cycling':'🚴','eBike':'🚴','Pool Swimming':'🏊','Open Water Swimming':'🏊','Triathlon':'🏊','Hiking':'🥾','Walking':'🚶','Climbing':'🧗','Strength Training':'🏋️','HIIT':'🔥','Cardio':'💓','Yoga':'🧘','Pilates':'🧘','Elliptical':'🔄','Stair Stepper':'🪜','Indoor Rowing':'🚣','Rowing':'🚣','Kayaking':'🛶','Stand-Up Paddleboarding (SUP)':'🏄','Badminton':'🏸','Tennis':'🎾','Padel':'🎾','Table Tennis':'🏓','Basketball':'🏀','Volleyball':'🏐','Soccer/Football':'⚽','Futsal':'⚽','Boxing':'🥊','Martial Arts':'🥋','Golf':'⛳'};
+
+function fmt(n) { return Number(n).toLocaleString('en-US'); }
+function fmtDur(m) { const h = Math.floor(m / 60), mn = Math.round(m % 60); return h > 0 ? `${h}h ${mn}m` : `${mn}m`; }
+
+async function init() {
+  const user = Session.get();
+  const notLoggedIn = document.getElementById('not-logged-in');
+  const loading = document.getElementById('loading');
+  const content = document.getElementById('content');
+
+  if (!user) {
+    loading.style.display = 'none';
+    notLoggedIn.style.display = 'block';
+    document.getElementById('ha').innerHTML = '<a href="index.html" class="btn btn-g">← Back</a>';
+    return;
+  }
+
+  const team = (CONFIG.TEAMS || []).find(t => t.id === user.team_id) || { name: 'No Team', emoji: '⚪', color: '#888' };
+  document.getElementById('username-display').textContent = `${team.emoji} ${user.name} · ${team.name}`;
+  document.getElementById('ha').innerHTML = `
+    <a href="index.html" class="btn btn-g">← Leaderboard</a>
+    <button class="btn btn-r" onclick="logout()">Logout</button>
+  `;
+
+  try {
+    const start = CONFIG.CHALLENGE_START || '2026-06-01';
+    const end   = CONFIG.CHALLENGE_END   || '2026-06-30';
+    const { leaderboard } = await DB.getLeaderboard(start, end);
+    const me = leaderboard.find(m => m.id === user.id);
+
+    loading.style.display = 'none';
+    content.style.display = 'block';
+
+    if (!me || !me.activities || me.activities.length === 0) {
+      document.getElementById('acts-container').innerHTML = '<div class="empty">No activities yet. Submit one on the main page!</div>';
+      document.getElementById('summary-stats').innerHTML = '';
+      return;
+    }
+
+    renderSummary(me);
+    renderActivities(me.activities, me);
+  } catch (e) {
+    loading.innerHTML = `<div class="empty" style="color:#e24b4a">Failed to load: ${e.message}</div>`;
+  }
+}
+
+function renderSummary(me) {
+  const valid = (me.activities || []).filter(a => a.breakdown && a.breakdown.valid !== false);
+  const totalPoints = me.totalPoints || 0;
+  const totalCal = me.totalCalories || 0;
+  const totalDist = me.totalDistanceKm || 0;
+  const totalDur = me.totalDurationMin || 0;
+  const count = valid.length;
+
+  document.getElementById('summary-stats').innerHTML = `
+    <div class="sc"><div class="sl">Total Points</div><div class="sv">${fmt(totalPoints)}</div></div>
+    <div class="sc"><div class="sl">Total Calories</div><div class="sv">${fmt(totalCal)}</div><div class="su">kcal</div></div>
+    <div class="sc"><div class="sl">Total Distance</div><div class="sv">${totalDist.toFixed(1)}</div><div class="su">km</div></div>
+    <div class="sc"><div class="sl">Total Duration</div><div class="sv">${fmtDur(totalDur)}</div></div>
+    <div class="sc"><div class="sl">Activities</div><div class="sv">${count}</div><div class="su">valid entries</div></div>
+  `;
+}
+
+function renderActivities(activities, me) {
+  const sorted = [...activities].sort((a, b) => new Date(b.start_date) - new Date(a.start_date));
+  const team = (CONFIG.TEAMS || []).find(t => t.id === me.team_id) || { color: '#888', name: 'No Team', emoji: '⚪' };
+
+  const cards = sorted.map(a => {
+    const icon = SICO[a.sport_type] || '🏅';
+    const dk = ((a.distance || 0) / 1000).toFixed(1), dm = Math.round((a.moving_time || 0) / 60), cal = Math.round(a.calories || 0);
+    const date = new Date(a.start_date).toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' });
+    const pts = a.points || 0, bd = a.breakdown || {};
+    const bn = [];
+    if (bd.base) bn.push(`+${bd.base} base`);
+    if (bd.calories) bn.push(`+${bd.calories} cal`);
+    if (bd.distance) bn.push(`+${bd.distance} dist`);
+    if (bd.duration) bn.push(`+${bd.duration} dur`);
+    if (bd.dailyTop) bn.push(`+${bd.dailyTop} top`);
+    if (bd.streak) bn.push(`+${bd.streak} streak`);
+    const methodTag = a.submission_method === 'manual'
+      ? '<span class="awtag manual">Manual</span>'
+      : '<span class="awtag ocr">OCR</span>';
+    const invalidTag = bd.valid === false ? '<span class="astat" style="color:#e24b4a">Below min duration</span>' : '';
+
+    return `<div class="acard${bd.valid === false ? ' ainv' : ''}">
+      <div class="aico">${icon}</div>
+      <div class="abody">
+        <div class="awho">
+          <span class="awn">${me.name} <span style="color:${team.color}">${team.emoji} ${team.name}</span></span>${methodTag}
+        </div>
+        <div class="aname">${a.name || a.sport_type}</div>
+        <div class="adate">${date} · ${a.sport_type}</div>
+        <div class="astats">
+          <div class="astat">⏱ <b>${dm}m</b></div>
+          ${dk > 0 ? `<div class="astat">📏 <b>${dk} km</b></div>` : ''}
+          ${cal > 0 ? `<div class="astat">🔥 <b>${cal} kcal</b></div>` : ''}
+          ${invalidTag}
+        </div>
+        ${bn.length ? `<div class="abns">${bn.map(x => `<span class="abn">${x}</span>`).join('')}</div>` : ''}
+      </div>
+      <div class="apts"><div class="apv">${pts}</div><div class="apl">pts</div></div>
+    </div>`;
+  }).join('');
+
+  document.getElementById('acts-container').innerHTML = `
+    <div class="sect-title">All Activities</div>
+    <div class="sect-sub">${cards.length} entries</div>
+    <div class="alist">${cards}</div>
+  `;
+}
+
+function logout() {
+  Session.clear();
+  location.reload();
+}
+
+init();
+</script>
+</body>
+</html>

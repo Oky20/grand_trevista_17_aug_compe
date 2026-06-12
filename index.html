@@ -337,6 +337,7 @@ function rHA() {
   } else {
     const team = CONFIG.TEAMS.find(t => t.id === u.team_id) || {};
     el.innerHTML = `<div class="apill"><span class="td" style="background:${team.color||'#555'};width:8px;height:8px;"></span><span>${u.name} · ${team.emoji||''} ${team.name||'No Team'}</span></div>
+    <a href="my-activities.html" class="btn btn-g">My Activities</a>
     <button class="btn btn-p" id="submit-btn">Submit Activity</button>
     <button class="btn btn-g" id="logout-btn">Sign out</button>`;
     document.getElementById('submit-btn').addEventListener('click', () => {
