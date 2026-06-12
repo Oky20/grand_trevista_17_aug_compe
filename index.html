@@ -919,7 +919,7 @@ async function confirmActivity() {
 function rScoring() {
   const S = CONFIG.SCORING;
   const rules = [
-    ['✅', 'Valid Activity', `Min duration met + ≥${S.MIN_CAL_PER_MIN ?? 4} kcal/min (if calories recorded).`, `+${S.BASE_ACTIVITY}`],
+    ['✅', 'Valid Activity', `Min duration per sport (Run:20m, Cycle:30m, Gym/Yoga/Pilates:30m, Swim:20m) + ≥${S.MIN_CAL_PER_MIN ?? 3} kcal/min for distance-based sports only (run, cycle, swim, hike, etc). Gym & non-distance sports skip cal/min check.`, `+${S.BASE_ACTIVITY}`],
     ['🔥', 'Calorie Bonus', `+${S.CALORIES_BONUS} per ${S.CALORIES_PER} kcal. Unlimited.`, `+${S.CALORIES_BONUS}/${S.CALORIES_PER}`],
     ['📏', 'Distance Bonus', 'Varies by sport (Run: +5/2.5km, Cycling: +5/10km, Swim: +5/0.5km). Unlimited.', ''],
     ['⛰️', 'Elevation Bonus', 'Trail/Hike/Climb: +5/100m, Cycling: +5/200m, eBike: +3/300m.', ''],
