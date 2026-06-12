@@ -159,6 +159,7 @@ footer{text-align:center;padding:24px 20px 36px;border-top:1px solid var(--borde
   <button class="tab" data-tab="teams">Teams</button>
   <button class="tab" data-tab="individual">Individual</button>
   <button class="tab" data-tab="activities">Activities</button>
+  <button class="tab" data-tab="myactivities">My Activities</button>
   <button class="tab" data-tab="submit">Submit</button>
   <button class="tab" data-tab="scoring">Scoring Guide</button>
 </div>
@@ -188,6 +189,10 @@ footer{text-align:center;padding:24px 20px 36px;border-top:1px solid var(--borde
   </div>
   <div class="achips" id="achips"></div>
   <div id="acontent"></div>
+</div>
+<div class="panel" id="panel-myactivities">
+  <div id="mastats"></div>
+  <div id="macontent"></div>
 </div>
 <div class="panel" id="panel-submit">
   <div id="submit-content"></div>
@@ -267,6 +272,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const panelId = 'panel-' + b.dataset.tab;
     document.getElementById(panelId).classList.add('active');
     if (b.dataset.tab === 'submit') rSubmit();
+    if (b.dataset.tab === 'myactivities') rMyActs();
   }));
   document.querySelectorAll('.mt').forEach(b => b.addEventListener('click', () => {
     document.querySelectorAll('.mt').forEach(t => t.classList.remove('active'));
@@ -337,7 +343,7 @@ function rHA() {
   } else {
     const team = CONFIG.TEAMS.find(t => t.id === u.team_id) || {};
     el.innerHTML = `<div class="apill"><span class="td" style="background:${team.color||'#555'};width:8px;height:8px;"></span><span>${u.name} · ${team.emoji||''} ${team.name||'No Team'}</span></div>
-    <a href="my-activities.html" class="btn btn-g">My Activities</a>
+    <button class="btn btn-g" id="myacts-btn">My Activities</button>
     <button class="btn btn-p" id="submit-btn">Submit Activity</button>
     <button class="btn btn-g" id="logout-btn">Sign out</button>`;
     document.getElementById('submit-btn').addEventListener('click', () => {
@@ -346,6 +352,13 @@ function rHA() {
       document.querySelector('[data-tab="submit"]').classList.add('active');
       document.getElementById('panel-submit').classList.add('active');
       rSubmit();
+    });
+    document.getElementById('myacts-btn').addEventListener('click', () => {
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+      document.querySelector('[data-tab="myactivities"]').classList.add('active');
+      document.getElementById('panel-myactivities').classList.add('active');
+      rMyActs();
     });
   }
 }
@@ -582,6 +595,70 @@ function rActs() {
     </div>`;
   }).join('');
   document.getElementById('acontent').innerHTML = `<div class="alist">${cards}</div>${pages > 1 ? pgr(p, pages, tot, 'acts') : ''}`;
+}
+
+function rMyActs() {
+  const u = Session.get();
+  const stEl = document.getElementById('mastats');
+  const ctEl = document.getElementById('macontent');
+  if (!u) {
+    stEl.innerHTML = '';
+    ctEl.innerHTML = `<div class="empty" style="padding:64px 20px;">
+      <div style="font-size:48px;margin-bottom:16px;">🔒</div>
+      <div style="font-size:16px;font-weight:600;margin-bottom:6px;">Login Required</div>
+      <div style="margin-bottom:16px;">Register or log in to see your activities.</div>
+    </div>`;
+    return;
+  }
+  const me = LB.find(m => m.id === u.id);
+  if (!me || !me.activities || me.activities.length === 0) {
+    stEl.innerHTML = '';
+    ctEl.innerHTML = '<div class="empty">No activities yet. Submit one on the main page!</div>';
+    return;
+  }
+  const valid = me.activities.filter(a => a.breakdown && a.breakdown.valid !== false);
+  stEl.innerHTML = `<div class="sstrip">
+    <div class="sc"><div class="sl">Total Points</div><div class="sv">${fmt(me.totalPoints||0)}</div></div>
+    <div class="sc"><div class="sl">Total Calories</div><div class="sv">${fmt(me.totalCalories||0)}</div><div class="su">kcal</div></div>
+    <div class="sc"><div class="sl">Total Distance</div><div class="sv">${((me.totalDistanceKm||0)).toFixed(1)}</div><div class="su">km</div></div>
+    <div class="sc"><div class="sl">Total Duration</div><div class="sv">${fmtDur(me.totalDurationMin||0)}</div></div>
+    <div class="sc"><div class="sl">Activities</div><div class="sv">${valid.length}</div><div class="su">valid entries</div></div>
+  </div>`;
+  const sorted = [...me.activities].sort((a, b) => new Date(b.start_date) - new Date(a.start_date));
+  const team = CONFIG.TEAMS.find(t => t.id === me.team_id) || { color: '#888', name: 'No Team', emoji: '⚪' };
+  const cards = sorted.map(a => {
+    const icon = SICO[a.sport_type] || '🏅';
+    const dk = ((a.distance || 0) / 1000).toFixed(1), dm = Math.round((a.moving_time || 0) / 60), cal = Math.round(a.calories || 0);
+    const date = new Date(a.start_date).toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' });
+    const pts = a.points || 0, bd = a.breakdown || {};
+    const bn = [];
+    if (bd.base) bn.push(`+${bd.base} base`);
+    if (bd.calories) bn.push(`+${bd.calories} cal`);
+    if (bd.distance) bn.push(`+${bd.distance} dist`);
+    if (bd.duration) bn.push(`+${bd.duration} dur`);
+    if (bd.dailyTop) bn.push(`+${bd.dailyTop} top`);
+    if (bd.streak) bn.push(`+${bd.streak} streak`);
+    const methodTag = a.submission_method === 'manual'
+      ? '<span class="awtag manual">Manual</span>'
+      : '<span class="awtag ocr">OCR</span>';
+    return `<div class="acard${bd.valid === false ? ' ainv' : ''}">
+      <div class="aico">${icon}</div>
+      <div class="abody">
+        <div class="awho"><span class="awn">${me.name} <span style="color:${team.color}">${team.emoji} ${team.name}</span></span>${methodTag}</div>
+        <div class="aname">${a.name || a.sport_type}</div>
+        <div class="adate">${date} · ${a.sport_type}</div>
+        <div class="astats">
+          <div class="astat">⏱ <b>${dm}m</b></div>
+          ${dk > 0 ? `<div class="astat">📏 <b>${dk} km</b></div>` : ''}
+          ${cal > 0 ? `<div class="astat">🔥 <b>${cal} kcal</b></div>` : ''}
+          ${bd.valid === false ? `<div class="astat" style="color:#e24b4a">Below min duration</div>` : ''}
+        </div>
+        ${bn.length ? `<div class="abns">${bn.map(x => `<span class="abn">${x}</span>`).join('')}</div>` : ''}
+      </div>
+      <div class="apts"><div class="apv">${pts}</div><div class="apl">pts</div></div>
+    </div>`;
+  }).join('');
+  ctEl.innerHTML = `<div class="alist">${cards}</div>`;
 }
 
 // ── SUBMIT PANEL ─────────────────────────────────────────────────
