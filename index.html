@@ -807,6 +807,17 @@ async function analyzeImage() {
 }
 
 function fillReviewForm(data) {
+  document.getElementById('rf-name').value = '';
+  document.getElementById('rf-sport').value = '';
+  document.getElementById('rf-cal').value = '';
+  document.getElementById('rf-dist').value = '';
+  document.getElementById('rf-dur').value = '';
+  document.getElementById('rf-elev').value = '';
+  document.getElementById('rf-date').value = new Date().toISOString().slice(0, 10);
+  ['rf-name','rf-cal','rf-dist','rf-dur','rf-date','rf-sport','rf-elev'].forEach(id => {
+    document.getElementById(id).classList.remove('edited');
+  });
+
   if (data.activity_name) document.getElementById('rf-name').value = data.activity_name;
   if (data.sport_type && SPORT_TYPES.includes(data.sport_type)) document.getElementById('rf-sport').value = data.sport_type;
   if (data.calories != null) document.getElementById('rf-cal').value = Math.round(data.calories);
