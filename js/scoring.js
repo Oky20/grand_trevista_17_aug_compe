@@ -53,7 +53,7 @@ const Scoring = (() => {
     }
     total += breakdown.distance;
 
-    if (distCfg.per === 0) {
+    if (distCfg.per === 0 || (activity.distance || 0) === 0) {
       breakdown.sportBonus = CONFIG.SCORING.SPORT_BONUS || 15;
       total += breakdown.sportBonus;
     } else {
