@@ -10,7 +10,7 @@ const CONFIG = {
   SUPABASE_ANON_KEY: 'sb_publishable_QCHhsyVbnij44Da6x8Nl9w_ZBVRDQwW',
 
   // --- Challenge Period ---
-  CHALLENGE_START: '2026-06-01',
+  CHALLENGE_START: '2026-06-15',
   CHALLENGE_END:   '2026-06-30',
   CHALLENGE_NAME:  'GTR 17 Aug Fitness Challenge 2026',
 
