@@ -827,9 +827,9 @@ function fillReviewForm(data) {
   const today = new Date().toISOString().slice(0, 16);
   const cs = CONFIG.CHALLENGE_START || '2026-06-01';
   const ce = CONFIG.CHALLENGE_END || '2026-06-30';
-  if (data.date && data.date.slice(0,10) >= cs && data.date.slice(0,10) <= ce) {
-    if (data.date.length > 10) {
-      document.getElementById('rf-date').value = data.date.replace(' ', 'T').slice(0, 16);
+  if (data.date && data.date >= cs && data.date <= ce) {
+    if (data.time) {
+      document.getElementById('rf-date').value = data.date + 'T' + data.time;
     } else {
       document.getElementById('rf-date').value = data.date + 'T00:00';
     }
