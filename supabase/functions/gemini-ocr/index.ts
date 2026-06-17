@@ -19,7 +19,8 @@ Return ONLY valid JSON (no markdown, no code fences):
   "distance_km": number or null,
   "duration_minutes": number or null,
   "elevation_gain_m": number or null,
-  "date": "YYYY-MM-DDTHH:MM" or "YYYY-MM-DD" or null,
+  "date": "YYYY-MM-DD" or null,
+  "time": "HH:MM" or null,
   "activity_name": string or null,
   "sport_type": "Road Running"|"Trail Running"|"Track Running"|"Treadmill Running"|"Virtual Running"|"Road Cycling"|"Mountain Biking (MTB)"|"Gravel Cycling"|"Indoor Cycling"|"eBike"|"Pool Swimming"|"Open Water Swimming"|"Triathlon"|"Hiking"|"Walking"|"Climbing"|"Strength Training"|"HIIT"|"Cardio"|"Yoga"|"Pilates"|"Elliptical"|"Stair Stepper"|"Indoor Rowing"|"Rowing"|"Kayaking"|"Stand-Up Paddleboarding (SUP)"|"Badminton"|"Tennis"|"Padel"|"Table Tennis"|"Basketball"|"Volleyball"|"Soccer/Football"|"Futsal"|"Boxing"|"Martial Arts"|"Golf"|null
 }
@@ -29,7 +30,8 @@ Rules:
 - distance_km: total distance in kilometers as float
 - duration_minutes: total duration in minutes as float
 - elevation_gain_m: total elevation gain in meters as integer (look for "Elev", "Elevation", "Elev Gain", "Ascent", "Total Ascent")
-- date: ISO date from the screenshot in 24-hour format. If start time is visible, include it (e.g. "2026-06-16T20:19"). If only the date is visible, return just "YYYY-MM-DD". If the year is not clearly visible, assume 2026 (the current year). Do NOT guess 2023 or earlier.
+- date: ISO date from the screenshot (e.g. "2026-06-16"). If the year is not clearly visible, assume 2026 (the current year). Do NOT guess 2023 or earlier.
+- time: the activity start time in 24-hour format if visible (e.g. "20:19"). Leave null if not visible.
 - activity_name: the name/title of the activity
 - sport_type: guess from activity name, icon, or type displayed. Map common names:
   "lari"/"run"/"running"/"jogging" → "Road Running"
@@ -124,6 +126,7 @@ serve(async (req) => {
       duration_minutes: parsed.duration_minutes ?? null,
       elevation_gain_m: parsed.elevation_gain_m ?? null,
       date: parsed.date ?? null,
+      time: parsed.time ?? null,
       activity_name: parsed.activity_name ?? null,
       sport_type: parsed.sport_type ?? null,
       raw_text: rawText,
