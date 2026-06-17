@@ -10,9 +10,12 @@ const Scoring = (() => {
   }
 
   function isValidActivity(activity) {
+    const reasons = [];
     const minMinutes = getMinDuration(activity.sport_type);
     const actualMinutes = (activity.moving_time || 0) / 60;
-    if (actualMinutes < minMinutes) return false;
+    if (actualMinutes < minMinutes) {
+      reasons.push('Duration: need ' + minMinutes + 'm, got ' + Math.round(actualMinutes) + 'm');
+    }
     const calories = activity.calories || 0;
     if (calories > 0) {
       const sportType = (activity.sport_type || '').trim();
@@ -20,15 +23,18 @@ const Scoring = (() => {
       if (distCfg.per > 0) {
         const calPerMin = calories / actualMinutes;
         const minCalPerMin = CONFIG.SCORING.MIN_CAL_PER_MIN ?? 4;
-        if (calPerMin < minCalPerMin) return false;
+        if (calPerMin < minCalPerMin) {
+          reasons.push('Cal/min: need \u2265' + minCalPerMin + ', got ' + calPerMin.toFixed(1));
+        }
       }
     }
-    return true;
+    return { valid: reasons.length === 0, reasons: reasons };
   }
 
   function calcActivityPoints(activity, streakContext = null, isDailyTopCalories = false) {
-    if (!isValidActivity(activity)) {
-      return { total: 0, breakdown: { valid: false } };
+    const validity = isValidActivity(activity);
+    if (!validity.valid) {
+      return { total: 0, breakdown: { valid: false, reasons: validity.reasons } };
     }
 
     const S = CONFIG.SCORING;
@@ -132,7 +138,10 @@ const Scoring = (() => {
 
     sorted.forEach(act => {
       const m = userMap[act.user_id];
-      if (!m) return;
+      if (!m) {
+        console.warn('calcLeaderboard: activity user not found in users list, user_id=' + act.user_id + ' activity_id=' + (act.id || '?'));
+        return;
+      }
 
       const day = act.start_date.slice(0, 10);
       const lastDay = lastActiveDateMap[act.user_id];
@@ -158,6 +167,10 @@ const Scoring = (() => {
         claimedMilestones: m.claimedMilestones,
       }, isDailyTop);
 
+      if (!result.breakdown.valid) {
+        console.log('calcLeaderboard: INVALID activity user=' + (m.name || m.id) + ' sport=' + act.sport_type + ' date=' + act.start_date + ' reasons=' + JSON.stringify(result.breakdown.reasons));
+      }
+
       if (result.breakdown.valid) {
         m.totalPoints     += result.total;
         m.totalCalories   += (act.calories || 0);
@@ -169,9 +182,8 @@ const Scoring = (() => {
         for (let i = 0; i < earned; i++) {
           m.claimedMilestones.add(i);
         }
-
-        m.activities.push({ ...act, points: result.total, breakdown: result.breakdown });
       }
+      m.activities.push({ ...act, points: result.total, breakdown: result.breakdown });
     });
 
     return Object.values(userMap).sort((a, b) => b.totalPoints - a.totalPoints);
