@@ -108,7 +108,8 @@ const DB = {
       return localDate >= start && localDate <= end;
     });
     console.log('getActivities: after date filter (' + start + ' to ' + end + '):', filtered.length);
-    if (data.length > 0) console.log('getActivities: first raw activity=', JSON.stringify(data[0]));
+    if (filtered.length > 0) console.log('getActivities: first filtered activity=', JSON.stringify(filtered[0]));
+    if (data.length !== filtered.length) console.log('getActivities: filtered out ' + (data.length - filtered.length) + ' activities outside date range');
     return filtered;
   },
 

@@ -98,10 +98,10 @@ serve(async (req) => {
       }
     }
 
-    // Check for duplicate activity (same user, date, sport, similar distance)
+    // Check for duplicate activity (same user, date, sport, similar distance, calories, duration)
     const { data: existingByCombo } = await sb
       .from("activities")
-      .select("id, distance")
+      .select("id, distance, calories, moving_time")
       .eq("user_id", user_id)
       .eq("start_date", start_date)
       .eq("sport_type", sport_type)
@@ -109,11 +109,15 @@ serve(async (req) => {
 
     if (existingByCombo && existingByCombo.length > 0) {
       const dist = (distance || 0) as number;
-      const closeMatch = existingByCombo.find((a: { distance: number }) =>
-        Math.abs((a.distance || 0) - dist) < 2
+      const cal = (calories || 0) as number;
+      const dur = (moving_time || 0) as number;
+      const closeMatch = existingByCombo.find((a: any) =>
+        Math.abs((a.distance || 0) - dist) < 2 &&
+        Math.abs((a.calories || 0) - cal) < 50 &&
+        Math.abs((a.moving_time || 0) - dur) < 300
       );
       if (closeMatch) {
-        return json({ error: "Duplicate activity detected — same user, date, sport, and distance." }, 409);
+        return json({ error: "Duplicate activity detected — same user, date, sport, and similar stats." }, 409);
       }
     }
 
