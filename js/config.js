@@ -143,6 +143,14 @@ const CONFIG = {
       'Golf': { per: 3, bonus: 5 },
       'DEFAULT': { per: 5, bonus: 5 },
     },
+    // Distance ranking categories
+    DISTANCE_CATEGORIES: [
+      { key: 'all',   label: '🏃 Semua' },
+      { key: 'foot',  label: '🏃 Lari & Jalan', sports: ['Road Running','Trail Running','Track Running','Treadmill Running','Virtual Running','Hiking','Walking'] },
+      { key: 'cycle', label: '🚴 Sepeda', sports: ['Road Cycling','Mountain Biking (MTB)','Gravel Cycling','Indoor Cycling','eBike'] },
+      { key: 'water', label: '🌊 Air', sports: ['Pool Swimming','Open Water Swimming','Rowing','Kayaking','Stand-Up Paddleboarding (SUP)','Indoor Rowing'] },
+      { key: 'other', label: '🎯 Lainnya', sports: ['Triathlon','Elliptical','Golf'] },
+    ],
     // Elevation bonus per sport: { per: meters, bonus: points per step }
     ELEVATION: {
       'Trail Running':  { per: 100, bonus: 5 },
