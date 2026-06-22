@@ -85,6 +85,7 @@ serve(async (req) => {
       const { data: existingDh } = await sb
         .from("activities")
         .select("id, dhash")
+        .eq("user_id", user_id)
         .not("dhash", "is", null)
         .limit(5000);
       if (existingDh) {
