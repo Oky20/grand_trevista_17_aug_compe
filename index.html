@@ -178,6 +178,7 @@ footer{text-align:center;padding:24px 20px 36px;border-top:1px solid var(--borde
     <button class="mt" data-metric="duration">Duration</button>
     <button class="mt" data-metric="activities">Activities</button>
   </div>
+  <div class="mtabs" id="distCats" style="display:none;"></div>
   <div id="ilb"></div>
 </div>
 <div class="panel" id="panel-activities">
@@ -244,7 +245,7 @@ footer{text-align:center;padding:24px 20px 36px;border-top:1px solid var(--borde
 
 <script>
 let LB=[],TEAMS=[],AACTS=[];
-let aMet='points';
+let aMet='points',aDistCat='all';
 window.aS=CONFIG.CHALLENGE_START||'2026-04-01';
 window.aE=CONFIG.CHALLENGE_END||'2026-04-30';
 let aS=window.aS,aE=window.aE;
@@ -276,10 +277,17 @@ document.addEventListener('DOMContentLoaded', async () => {
   }));
   document.querySelectorAll('.mt').forEach(b => b.addEventListener('click', () => {
     document.querySelectorAll('.mt').forEach(t => t.classList.remove('active'));
-    b.classList.add('active'); aMet = b.dataset.metric; PG.individual = 1; rInd();
+    b.classList.add('active'); aMet = b.dataset.metric; PG.individual = 1;
+    if (aMet !== 'distance') aDistCat = 'all';
+    rDistCats(); rInd();
   }));
   document.getElementById('asrch').addEventListener('input', e => {
     aSrch = e.target.value.toLowerCase(); selA = null; rChips(); if (!aSrch) rActs();
+  });
+  document.getElementById('distCats').addEventListener('click', e => {
+    const btn = e.target.closest('[data-distcat]');
+    if (!btn) return;
+    aDistCat = btn.dataset.distcat; PG.individual = 1; rDistCats(); rInd();
   });
   document.getElementById('rs').value = aS;
   document.getElementById('re').value = aE;
@@ -327,7 +335,7 @@ async function loadData() {
       }
     }
     LB = lb.leaderboard; TEAMS = lb.teams; AACTS = acts; PG = { overall: 1, individual: 1, acts: 1 };
-    rOStats(); rOLB(); rTeams(); rInd(); rActs(); rChips(); rMyActs();
+    rOStats(); rOLB(); rTeams(); rDistCats(); rInd(); rActs(); rChips(); rMyActs();
   } catch (e) { console.error('loadData ERROR:', e); toast('Failed to load data.', 'error'); }
 }
 
@@ -458,8 +466,28 @@ function rTeams() {
     </div></div>`).join('');
 }
 
+function rDistCats() {
+  const cats = (CONFIG.SCORING && CONFIG.SCORING.DISTANCE_CATEGORIES) || [];
+  const el = document.getElementById('distCats');
+  if (!el) return;
+  el.innerHTML = cats.map(c => `<button class="mt ${c.key === aDistCat ? 'active' : ''}" data-distcat="${c.key}">${c.label}</button>`).join('');
+  el.style.display = aMet === 'distance' ? 'flex' : 'none';
+}
+
 function rInd() {
   let s = [...LB];
+  if (aMet === 'distance' && aDistCat !== 'all') {
+    const catCfg = (CONFIG.SCORING.DISTANCE_CATEGORIES || []).find(c => c.key === aDistCat);
+    if (catCfg && catCfg.sports) {
+      const catSports = catCfg.sports;
+      s = s.map(m => {
+        const catDist = (m.activities || [])
+          .filter(a => catSports.includes(a.sport_type))
+          .reduce((sum, a) => sum + ((a.distance || 0) / 1000), 0);
+        return { ...m, _fullDistKm: m.totalDistanceKm, totalDistanceKm: catDist };
+      });
+    }
+  }
   if (aMet === 'calories') s.sort((a, b) => b.totalCalories - a.totalCalories);
   if (aMet === 'distance') s.sort((a, b) => b.totalDistanceKm - a.totalDistanceKm);
   if (aMet === 'duration') s.sort((a, b) => b.totalDurationMin - a.totalDurationMin);
@@ -495,7 +523,7 @@ function bTable(members, metric, pgKey) {
       </div></td>
       <td class="r">${pri}</td>
       <td class="r mc hm">${fmt(Math.round(m.totalCalories))}</td>
-      <td class="r mc hm">${m.totalDistanceKm.toFixed(1)} km</td>
+      <td class="r mc hm">${(m._fullDistKm ?? m.totalDistanceKm).toFixed(1)} km</td>
       <td class="r mc hm">${fmtDur(m.totalDurationMin)}</td>
       <td class="r mc hm">${m.activityCount}</td>
     </tr>`;

@@ -31,7 +31,7 @@ Rules:
 - duration_minutes: total duration in minutes as float
 - elevation_gain_m: total elevation gain in meters as integer (look for "Elev", "Elevation", "Elev Gain", "Ascent", "Total Ascent")
 - date: ISO date from the screenshot (e.g. "2026-06-16"). If the year is not clearly visible, assume 2026 (the current year). Do NOT guess 2023 or earlier.
-- time: the activity start time in 24-hour format if visible (e.g. "20:19"). Leave null if not visible.
+- time: the activity start time in 24-hour format (e.g. "20:19", "06:30"). If the time uses a dot separator like "20.19", output it with a colon ("20:19"). If the time is in 12-hour AM/PM format, convert to 24-hour. Look for time labels like "Time", "Start", "Waktu", "Jam", "Duration". Leave null if no time is visible anywhere on the screenshot.
 - activity_name: the name/title of the activity
 - sport_type: guess from activity name, icon, or type displayed. Map common names:
   "lari"/"run"/"running"/"jogging" → "Road Running"
