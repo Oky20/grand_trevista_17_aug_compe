@@ -570,7 +570,7 @@ function rActs() {
   const cards = sl.map(a => {
     const icon = SICO[a.sport_type] || '🏅';
     const dk = ((a.distance || 0) / 1000).toFixed(1), dm = Math.round((a.moving_time || 0) / 60), cal = Math.round(a.calories || 0);
-    const date = new Date(a.start_date).toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' });
+    const _d = new Date(a.start_date); const date = _d.toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' }) + ', ' + _d.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
     const pts = a.points || 0, bd = a.breakdown || {};
     const bn = [];
     if (bd.base) bn.push(`+${bd.base} base`); if (bd.calories) bn.push(`+${bd.calories} cal`);
@@ -629,7 +629,7 @@ function rMyActs() {
   const cards = sorted.map(a => {
     const icon = SICO[a.sport_type] || '🏅';
     const dk = ((a.distance || 0) / 1000).toFixed(1), dm = Math.round((a.moving_time || 0) / 60), cal = Math.round(a.calories || 0);
-    const date = new Date(a.start_date).toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' });
+    const _d = new Date(a.start_date); const date = _d.toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' }) + ', ' + _d.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
     const pts = a.points || 0, bd = a.breakdown || {};
     const bn = [];
     if (bd.base) bn.push(`+${bd.base} base`);

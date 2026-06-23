@@ -64,6 +64,7 @@ Rules:
   "badminton"/"bulutangkis" → "Badminton"
   "tennis"/"tenis"/"tenis lapangan" → "Tennis"
   "padel"/"padel tennis" → "Padel"
+  "pickleball"/"pickle ball" → "Pickleball"
   "table tennis"/"pingpong"/"ping pong"/"tenis meja" → "Table Tennis"
   "basket"/"basketball"/"bola basket" → "Basketball"
   "volleyball"/"voli"/"volley"/"bola voli" → "Volleyball"

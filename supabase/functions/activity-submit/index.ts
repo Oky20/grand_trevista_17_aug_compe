@@ -27,7 +27,7 @@ const VALID_SPORT_TYPES = [
   // Paddling
   "Rowing", "Kayaking", "Stand-Up Paddleboarding (SUP)",
   // Racket Sports
-  "Badminton", "Tennis", "Padel", "Table Tennis",
+  "Badminton", "Tennis", "Padel", "Pickleball", "Table Tennis",
   // Team Sports
   "Basketball", "Volleyball", "Soccer/Football", "Futsal",
   // Martial Arts
@@ -68,23 +68,25 @@ serve(async (req) => {
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
     );
 
-    // Check for exact duplicate image (SHA-256)
+    // Check for exact duplicate image (SHA-256) — same user only
     if (image_hash) {
       const { data: existingByHash } = await sb
         .from("activities")
         .select("id")
         .eq("image_hash", image_hash)
+        .eq("user_id", user_id)
         .limit(1);
       if (existingByHash && existingByHash.length > 0) {
         return json({ error: "This image has already been submitted (exact match)." }, 409);
       }
     }
 
-    // Check for perceptual duplicate (dHash)
+    // Check for perceptual duplicate (dHash) — same user only
     if (dhash) {
       const { data: existingDh } = await sb
         .from("activities")
         .select("id, dhash")
+        .eq("user_id", user_id)
         .not("dhash", "is", null)
         .limit(5000);
       if (existingDh) {
@@ -98,27 +100,58 @@ serve(async (req) => {
       }
     }
 
-    // Check for duplicate activity (same user, date, sport, similar distance, calories, duration)
-    const { data: existingByCombo } = await sb
-      .from("activities")
-      .select("id, distance, calories, moving_time")
-      .eq("user_id", user_id)
-      .eq("start_date", start_date)
-      .eq("sport_type", sport_type)
-      .limit(5);
+    // Similarity helper: % difference relative to larger value; both-zero = match
+    const withinTol = (a: number, b: number, tol: number): boolean => {
+      const maxVal = Math.max(Math.abs(a), Math.abs(b));
+      if (maxVal === 0) return true;
+      return Math.abs(a - b) / maxVal <= tol;
+    };
 
-    if (existingByCombo && existingByCombo.length > 0) {
-      const dist = (distance || 0) as number;
-      const cal = (calories || 0) as number;
-      const dur = (moving_time || 0) as number;
-      const closeMatch = existingByCombo.find((a: any) =>
-        Math.abs((a.distance || 0) - dist) < 2 &&
-        Math.abs((a.calories || 0) - cal) < 50 &&
-        Math.abs((a.moving_time || 0) - dur) < 300
-      );
-      if (closeMatch) {
-        return json({ error: "Duplicate activity detected — same user, date, sport, and similar stats." }, 409);
-      }
+    const numFields = ["calories", "distance", "moving_time", "elevation_gain"] as const;
+    const SIMILARITY_THRESHOLD = 0.80; // 80% = 3.2/4 fields → effectively all must match
+    const SAME_USER_TOL = 0.10;        // 10% tolerance for same-user re-submit
+    const CROSS_USER_TOL = 0.08;       // 8% tolerance for cross-user fraud
+
+    const submitted = {
+      calories: (calories || 0) as number,
+      distance: (distance || 0) as number,
+      moving_time: (moving_time || 0) as number,
+      elevation_gain: (elevation_gain || 0) as number,
+    };
+
+    const scoreMatch = (act: any, tol: number): number => {
+      const matches = numFields.filter(f => withinTol(submitted[f], act[f] || 0, tol)).length;
+      return matches / numFields.length;
+    };
+
+    // Same-user re-submit check (same date + sport + ≥80% stats match)
+    const dateOnly = start_date.substring(0, 10);
+    const { data: sameUserActs } = await sb
+      .from("activities")
+      .select("id, distance, calories, moving_time, elevation_gain")
+      .eq("user_id", user_id)
+      .eq("sport_type", sport_type)
+      .gte("start_date", `${dateOnly}T00:00:00`)
+      .lte("start_date", `${dateOnly}T23:59:59`)
+      .limit(10);
+
+    if (sameUserActs?.some((a: any) => scoreMatch(a, SAME_USER_TOL) >= SIMILARITY_THRESHOLD)) {
+      return json({ error: "Duplicate activity detected — same user, date, sport, and similar stats." }, 409);
+    }
+
+    // Cross-user fraud check (different user, same date + sport + ≥80% stats)
+    // Lari bareng safe: calories will differ → only 3/4 match = 75% < 80%
+    const { data: crossUserActs } = await sb
+      .from("activities")
+      .select("id, distance, calories, moving_time, elevation_gain")
+      .neq("user_id", user_id)
+      .eq("sport_type", sport_type)
+      .gte("start_date", `${dateOnly}T00:00:00`)
+      .lte("start_date", `${dateOnly}T23:59:59`)
+      .limit(1000);
+
+    if (crossUserActs?.some((a: any) => scoreMatch(a, CROSS_USER_TOL) >= SIMILARITY_THRESHOLD)) {
+      return json({ error: "Activity data too similar to an existing submission. If this is a legitimate activity, please contact admin." }, 409);
     }
 
     const submission_method = image_path ? "image_ocr" : "manual";
