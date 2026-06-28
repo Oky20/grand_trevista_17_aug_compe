@@ -110,7 +110,7 @@ serve(async (req) => {
     const numFields = ["calories", "distance", "moving_time", "elevation_gain"] as const;
     const SIMILARITY_THRESHOLD = 0.80; // 80% = 3.2/4 fields → effectively all must match
     const SAME_USER_TOL = 0.10;        // 10% tolerance for same-user re-submit
-    const CROSS_USER_TOL = 0.08;       // 8% tolerance for cross-user fraud
+    const CROSS_USER_TOL = 0.05;       // 5% tolerance for cross-user fraud (same team only)
 
     const submitted = {
       calories: (calories || 0) as number,
@@ -139,19 +139,28 @@ serve(async (req) => {
       return json({ error: "Duplicate activity detected — same user, date, sport, and similar stats." }, 409);
     }
 
-    // Cross-user fraud check (different user, same date + sport + ≥80% stats)
+    // Cross-user fraud check — only within the same team/zone (cross-zone overlap is fine, fest is casual)
     // Lari bareng safe: calories will differ → only 3/4 match = 75% < 80%
-    const { data: crossUserActs } = await sb
-      .from("activities")
-      .select("id, distance, calories, moving_time, elevation_gain")
-      .neq("user_id", user_id)
-      .eq("sport_type", sport_type)
-      .gte("start_date", `${dateOnly}T00:00:00`)
-      .lte("start_date", `${dateOnly}T23:59:59`)
-      .limit(1000);
+    const { data: submitter } = await sb
+      .from("users")
+      .select("team_id")
+      .eq("id", user_id)
+      .single();
 
-    if (crossUserActs?.some((a: any) => scoreMatch(a, CROSS_USER_TOL) >= SIMILARITY_THRESHOLD)) {
-      return json({ error: "Activity data too similar to an existing submission. If this is a legitimate activity, please contact admin." }, 409);
+    if (submitter?.team_id != null) {
+      const { data: crossUserActs } = await sb
+        .from("activities")
+        .select("id, distance, calories, moving_time, elevation_gain, users!inner(team_id)")
+        .neq("user_id", user_id)
+        .eq("sport_type", sport_type)
+        .eq("users.team_id", submitter.team_id)
+        .gte("start_date", `${dateOnly}T00:00:00`)
+        .lte("start_date", `${dateOnly}T23:59:59`)
+        .limit(1000);
+
+      if (crossUserActs?.some((a: any) => scoreMatch(a, CROSS_USER_TOL) >= SIMILARITY_THRESHOLD)) {
+        return json({ error: "Activity data too similar to an existing submission. If this is a legitimate activity, please contact admin." }, 409);
+      }
     }
 
     const submission_method = image_path ? "image_ocr" : "manual";
