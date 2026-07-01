@@ -3,6 +3,15 @@
 // Fill in your credentials before deploying
 // ============================================================
 
+// All "which day did this happen" logic (scoring day-buckets, streaks,
+// activity list display, submission deadline) must agree on one timezone,
+// regardless of the viewer's/server's own local timezone.
+const TIMEZONE = 'Asia/Jakarta';
+
+function jakartaDateKey(dateInput) {
+  return new Date(dateInput).toLocaleDateString('en-CA', { timeZone: TIMEZONE });
+}
+
 const CONFIG = {
 
   // --- Supabase ---
@@ -13,6 +22,9 @@ const CONFIG = {
   CHALLENGE_START: '2026-06-15',
   CHALLENGE_END:   '2026-06-30',
   CHALLENGE_NAME:  'GTR 17 Aug Fitness Challenge 2026',
+
+  // --- Submission Window ---
+  SUBMIT_WINDOW_DAYS: 7, // activity dated D can be submitted through D+7 (Jakarta time)
 
   // --- Teams ---
   TEAMS: [

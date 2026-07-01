@@ -101,10 +101,7 @@ const DB = {
     console.log('getActivities: fetched', data.length, 'total activities from DB');
     const filtered = data.filter(a => {
       if (!a.start_date) return false;
-      const d = new Date(a.start_date);
-      const localDate = d.getFullYear() + '-' +
-        String(d.getMonth() + 1).padStart(2, '0') + '-' +
-        String(d.getDate()).padStart(2, '0');
+      const localDate = jakartaDateKey(a.start_date);
       return localDate >= start && localDate <= end;
     });
     console.log('getActivities: after date filter (' + start + ' to ' + end + '):', filtered.length);

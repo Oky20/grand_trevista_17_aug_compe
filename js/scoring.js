@@ -127,11 +127,11 @@ const Scoring = (() => {
       new Date(a.start_date) - new Date(b.start_date)
     );
 
-    const dailyCalMap = {};
+    const dailyMaxCalMap = {};
     sorted.forEach(act => {
-      const day = act.start_date.slice(0, 10);
-      if (!dailyCalMap[day]) dailyCalMap[day] = {};
-      dailyCalMap[day][act.user_id] = (dailyCalMap[day][act.user_id] || 0) + (act.calories || 0);
+      const day = jakartaDateKey(act.start_date);
+      const cal = act.calories || 0;
+      if (!dailyMaxCalMap[day] || cal > dailyMaxCalMap[day]) dailyMaxCalMap[day] = cal;
     });
 
     const lastActiveDateMap = {};
@@ -143,11 +143,11 @@ const Scoring = (() => {
         return;
       }
 
-      const day = act.start_date.slice(0, 10);
+      const day = jakartaDateKey(act.start_date);
       const lastDay = lastActiveDateMap[act.user_id];
 
       if (lastDay) {
-        const diff = (new Date(day) - new Date(lastDay)) / 86400000;
+        const diff = (new Date(day + 'T00:00:00Z') - new Date(lastDay + 'T00:00:00Z')) / 86400000;
         if (diff === 1) {
           m.currentStreak += 1;
         } else if (diff > 1) {
@@ -158,9 +158,8 @@ const Scoring = (() => {
       }
       if (day !== lastDay) lastActiveDateMap[act.user_id] = day;
 
-      const allDayCals = Object.values(dailyCalMap[day] || {});
-      const maxOverallCal = allDayCals.length > 0 ? Math.max(...allDayCals) : 0;
-      const isDailyTop = maxOverallCal > 0 && (dailyCalMap[day]?.[act.user_id] || 0) >= maxOverallCal;
+      const maxOverallCal = dailyMaxCalMap[day] || 0;
+      const isDailyTop = maxOverallCal > 0 && (act.calories || 0) === maxOverallCal;
 
       const result = calcActivityPoints(act, {
         currentStreak: m.currentStreak,

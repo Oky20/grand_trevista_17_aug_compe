@@ -50,6 +50,13 @@ function hammingDistance(h1: string, h2: string): number {
 
 const DHASH_THRESHOLD = 0;
 
+const TIMEZONE = "Asia/Jakarta";
+const SUBMIT_WINDOW_DAYS = 7; // activity dated D can be submitted through D+7 (Jakarta time)
+
+function jakartaDateKey(dateInput: string | number | Date): string {
+  return new Intl.DateTimeFormat("en-CA", { timeZone: TIMEZONE }).format(new Date(dateInput));
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: CORS });
 
@@ -61,6 +68,16 @@ serve(async (req) => {
     if (!start_date) return json({ error: "Missing start_date" }, 400);
     if (!sport_type || !VALID_SPORT_TYPES.includes(sport_type)) {
       return json({ error: `Invalid sport_type. Must be one of: ${VALID_SPORT_TYPES.join(", ")}` }, 400);
+    }
+
+    const activityDay = jakartaDateKey(start_date);
+    const todayDay = jakartaDateKey(new Date());
+    const daysSince = (Date.parse(todayDay) - Date.parse(activityDay)) / 86400000;
+    if (daysSince > SUBMIT_WINDOW_DAYS) {
+      return json({ error: `Submission window closed — activities must be submitted within ${SUBMIT_WINDOW_DAYS} days (activity date: ${activityDay}).` }, 400);
+    }
+    if (daysSince < 0) {
+      return json({ error: "Activity date cannot be in the future." }, 400);
     }
 
     const sb = createClient(
