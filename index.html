@@ -945,7 +945,7 @@ async function confirmActivity() {
       distance: distanceKm * 1000,
       moving_time: Math.round(durationMin * 60),
       calories: Math.round(calories),
-      start_date: date,
+      start_date: date + ':00+07:00',
       image_path: ocrImage ? date : null,
       image_hash: imageHash,
       dhash: dhash,
