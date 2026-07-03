@@ -187,11 +187,23 @@ footer{text-align:center;padding:24px 20px 36px;border-top:1px solid var(--borde
     <div style="display:flex;gap:6px;flex-wrap:wrap;" id="tfbtns">
       <button class="tfb active" data-team="all" id="tf-all">All</button>
     </div>
+    <div style="display:flex;gap:6px;align-items:center;">
+      <input type="date" class="di" id="af-from" title="From date"/>
+      <span style="color:var(--dim);font-size:11px;">–</span>
+      <input type="date" class="di" id="af-to" title="To date"/>
+      <button class="tfb" id="af-clear" style="display:none;">✕</button>
+    </div>
   </div>
   <div class="achips" id="achips"></div>
   <div id="acontent"></div>
 </div>
 <div class="panel" id="panel-myactivities">
+  <div class="af">
+    <input type="date" class="di" id="maf-from" title="From date"/>
+    <span style="color:var(--dim);font-size:11px;">–</span>
+    <input type="date" class="di" id="maf-to" title="To date"/>
+    <button class="tfb" id="maf-clear" style="display:none;">✕</button>
+  </div>
   <div id="mastats"></div>
   <div id="macontent"></div>
 </div>
@@ -250,6 +262,9 @@ window.aS=CONFIG.CHALLENGE_START||'2026-04-01';
 window.aE=CONFIG.CHALLENGE_END||'2026-04-30';
 let aS=window.aS,aE=window.aE;
 let aTm='all',aSrch='',selA=null;
+let afFrom='',afTo='',mafFrom='',mafTo='';
+const actDay = a => new Date(a.start_date).toLocaleDateString('en-CA', { timeZone: TIMEZONE });
+const inDR = (a, f, t) => { const d = actDay(a); return (!f || d >= f) && (!t || d <= t); };
 let PG={overall:1,individual:1,acts:1};
 const PS=15;
 const SICO={'Road Running':'🏃','Trail Running':'🏃','Track Running':'🏃','Treadmill Running':'🏃','Virtual Running':'🏃','Road Cycling':'🚴','Mountain Biking (MTB)':'🚵','Gravel Cycling':'🚴','Indoor Cycling':'🚴','eBike':'🚴','Pool Swimming':'🏊','Open Water Swimming':'🏊','Triathlon':'🏊','Hiking':'🥾','Walking':'🚶','Climbing':'🧗','Strength Training':'🏋️','HIIT':'🔥','Cardio':'💓','Yoga':'🧘','Pilates':'🧘','Elliptical':'🔄','Stair Stepper':'🪜','Indoor Rowing':'🚣','Rowing':'🚣','Kayaking':'🛶','Stand-Up Paddleboarding (SUP)':'🏄','Badminton':'🏸','Tennis':'🎾','Padel':'🎾','Table Tennis':'🏓','Basketball':'🏀','Volleyball':'🏐','Soccer/Football':'⚽','Futsal':'⚽','Boxing':'🥊','Martial Arts':'🥋','Golf':'⛳'};
@@ -293,6 +308,14 @@ document.addEventListener('DOMContentLoaded', async () => {
   document.getElementById('re').value = aE;
   document.getElementById('apply-btn').addEventListener('click', applyRange);
   document.getElementById('tf-all').addEventListener('click', e => filterTeam('all', e.currentTarget));
+  const bindDF = (fromId, toId, clearId, onChange) => {
+    const f = document.getElementById(fromId), t = document.getElementById(toId), c = document.getElementById(clearId);
+    const upd = () => { c.style.display = (f.value || t.value) ? '' : 'none'; onChange(f.value, t.value); };
+    f.addEventListener('change', upd); t.addEventListener('change', upd);
+    c.addEventListener('click', () => { f.value = ''; t.value = ''; upd(); });
+  };
+  bindDF('af-from', 'af-to', 'af-clear', (f, t) => { afFrom = f; afTo = t; PG.acts = 1; rActs(); });
+  bindDF('maf-from', 'maf-to', 'maf-clear', (f, t) => { mafFrom = f; mafTo = t; rMyActs(); });
 
   // Register modal
   document.getElementById('reg-submit').addEventListener('click', handleRegister);
@@ -586,11 +609,12 @@ function rActs() {
   let members = [...LB];
   if (aTm !== 'all') members = members.filter(m => m.team_id === aTm);
   if (selA) members = members.filter(m => m.id === selA);
-  const all = [];
+  let all = [];
   members.forEach(m => {
     const team = tb[m.team_id] || { color: '#555', name: 'No Team', emoji: '⚪' };
     (m.activities || []).forEach(a => all.push({ ...a, member: m, team }));
   });
+  if (afFrom || afTo) all = all.filter(a => inDR(a, afFrom, afTo));
   all.sort((a, b) => new Date(b.start_date) - new Date(a.start_date));
   if (!all.length) { document.getElementById('acontent').innerHTML = `<div class="empty">No activities found.</div>`; return; }
   const p = PG.acts, tot = all.length, pages = Math.ceil(tot / PS);
@@ -644,15 +668,22 @@ function rMyActs() {
     ctEl.innerHTML = '<div class="empty">No activities yet. Submit one on the main page!</div>';
     return;
   }
-  const valid = me.activities.filter(a => a.breakdown && a.breakdown.valid !== false);
+  const dfOn = !!(mafFrom || mafTo);
+  const acts = dfOn ? me.activities.filter(a => inDR(a, mafFrom, mafTo)) : me.activities;
+  const valid = acts.filter(a => a.breakdown && a.breakdown.valid !== false);
+  const tp = dfOn ? valid.reduce((s, a) => s + (a.points || 0), 0) : (me.totalPoints || 0);
+  const tc = dfOn ? Math.round(valid.reduce((s, a) => s + (a.calories || 0), 0)) : (me.totalCalories || 0);
+  const td = dfOn ? valid.reduce((s, a) => s + (a.distance || 0), 0) / 1000 : (me.totalDistanceKm || 0);
+  const tm = dfOn ? valid.reduce((s, a) => s + (a.moving_time || 0), 0) / 60 : (me.totalDurationMin || 0);
   stEl.innerHTML = `<div class="sstrip">
-    <div class="sc"><div class="sl">Total Points</div><div class="sv">${fmt(me.totalPoints||0)}</div></div>
-    <div class="sc"><div class="sl">Total Calories</div><div class="sv">${fmt(me.totalCalories||0)}</div><div class="su">kcal</div></div>
-    <div class="sc"><div class="sl">Total Distance</div><div class="sv">${((me.totalDistanceKm||0)).toFixed(1)}</div><div class="su">km</div></div>
-    <div class="sc"><div class="sl">Total Duration</div><div class="sv">${fmtDur(me.totalDurationMin||0)}</div></div>
+    <div class="sc"><div class="sl">Total Points</div><div class="sv">${fmt(tp)}</div></div>
+    <div class="sc"><div class="sl">Total Calories</div><div class="sv">${fmt(tc)}</div><div class="su">kcal</div></div>
+    <div class="sc"><div class="sl">Total Distance</div><div class="sv">${td.toFixed(1)}</div><div class="su">km</div></div>
+    <div class="sc"><div class="sl">Total Duration</div><div class="sv">${fmtDur(tm)}</div></div>
     <div class="sc"><div class="sl">Activities</div><div class="sv">${valid.length}</div><div class="su">valid entries</div></div>
   </div>`;
-  const sorted = [...me.activities].sort((a, b) => new Date(b.start_date) - new Date(a.start_date));
+  if (!acts.length) { ctEl.innerHTML = '<div class="empty">No activities in selected date range.</div>'; return; }
+  const sorted = [...acts].sort((a, b) => new Date(b.start_date) - new Date(a.start_date));
   const team = CONFIG.TEAMS.find(t => t.id === me.team_id) || { color: '#888', name: 'No Team', emoji: '⚪' };
   const cards = sorted.map(a => {
     const icon = SICO[a.sport_type] || '🏅';
