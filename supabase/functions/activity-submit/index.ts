@@ -85,26 +85,35 @@ serve(async (req) => {
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
     );
 
-    // Check for exact duplicate image (SHA-256) — same user only
+    // Image-hash checks are scoped to the activity's own date — same-sport screenshots from this
+    // app share near-identical background/layout, so comparing across all history causes false
+    // positives on legitimate different-day sessions.
+    const dateOnly = start_date.substring(0, 10);
+
+    // Check for exact duplicate image (SHA-256) — same user, same day only
     if (image_hash) {
       const { data: existingByHash } = await sb
         .from("activities")
         .select("id")
         .eq("image_hash", image_hash)
         .eq("user_id", user_id)
+        .gte("start_date", `${dateOnly}T00:00:00`)
+        .lte("start_date", `${dateOnly}T23:59:59`)
         .limit(1);
       if (existingByHash && existingByHash.length > 0) {
         return json({ error: "This image has already been submitted (exact match)." }, 409);
       }
     }
 
-    // Check for perceptual duplicate (dHash) — same user only
+    // Check for perceptual duplicate (dHash) — same user, same day only
     if (dhash) {
       const { data: existingDh } = await sb
         .from("activities")
         .select("id, dhash")
         .eq("user_id", user_id)
         .not("dhash", "is", null)
+        .gte("start_date", `${dateOnly}T00:00:00`)
+        .lte("start_date", `${dateOnly}T23:59:59`)
         .limit(5000);
       if (existingDh) {
         for (const act of existingDh) {
@@ -142,7 +151,6 @@ serve(async (req) => {
     };
 
     // Same-user re-submit check (same date + sport + ≥80% stats match)
-    const dateOnly = start_date.substring(0, 10);
     const { data: sameUserActs } = await sb
       .from("activities")
       .select("id, distance, calories, moving_time, elevation_gain")
