@@ -122,8 +122,8 @@ const CONFIG = {
       // Triathlon
       'Triathlon':           { per: 5, bonus: 5 },
       // Hiking & Outdoor
-      'Hiking':   { per: 3, bonus: 5 },
-      'Walking':  { per: 3, bonus: 5 },
+      'Hiking':   { per: 2.5, bonus: 5 },
+      'Walking':  { per: 2.5, bonus: 5 },
       'Climbing': { per: 0, bonus: 0 },
       // Gym & Fitness
       'Strength Training': { per: 0, bonus: 0 },
