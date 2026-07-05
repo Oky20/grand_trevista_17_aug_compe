@@ -36,20 +36,6 @@ const VALID_SPORT_TYPES = [
   "Golf",
 ];
 
-function hammingDistance(h1: string, h2: string): number {
-  let b1 = BigInt("0x" + h1);
-  let b2 = BigInt("0x" + h2);
-  let xor = b1 ^ b2;
-  let count = 0;
-  while (xor > 0n) {
-    count++;
-    xor &= xor - 1n;
-  }
-  return count;
-}
-
-const DHASH_THRESHOLD = 0;
-
 const TIMEZONE = "Asia/Jakarta";
 const SUBMIT_WINDOW_DAYS = 7; // activity dated D can be submitted through D+7 (Jakarta time)
 
