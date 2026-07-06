@@ -505,7 +505,7 @@ function rInd() {
       const catSports = catCfg.sports;
       s = s.map(m => {
         const catDist = (m.activities || [])
-          .filter(a => catSports.includes(a.sport_type))
+          .filter(a => catSports.includes(a.sport_type) && a.breakdown?.valid)
           .reduce((sum, a) => sum + ((a.distance || 0) / 1000), 0);
         return { ...m, _fullDistKm: m.totalDistanceKm, totalDistanceKm: catDist };
       });
