@@ -31,7 +31,7 @@ const Scoring = (() => {
     return { valid: reasons.length === 0, reasons: reasons };
   }
 
-  function calcActivityPoints(activity, streakContext = null, isDailyTopCalories = false) {
+  function calcActivityPoints(activity, streakContext = null, isDailyTopCalories = false, isReactivation = false, groupBonus = 0) {
     const validity = isValidActivity(activity);
     if (!validity.valid) {
       return { total: 0, breakdown: { valid: false, reasons: validity.reasons } };
@@ -89,8 +89,9 @@ const Scoring = (() => {
     }
 
     breakdown.streak = 0;
+    breakdown.streak30 = 0;
     if (streakContext) {
-      const { currentStreak, claimedMilestones } = streakContext;
+      const { currentStreak, claimedMilestones, claimedStreak30 } = streakContext;
       const milestones = CONFIG.SCORING.STREAK_MILESTONES;
       const milestonesCap = milestones.length;
       const earnedCount = Math.floor(currentStreak / 3);
@@ -102,12 +103,58 @@ const Scoring = (() => {
         }
       }
       total += breakdown.streak;
+
+      if (currentStreak >= S.STREAK_BONUS_30_DAYS && !claimedStreak30) {
+        breakdown.streak30 = S.STREAK_BONUS_30_POINTS;
+        total += breakdown.streak30;
+      }
     }
+
+    breakdown.reactivation = isReactivation ? S.REACTIVATION_BONUS : 0;
+    total += breakdown.reactivation;
+
+    breakdown.groupBonus = groupBonus || 0;
+    total += breakdown.groupBonus;
 
     return { total, breakdown };
   }
 
-  function calcLeaderboard(users, activities) {
+  // Resolves mutually-tagged group workouts: a group of >= GROUP_MIN_SIZE people
+  // each qualifies only once every member has their own matching activity
+  // (same sport, close start time, identical companion tag set on all sides).
+  function calcGroupMatches(activities) {
+    const S = CONFIG.SCORING;
+    const bonusByActId = new Map();
+
+    const candidates = activities.filter(act =>
+      Array.isArray(act.companions) &&
+      act.companions.length >= S.GROUP_MIN_SIZE - 1 &&
+      isValidActivity(act).valid
+    );
+
+    const setEquals = (a, b) => a.size === b.size && [...a].every(x => b.has(x));
+
+    candidates.forEach(a => {
+      const group = new Set([a.user_id, ...a.companions]);
+      if (group.size < S.GROUP_MIN_SIZE) return;
+      const aTime = new Date(a.start_date).getTime();
+
+      const allMatch = [...group].every(memberId => candidates.some(b => {
+        if (b.user_id !== memberId || b.sport_type !== a.sport_type) return false;
+        const bTime = new Date(b.start_date).getTime();
+        if (Math.abs(bTime - aTime) > S.GROUP_TIME_WINDOW_MIN * 60000) return false;
+        return setEquals(new Set([b.user_id, ...b.companions]), group);
+      }));
+
+      if (allMatch) bonusByActId.set(a.id, S.GROUP_BONUS_PER_PERSON);
+    });
+
+    return bonusByActId;
+  }
+
+  function calcLeaderboard(users, activities, windowStart, windowEnd) {
+    const S = CONFIG.SCORING;
+    const inWindow = day => (!windowStart || day >= windowStart) && (!windowEnd || day <= windowEnd);
     const userMap = {};
     users.forEach(u => {
       userMap[u.id] = {
@@ -119,6 +166,7 @@ const Scoring = (() => {
         activityCount:   0,
         currentStreak:   0,
         claimedMilestones: new Set(),
+        claimedStreak30: false,
         activities: [],
       };
     });
@@ -134,6 +182,7 @@ const Scoring = (() => {
       if (!dailyMaxCalMap[day] || cal > dailyMaxCalMap[day]) dailyMaxCalMap[day] = cal;
     });
 
+    const groupBonusByActId = calcGroupMatches(activities);
     const lastActiveDateMap = {};
 
     sorted.forEach(act => {
@@ -145,12 +194,13 @@ const Scoring = (() => {
 
       const day = jakartaDateKey(act.start_date);
       const lastDay = lastActiveDateMap[act.user_id];
+      let gapDays = null;
 
       if (lastDay) {
-        const diff = (new Date(day + 'T00:00:00Z') - new Date(lastDay + 'T00:00:00Z')) / 86400000;
-        if (diff === 1) {
+        gapDays = (new Date(day + 'T00:00:00Z') - new Date(lastDay + 'T00:00:00Z')) / 86400000;
+        if (gapDays === 1) {
           m.currentStreak += 1;
-        } else if (diff > 1) {
+        } else if (gapDays > 1) {
           m.currentStreak = 1;
         }
       } else {
@@ -158,31 +208,42 @@ const Scoring = (() => {
       }
       if (day !== lastDay) lastActiveDateMap[act.user_id] = day;
 
+      const isReactivation = lastDay != null && gapDays != null && gapDays >= S.REACTIVATION_GAP_DAYS;
+
       const maxOverallCal = dailyMaxCalMap[day] || 0;
       const isDailyTop = maxOverallCal > 0 && (act.calories || 0) === maxOverallCal;
 
       const result = calcActivityPoints(act, {
         currentStreak: m.currentStreak,
         claimedMilestones: m.claimedMilestones,
-      }, isDailyTop);
+        claimedStreak30: m.claimedStreak30,
+      }, isDailyTop, isReactivation, groupBonusByActId.get(act.id) || 0);
 
       if (!result.breakdown.valid) {
         console.log('calcLeaderboard: INVALID activity user=' + (m.name || m.id) + ' sport=' + act.sport_type + ' date=' + act.start_date + ' reasons=' + JSON.stringify(result.breakdown.reasons));
       }
 
       if (result.breakdown.valid) {
-        m.totalPoints     += result.total;
-        m.totalCalories   += (act.calories || 0);
-        m.totalDistanceKm += (act.distance || 0) / 1000;
-        m.totalDurationMin += (act.moving_time || 0) / 60;
-        m.activityCount   += 1;
-
+        // Claim/streak state reflects TRUE full history regardless of the display
+        // window, so narrowing the date filter can't re-award an already-claimed
+        // milestone or corrupt the streak count.
         const earned = Math.floor(m.currentStreak / 3);
         for (let i = 0; i < earned; i++) {
           m.claimedMilestones.add(i);
         }
+        if (result.breakdown.streak30 > 0) m.claimedStreak30 = true;
+
+        if (inWindow(day)) {
+          m.totalPoints     += result.total;
+          m.totalCalories   += (act.calories || 0);
+          m.totalDistanceKm += (act.distance || 0) / 1000;
+          m.totalDurationMin += (act.moving_time || 0) / 60;
+          m.activityCount   += 1;
+        }
       }
-      m.activities.push({ ...act, points: result.total, breakdown: result.breakdown });
+      if (inWindow(day)) {
+        m.activities.push({ ...act, points: result.total, breakdown: result.breakdown });
+      }
     });
 
     return Object.values(userMap).sort((a, b) => b.totalPoints - a.totalPoints);
