@@ -184,6 +184,8 @@ const Scoring = (() => {
 
     const groupBonusByActId = calcGroupMatches(activities);
     const lastActiveDateMap = {};
+    const fullStreakMap = {};
+    const lastActiveDateMapWindow = {};
 
     sorted.forEach(act => {
       const m = userMap[act.user_id];
@@ -199,12 +201,12 @@ const Scoring = (() => {
       if (lastDay) {
         gapDays = (new Date(day + 'T00:00:00Z') - new Date(lastDay + 'T00:00:00Z')) / 86400000;
         if (gapDays === 1) {
-          m.currentStreak += 1;
+          fullStreakMap[act.user_id] += 1;
         } else if (gapDays > 1) {
-          m.currentStreak = 1;
+          fullStreakMap[act.user_id] = 1;
         }
       } else {
-        m.currentStreak = 1;
+        fullStreakMap[act.user_id] = 1;
       }
       if (day !== lastDay) lastActiveDateMap[act.user_id] = day;
 
@@ -214,7 +216,7 @@ const Scoring = (() => {
       const isDailyTop = maxOverallCal > 0 && (act.calories || 0) === maxOverallCal;
 
       const result = calcActivityPoints(act, {
-        currentStreak: m.currentStreak,
+        currentStreak: fullStreakMap[act.user_id],
         claimedMilestones: m.claimedMilestones,
         claimedStreak30: m.claimedStreak30,
       }, isDailyTop, isReactivation, groupBonusByActId.get(act.id) || 0);
@@ -227,7 +229,7 @@ const Scoring = (() => {
         // Claim/streak state reflects TRUE full history regardless of the display
         // window, so narrowing the date filter can't re-award an already-claimed
         // milestone or corrupt the streak count.
-        const earned = Math.floor(m.currentStreak / 3);
+        const earned = Math.floor(fullStreakMap[act.user_id] / 3);
         for (let i = 0; i < earned; i++) {
           m.claimedMilestones.add(i);
         }
@@ -242,6 +244,22 @@ const Scoring = (() => {
         }
       }
       if (inWindow(day)) {
+        // Displayed streak is scoped to the filter window: consecutive days are
+        // only counted from windowStart onward, so narrowing the date range
+        // can't show a streak that started before the visible period.
+        const lastDayW = lastActiveDateMapWindow[act.user_id];
+        if (lastDayW) {
+          const gapDaysW = (new Date(day + 'T00:00:00Z') - new Date(lastDayW + 'T00:00:00Z')) / 86400000;
+          if (gapDaysW === 1) {
+            m.currentStreak += 1;
+          } else if (gapDaysW > 1) {
+            m.currentStreak = 1;
+          }
+        } else {
+          m.currentStreak = 1;
+        }
+        if (day !== lastDayW) lastActiveDateMapWindow[act.user_id] = day;
+
         m.activities.push({ ...act, points: result.total, breakdown: result.breakdown });
       }
     });
