@@ -92,13 +92,18 @@ const DB = {
     return data[0] || null;
   },
 
-  async getActivities(startDate, endDate) {
-    const start = startDate || CONFIG.CHALLENGE_START;
-    const end   = endDate   || CONFIG.CHALLENGE_END;
+  async getAllActivities() {
     const res = await sbFetch('activities?order=start_date.asc');
     if (!res.ok) throw new Error(await res.text());
     const data = await res.json();
-    console.log('getActivities: fetched', data.length, 'total activities from DB');
+    console.log('getAllActivities: fetched', data.length, 'total activities from DB');
+    return data;
+  },
+
+  async getActivities(startDate, endDate) {
+    const start = startDate || CONFIG.CHALLENGE_START;
+    const end   = endDate   || CONFIG.CHALLENGE_END;
+    const data = await DB.getAllActivities();
     const filtered = data.filter(a => {
       if (!a.start_date) return false;
       const localDate = jakartaDateKey(a.start_date);
@@ -113,14 +118,13 @@ const DB = {
   async getLeaderboard(startDate, endDate) {
     const start = startDate || CONFIG.CHALLENGE_START;
     const end   = endDate   || CONFIG.CHALLENGE_END;
-    const [users, activities] = await Promise.all([
+    const [users, allActivities] = await Promise.all([
       DB.getUsers(),
-      DB.getActivities(start, end),
+      DB.getAllActivities(),
     ]);
-    console.log('getLeaderboard: users count=', users.length, 'activities count=', activities.length);
+    console.log('getLeaderboard: users count=', users.length, 'total activities count=', allActivities.length);
     if (users.length > 0) console.log('getLeaderboard: first user=', JSON.stringify({id:users[0].id, name:users[0].name, team_id:users[0].team_id}));
-    if (activities.length > 0) console.log('getLeaderboard: first activity=', JSON.stringify({user_id:activities[0].user_id, sport_type:activities[0].sport_type, start_date:activities[0].start_date, calories:activities[0].calories}));
-    const leaderboard = Scoring.calcLeaderboard(users, activities);
+    const leaderboard = Scoring.calcLeaderboard(users, allActivities, start, end);
     const teams       = Scoring.calcTeamStats(leaderboard);
     return { leaderboard, teams };
   },

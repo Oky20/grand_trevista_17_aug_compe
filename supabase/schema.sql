@@ -38,6 +38,7 @@ CREATE TABLE IF NOT EXISTS activities (
   dhash             TEXT,
   submission_method TEXT DEFAULT 'image_ocr',
   user_corrected    BOOLEAN DEFAULT FALSE,
+  companions        UUID[] DEFAULT '{}',
   created_at        TIMESTAMPTZ DEFAULT NOW()
 );
 
@@ -54,6 +55,7 @@ CREATE INDEX IF NOT EXISTS idx_activities_start_date ON activities(start_date);
 CREATE INDEX IF NOT EXISTS idx_activities_sport_type ON activities(sport_type);
 CREATE INDEX IF NOT EXISTS idx_activities_image_hash ON activities(image_hash);
 CREATE INDEX IF NOT EXISTS idx_activities_dhash     ON activities(dhash);
+CREATE INDEX IF NOT EXISTS idx_activities_companions ON activities USING GIN (companions);
 CREATE INDEX IF NOT EXISTS idx_users_team_id         ON users(team_id);
 CREATE INDEX IF NOT EXISTS idx_invite_codes_code     ON invite_codes(code);
 

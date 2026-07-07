@@ -271,6 +271,7 @@ const SICO={'Road Running':'🏃','Trail Running':'🏃','Track Running':'🏃',
 const SPORT_GROUPS=[{label:'🏃 Running',options:['Road Running','Trail Running','Track Running','Treadmill Running','Virtual Running']},{label:'🚴 Cycling',options:['Road Cycling','Mountain Biking (MTB)','Gravel Cycling','Indoor Cycling','eBike']},{label:'🏊 Swimming',options:['Pool Swimming','Open Water Swimming']},{label:'🏊 Triathlon & Multisport',options:['Triathlon']},{label:'🥾 Hiking & Outdoor',options:['Hiking','Walking','Climbing']},{label:'💪 Gym & Fitness',options:['Strength Training','HIIT','Cardio','Yoga','Pilates','Elliptical','Stair Stepper','Indoor Rowing']},{label:'🚣 Paddling',options:['Rowing','Kayaking','Stand-Up Paddleboarding (SUP)']},{label:'🏸 Racket Sports',options:['Badminton','Tennis','Padel','Table Tennis']},{label:'⚽ Team Sports',options:['Basketball','Volleyball','Soccer/Football','Futsal']},{label:'🥊 Martial Arts',options:['Boxing','Martial Arts']},{label:'⛳ Golf',options:['Golf']}];
 const SPORT_TYPES=SPORT_GROUPS.flatMap(g=>g.options);
 let ocrResult=null, ocrImage=null, ocrLoading=false;
+let rfCompanions=[], rfCompSrch='';
 
 document.addEventListener('click', e => {
   const pg = e.target.dataset && e.target.dataset.pg;
@@ -628,6 +629,7 @@ function rActs() {
     if (bd.base) bn.push(`+${bd.base} base`); if (bd.calories) bn.push(`+${bd.calories} cal`);
     if (bd.distance) bn.push(`+${bd.distance} dist`); if (bd.sportBonus) bn.push(`+${bd.sportBonus} sport`); if (bd.duration) bn.push(`+${bd.duration} dur`);
     if (bd.dailyTop) bn.push(`+${bd.dailyTop} top`); if (bd.streak) bn.push(`+${bd.streak} streak`);
+    if (bd.streak30) bn.push(`+${bd.streak30} 30-day streak`); if (bd.reactivation) bn.push(`+${bd.reactivation} comeback`); if (bd.groupBonus) bn.push(`+${bd.groupBonus} group`);
     const methodTag = a.submission_method === 'manual' ? '<span class="awtag manual">Manual</span>' : '<span class="awtag ocr">OCR</span>';
     return `<div class="acard${bd.valid === false ? ' ainv' : ''}">
       <div class="aico">${icon}</div>
@@ -698,6 +700,9 @@ function rMyActs() {
     if (bd.duration) bn.push(`+${bd.duration} dur`);
     if (bd.dailyTop) bn.push(`+${bd.dailyTop} top`);
     if (bd.streak) bn.push(`+${bd.streak} streak`);
+    if (bd.streak30) bn.push(`+${bd.streak30} 30-day streak`);
+    if (bd.reactivation) bn.push(`+${bd.reactivation} comeback`);
+    if (bd.groupBonus) bn.push(`+${bd.groupBonus} group`);
     const methodTag = a.submission_method === 'manual'
       ? '<span class="awtag manual">Manual</span>'
       : '<span class="awtag ocr">OCR</span>';
@@ -759,6 +764,13 @@ function rSubmit() {
         <div class="fcol"><label>Date & Time</label><input type="datetime-local" id="rf-date" value="${new Date().toISOString().slice(0,16)}"/></div>
         <div class="fcol"><label>Elevation Gain (m)</label><input type="number" id="rf-elev" placeholder="0" step="1"/></div>
       </div>
+      <div class="frow">
+        <div class="fcol" style="flex:1 1 100%;">
+          <label>Training Partners (optional — ${CONFIG.SCORING.GROUP_MIN_SIZE}+ people, same sport &amp; time, for +${CONFIG.SCORING.GROUP_BONUS_PER_PERSON}/person group bonus)</label>
+          <input type="text" class="asrch" id="rf-comp-srch" placeholder="Search teammate name..."/>
+          <div class="achips" id="rf-comp-chips" style="margin-top:8px;"></div>
+        </div>
+      </div>
       <div class="rft">
         <div style="display:flex;gap:8px;">
           <button class="btn btn-p" id="confirm-btn">Confirm Activity</button>
@@ -775,11 +787,46 @@ function rSubmit() {
   });
   document.getElementById('reupload-btn').addEventListener('click', resetUpload);
   document.getElementById('confirm-btn').addEventListener('click', confirmActivity);
+  document.getElementById('rf-comp-srch').addEventListener('input', e => {
+    rfCompSrch = e.target.value.toLowerCase();
+    rCompanionChips();
+  });
+  rCompanionChips();
 
   // Mark fields as edited
   ['rf-name','rf-cal','rf-dist','rf-dur','rf-date','rf-sport','rf-elev'].forEach(id => {
     document.getElementById(id).addEventListener('input', function() { this.classList.add('edited'); });
   });
+}
+
+function rCompanionChips() {
+  const el = document.getElementById('rf-comp-chips');
+  if (!el) return;
+  const u = Session.get();
+  const selectedSet = new Set(rfCompanions);
+  const tb = {}; CONFIG.TEAMS.forEach(t => tb[t.id] = t);
+  const selectedChips = LB.filter(m => selectedSet.has(m.id));
+  const searched = rfCompSrch
+    ? LB.filter(m => !selectedSet.has(m.id) && (!u || m.id !== u.id) && m.name.toLowerCase().includes(rfCompSrch))
+    : [];
+  const list = [...selectedChips, ...searched];
+  if (!list.length) {
+    el.innerHTML = rfCompSrch ? `<span style="font-size:12px;color:var(--dim);font-family:var(--mono)">No athletes found.</span>` : '';
+    return;
+  }
+  el.innerHTML = list.map(m => {
+    const team = tb[m.team_id] || { color: '#555' };
+    const sel = selectedSet.has(m.id) ? 'sel' : '';
+    return `<div class="achip ${sel}" onclick="toggleCompanion('${m.id}')">
+      <span class="td" style="background:${team.color};width:6px;height:6px;"></span>
+      <span>${m.name}</span></div>`;
+  }).join('');
+}
+
+function toggleCompanion(id) {
+  const idx = rfCompanions.indexOf(id);
+  if (idx === -1) rfCompanions.push(id); else rfCompanions.splice(idx, 1);
+  rCompanionChips();
 }
 
 function setupUpload() {
@@ -839,7 +886,7 @@ function showAnalyzeButton() {
 }
 
 function resetUpload() {
-  ocrResult = null; ocrImage = null;
+  ocrResult = null; ocrImage = null; rfCompanions = []; rfCompSrch = '';
   const zone = document.getElementById('upload-zone');
   zone.classList.remove('has-image');
   zone.innerHTML = `<div class="uz-icon">📸</div>
@@ -981,6 +1028,7 @@ async function confirmActivity() {
       image_hash: imageHash,
       dhash: dhash,
       elevation_gain: elevationGain,
+      companions: rfCompanions,
     });
     toast('Activity submitted!', 'success');
     resetUpload();
@@ -1007,6 +1055,9 @@ function rScoring() {
     ['🎯', 'Streak M2', '6 consecutive days. Once per challenge.', `+${S.STREAK_MILESTONES[1]}`],
     ['🎯', 'Streak M3', '9 consecutive days. Once per challenge.', `+${S.STREAK_MILESTONES[2]}`],
     ['🎯', 'Streak M4+', '12+ days. Max streak bonus = 100 pts.', `+${S.STREAK_MILESTONES[3]}`],
+    ['🏅', '30-Day Streak Bonus', `${S.STREAK_BONUS_30_DAYS} consecutive days. One-time, on top of the milestones above.`, `+${S.STREAK_BONUS_30_POINTS}`],
+    ['🔥', 'Comeback Bonus', `First activity after ${S.REACTIVATION_GAP_DAYS}+ days inactive.`, `+${S.REACTIVATION_BONUS}`],
+    ['🤝', 'Group Activity Bonus', `${S.GROUP_MIN_SIZE}+ people, same sport, within ${S.GROUP_TIME_WINDOW_MIN}min of each other, mutually tagged. Any zone.`, `+${S.GROUP_BONUS_PER_PERSON}/person`],
   ];
   document.getElementById('sgrid').innerHTML = rules.map(([i, t, d, p]) => `
     <div class="sr"><div class="si">${i}</div><div><div class="stt">${t}</div><div class="sd">${d}</div></div><div class="spts">${p}</div></div>`).join('');

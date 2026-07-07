@@ -102,6 +102,13 @@ const CONFIG = {
     MIN_CAL_PER_MIN:       3,
     DAILY_TOP_CALORIES:    5,
     STREAK_MILESTONES:  [10, 20, 30, 40],
+    STREAK_BONUS_30_DAYS:   30,
+    STREAK_BONUS_30_POINTS: 50,
+    REACTIVATION_GAP_DAYS:  14,
+    REACTIVATION_BONUS:     20,
+    GROUP_MIN_SIZE:          5,
+    GROUP_BONUS_PER_PERSON: 20,
+    GROUP_TIME_WINDOW_MIN:  60,
     // Distance bonus per sport: { per: km, bonus: points per step }
     DISTANCE: {
       // Running
