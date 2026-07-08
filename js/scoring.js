@@ -177,6 +177,7 @@ const Scoring = (() => {
 
     const dailyMaxCalMap = {};
     sorted.forEach(act => {
+      if (!isValidActivity(act).valid) return;
       const day = jakartaDateKey(act.start_date);
       const cal = act.calories || 0;
       if (!dailyMaxCalMap[day] || cal > dailyMaxCalMap[day]) dailyMaxCalMap[day] = cal;
@@ -195,28 +196,36 @@ const Scoring = (() => {
       }
 
       const day = jakartaDateKey(act.start_date);
-      const lastDay = lastActiveDateMap[act.user_id];
-      let gapDays = null;
+      const activityValid = isValidActivity(act).valid;
 
-      if (lastDay) {
-        gapDays = (new Date(day + 'T00:00:00Z') - new Date(lastDay + 'T00:00:00Z')) / 86400000;
-        if (gapDays === 1) {
-          fullStreakMap[act.user_id] += 1;
-        } else if (gapDays > 1) {
+      // Invalid activities (too short, etc.) don't count as an "active day" —
+      // otherwise they'd still inflate the streak and unlock milestone bonuses
+      // on a later, actually-valid activity.
+      let lastDay = null;
+      let gapDays = null;
+      let isReactivation = false;
+
+      if (activityValid) {
+        lastDay = lastActiveDateMap[act.user_id];
+        if (lastDay) {
+          gapDays = (new Date(day + 'T00:00:00Z') - new Date(lastDay + 'T00:00:00Z')) / 86400000;
+          if (gapDays === 1) {
+            fullStreakMap[act.user_id] += 1;
+          } else if (gapDays > 1) {
+            fullStreakMap[act.user_id] = 1;
+          }
+        } else {
           fullStreakMap[act.user_id] = 1;
         }
-      } else {
-        fullStreakMap[act.user_id] = 1;
+        isReactivation = lastDay != null && gapDays != null && gapDays >= S.REACTIVATION_GAP_DAYS;
+        if (day !== lastDay) lastActiveDateMap[act.user_id] = day;
       }
-      if (day !== lastDay) lastActiveDateMap[act.user_id] = day;
-
-      const isReactivation = lastDay != null && gapDays != null && gapDays >= S.REACTIVATION_GAP_DAYS;
 
       const maxOverallCal = dailyMaxCalMap[day] || 0;
       const isDailyTop = maxOverallCal > 0 && (act.calories || 0) === maxOverallCal;
 
       const result = calcActivityPoints(act, {
-        currentStreak: fullStreakMap[act.user_id],
+        currentStreak: fullStreakMap[act.user_id] || 0,
         claimedMilestones: m.claimedMilestones,
         claimedStreak30: m.claimedStreak30,
       }, isDailyTop, isReactivation, groupBonusByActId.get(act.id) || 0);
@@ -247,18 +256,21 @@ const Scoring = (() => {
         // Displayed streak is scoped to the filter window: consecutive days are
         // only counted from windowStart onward, so narrowing the date range
         // can't show a streak that started before the visible period.
-        const lastDayW = lastActiveDateMapWindow[act.user_id];
-        if (lastDayW) {
-          const gapDaysW = (new Date(day + 'T00:00:00Z') - new Date(lastDayW + 'T00:00:00Z')) / 86400000;
-          if (gapDaysW === 1) {
-            m.currentStreak += 1;
-          } else if (gapDaysW > 1) {
+        // Invalid activities don't break or extend it either way.
+        if (activityValid) {
+          const lastDayW = lastActiveDateMapWindow[act.user_id];
+          if (lastDayW) {
+            const gapDaysW = (new Date(day + 'T00:00:00Z') - new Date(lastDayW + 'T00:00:00Z')) / 86400000;
+            if (gapDaysW === 1) {
+              m.currentStreak += 1;
+            } else if (gapDaysW > 1) {
+              m.currentStreak = 1;
+            }
+          } else {
             m.currentStreak = 1;
           }
-        } else {
-          m.currentStreak = 1;
+          if (day !== lastDayW) lastActiveDateMapWindow[act.user_id] = day;
         }
-        if (day !== lastDayW) lastActiveDateMapWindow[act.user_id] = day;
 
         m.activities.push({ ...act, points: result.total, breakdown: result.breakdown });
       }
