@@ -93,32 +93,11 @@ const DB = {
   },
 
   async getAllActivities() {
-    // Supabase caps rows per request at the project's db-max-rows setting
-    // (default 1000) regardless of any ?limit= we pass, so page through
-    // with offset. Fetch page 1 with an exact count, then fire the rest
-    // of the pages in parallel instead of one round-trip at a time —
-    // matters once submissions run into the thousands.
-    const pageSize = 1000;
-    const first = await sbFetch(`activities?order=start_date.asc&offset=0&limit=${pageSize}`, {
-      headers: { 'Prefer': 'count=exact' },
-    });
-    if (!first.ok) throw new Error(await first.text());
-    const firstPage = await first.json();
-    const range = first.headers.get('content-range'); // "0-999/12345"
-    const total = range ? parseInt(range.split('/')[1], 10) : firstPage.length;
-
-    const offsets = [];
-    for (let offset = pageSize; offset < total; offset += pageSize) offsets.push(offset);
-
-    const restPages = await Promise.all(offsets.map(async offset => {
-      const res = await sbFetch(`activities?order=start_date.asc&offset=${offset}&limit=${pageSize}`);
-      if (!res.ok) throw new Error(await res.text());
-      return res.json();
-    }));
-
-    const all = [firstPage, ...restPages].flat();
-    console.log('getAllActivities: fetched', all.length, 'of', total, 'total activities from DB');
-    return all;
+    const res = await sbFetch('activities?order=start_date.asc');
+    if (!res.ok) throw new Error(await res.text());
+    const data = await res.json();
+    console.log('getAllActivities: fetched', data.length, 'total activities from DB');
+    return data;
   },
 
   async getActivities(startDate, endDate) {
