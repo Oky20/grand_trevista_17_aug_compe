@@ -636,6 +636,7 @@ function rActs() {
     if (bd.distance) bn.push(`+${bd.distance} dist`); if (bd.sportBonus) bn.push(`+${bd.sportBonus} sport`); if (bd.duration) bn.push(`+${bd.duration} dur`);
     if (bd.dailyTop) bn.push(`+${bd.dailyTop} top`); if (bd.streak) bn.push(`+${bd.streak} streak`);
     if (bd.streak30) bn.push(`+${bd.streak30} 30-day streak`); if (bd.reactivation) bn.push(`+${bd.reactivation} comeback`); if (bd.groupBonus) bn.push(`+${bd.groupBonus} group`);
+    if (bd.teamActivation) bn.push(`+${bd.teamActivation} team activation`);
     const methodTag = a.submission_method === 'manual' ? '<span class="awtag manual">Manual</span>' : '<span class="awtag ocr">OCR</span>';
     return `<div class="acard${bd.valid === false ? ' ainv' : ''}">
       <div class="aico">${icon}</div>
@@ -710,6 +711,7 @@ function rMyActs() {
     if (bd.streak30) bn.push(`+${bd.streak30} 30-day streak`);
     if (bd.reactivation) bn.push(`+${bd.reactivation} comeback`);
     if (bd.groupBonus) bn.push(`+${bd.groupBonus} group`);
+    if (bd.teamActivation) bn.push(`+${bd.teamActivation} team activation`);
     const methodTag = a.submission_method === 'manual'
       ? '<span class="awtag manual">Manual</span>'
       : '<span class="awtag ocr">OCR</span>';
