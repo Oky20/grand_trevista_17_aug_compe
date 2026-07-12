@@ -12,6 +12,12 @@ function jakartaDateKey(dateInput) {
   return new Date(dateInput).toLocaleDateString('en-CA', { timeZone: TIMEZONE });
 }
 
+const WEEKDAY_INDEX = { Sun: 0, Mon: 1, Tue: 2, Wed: 3, Thu: 4, Fri: 5, Sat: 6 };
+function jakartaWeekday(dateInput) {
+  const short = new Intl.DateTimeFormat('en-US', { timeZone: TIMEZONE, weekday: 'short' }).format(new Date(dateInput));
+  return WEEKDAY_INDEX[short];
+}
+
 // Distance bonus per sport: { per: km, bonus: points per step }
 // Shared verbatim between legacy and current scoring — the per-km rates
 // themselves never changed, only how many steps you're allowed to bank.
@@ -295,6 +301,15 @@ const CONFIG = {
       'Virtual Running':   { minDistanceKm: 2.5, maxPaceMinPerKm: 12 },
       'Trail Running':     { minDistanceKm: 2.5, maxPaceMinPerKm: 15 },
     },
+
+    // Team daily activation bonus: once a team has this many distinct valid-active
+    // members on the same Mon-Thu day (Jakarta) from TEAM_ACTIVATION_START_DATE
+    // onward, every one of those members earns the bonus on their own earliest
+    // valid activity that day.
+    TEAM_ACTIVATION_MIN_USERS: 13,
+    TEAM_ACTIVATION_BONUS: 5,
+    TEAM_ACTIVATION_WEEKDAYS: [1, 2, 3, 4], // Mon-Thu (0 = Sun, matches Date.getDay())
+    TEAM_ACTIVATION_START_DATE: '2026-07-13', // kept independent of RULE_CUTOVER_DATE on purpose
   },
 };
 
@@ -303,6 +318,7 @@ Object.freeze(CONFIG.SCORING_LEGACY);
 Object.freeze(CONFIG.SCORING);
 Object.freeze(CONFIG.SCORING.CAL_PER_MIN);
 Object.freeze(CONFIG.SCORING.PACE);
+Object.freeze(CONFIG.SCORING.TEAM_ACTIVATION_WEEKDAYS);
 Object.freeze(CONFIG.SCORING.DURATION_TIERS);
 Object.freeze(CONFIG.SCORING.CALORIE_TIERS);
 Object.freeze(DISTANCE_MAP);
