@@ -1103,6 +1103,7 @@ function rScoring() {
     ['🏅', '30-Day Streak Bonus', `${S.STREAK_BONUS_30_DAYS} consecutive days. One-time, on top of the milestones above.`, `+${S.STREAK_BONUS_30_POINTS}`],
     ['🔥', 'Comeback Bonus', `First activity after ${S.REACTIVATION_GAP_DAYS}+ days inactive.`, `+${S.REACTIVATION_BONUS}`],
     ['🤝', 'Group Activity Bonus', `${S.GROUP_MIN_SIZE}+ people, same sport, within ${S.GROUP_TIME_WINDOW_MIN}min of each other, mutually tagged. Any zone.`, `+${S.GROUP_BONUS_PER_PERSON}/person`],
+    ['🔓', 'Team Activation Bonus', `${S.TEAM_ACTIVATION_MIN_USERS}+ unique members of your team active (valid) on the same day, Mon-Thu only, from ${S.TEAM_ACTIVATION_START_DATE}. Everyone who's active gets it on their own earliest activity that day.`, `+${S.TEAM_ACTIVATION_BONUS}/person`],
   ];
   document.getElementById('sgrid').innerHTML = rules.map(([i, t, d, p]) => `
     <div class="sr"><div class="si">${i}</div><div><div class="stt">${t}</div><div class="sd">${d}</div></div><div class="spts">${p}</div></div>`).join('');
