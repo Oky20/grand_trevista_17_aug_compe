@@ -94,6 +94,8 @@ thead th.r{text-align:right;}
 .abns{display:flex;gap:5px;flex-wrap:wrap;margin-top:6px;}
 .abn{background:rgba(252,82,0,.1);color:var(--orange);border-radius:4px;padding:2px 7px;font-size:10px;font-family:var(--mono);}
 .apts{text-align:right;flex-shrink:0;}.apv{font-size:20px;font-weight:600;color:var(--orange);}.apl{font-size:10px;color:var(--dim);font-family:var(--mono);}
+.adel{cursor:pointer;font-size:13px;opacity:.35;transition:opacity .15s;margin-bottom:6px;}
+.adel:hover{opacity:1;}
 .ainv{opacity:.4;}.ainv .apv{color:var(--dim);}
 .sgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:10px;}
 .sr{background:var(--card);border:0.5px solid var(--border);border-radius:var(--r);padding:14px 16px;display:flex;align-items:flex-start;gap:12px;}
@@ -619,6 +621,23 @@ function companionNamesLine(a) {
   return `<div class="awith">🤝 with: ${names.join(', ')}</div>`;
 }
 
+function deleteBtn(a) {
+  const u = Session.get();
+  if (!u || a.user_id !== u.id) return '';
+  return `<div class="adel" title="Delete activity" onclick="handleDeleteActivity('${a.id}')">🗑</div>`;
+}
+
+async function handleDeleteActivity(activityId) {
+  if (!window.confirm('Delete this activity? This cannot be undone and will remove its points.')) return;
+  try {
+    await Activity.delete(activityId);
+    toast('Activity deleted', 'success');
+    loadData();
+  } catch (e) {
+    toast(e.message || 'Failed to delete activity.', 'error');
+  }
+}
+
 function rActs() {
   const tb = {}; CONFIG.TEAMS.forEach(t => tb[t.id] = t);
   let members = [...LB];
@@ -662,7 +681,7 @@ function rActs() {
         </div>
         ${bn.length ? `<div class="abns">${bn.map(x => `<span class="abn">${x}</span>`).join('')}</div>` : ''}
       </div>
-      <div class="apts"><div class="apv">${pts}</div><div class="apl">pts</div></div>
+      <div class="apts">${deleteBtn(a)}<div class="apv">${pts}</div><div class="apl">pts</div></div>
     </div>`;
   }).join('');
   document.getElementById('acontent').innerHTML = `<div class="alist">${cards}</div>${pages > 1 ? pgr(p, pages, tot, 'acts') : ''}`;
@@ -740,7 +759,7 @@ function rMyActs() {
         </div>
         ${bn.length ? `<div class="abns">${bn.map(x => `<span class="abn">${x}</span>`).join('')}</div>` : ''}
       </div>
-      <div class="apts"><div class="apv">${pts}</div><div class="apl">pts</div></div>
+      <div class="apts">${deleteBtn(a)}<div class="apv">${pts}</div><div class="apl">pts</div></div>
     </div>`;
   }).join('');
   ctEl.innerHTML = `<div class="alist">${cards}</div>`;
