@@ -167,19 +167,19 @@ const CONFIG = {
     'Stand-Up Paddleboarding (SUP)': 20,
     // Racket Sports
     'Badminton':              30,
-    'Tennis':                 45,
-    'Padel':                  45,
+    'Tennis':                 30,
+    'Padel':                  30,
     'Table Tennis':           30,
     // Team Sports
     'Basketball':             30,
     'Volleyball':             30,
-    'Soccer/Football':        45,
-    'Futsal':                 45,
+    'Soccer/Football':        30,
+    'Futsal':                 30,
     // Martial Arts
     'Boxing':                 30,
     'Martial Arts':           30,
     // Golf
-    'Golf':                   60,
+    'Golf':                   30,
     'DEFAULT':                30,
   },
 
