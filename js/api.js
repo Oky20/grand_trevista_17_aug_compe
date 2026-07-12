@@ -151,6 +151,27 @@ const DB = {
   },
 };
 
+// -- ACTIVITY (Self-service delete) ----------------------------
+
+const Activity = {
+  async delete(activityId) {
+    const u = Session.get();
+    const res = await fetch(`${CONFIG.SUPABASE_URL}/functions/v1/activity-delete`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${CONFIG.SUPABASE_ANON_KEY}`,
+      },
+      body: JSON.stringify({ activity_id: activityId, user_id: u ? u.id : null }),
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.error || 'Failed to delete activity.');
+    }
+    return res.json();
+  },
+};
+
 // -- SESSION --------------------------------------------------
 
 const Session = {
