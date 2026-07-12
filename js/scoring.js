@@ -212,7 +212,7 @@ const Scoring = (() => {
   // user's running totals for that Jakarta day BEFORE this activity, so each
   // bonus below is the marginal gain from pushing the pool further — not the
   // activity's own value scored in isolation.
-  function calcActivityPointsNew(activity, streakContext, isDailyTopCalories, isReactivation, groupBonus, poolContext) {
+  function calcActivityPointsNew(activity, streakContext, isDailyTopCalories, isReactivation, groupBonus, poolContext, teamActivationBonus) {
     const validity = isValidActivityNew(activity);
     if (!validity.valid) {
       return { total: 0, breakdown: { valid: false, reasons: validity.reasons } };
@@ -307,6 +307,9 @@ const Scoring = (() => {
     breakdown.groupBonus = groupBonus || 0;
     total += breakdown.groupBonus;
 
+    breakdown.teamActivation = teamActivationBonus || 0;
+    total += breakdown.teamActivation;
+
     return { total, breakdown };
   }
 
@@ -318,10 +321,10 @@ const Scoring = (() => {
     return isLegacyActivity(activity) ? isValidActivityLegacy(activity) : isValidActivityNew(activity);
   }
 
-  function calcActivityPoints(activity, streakContext = null, isDailyTopCalories = false, isReactivation = false, groupBonus = 0, poolContext = null) {
+  function calcActivityPoints(activity, streakContext = null, isDailyTopCalories = false, isReactivation = false, groupBonus = 0, poolContext = null, teamActivationBonus = 0) {
     return isLegacyActivity(activity)
       ? calcActivityPointsLegacy(activity, streakContext, isDailyTopCalories, isReactivation, groupBonus)
-      : calcActivityPointsNew(activity, streakContext, isDailyTopCalories, isReactivation, groupBonus, poolContext);
+      : calcActivityPointsNew(activity, streakContext, isDailyTopCalories, isReactivation, groupBonus, poolContext, teamActivationBonus);
   }
 
   // Resolves mutually-tagged group workouts: a group of >= GROUP_MIN_SIZE people
@@ -431,6 +434,7 @@ const Scoring = (() => {
     });
 
     const groupBonusByActId = calcGroupMatches(activities);
+    const teamActivationByActId = calcTeamActivationBonus(activities, users);
     const lastActiveDateMap = {};
     const streakMap = {};
 
@@ -504,7 +508,7 @@ const Scoring = (() => {
         currentStreak: streakMap[act.user_id] || 0,
         claimedMilestones: m.claimedMilestones,
         claimedStreak30: m.claimedStreak30,
-      }, isDailyTop, isReactivation, groupBonusByActId.get(act.id) || 0, poolContext);
+      }, isDailyTop, isReactivation, groupBonusByActId.get(act.id) || 0, poolContext, teamActivationByActId.get(act.id) || 0);
 
       if (!result.breakdown.valid) {
         console.log('calcLeaderboard: INVALID activity user=' + (m.name || m.id) + ' sport=' + act.sport_type + ' date=' + act.start_date + ' reasons=' + JSON.stringify(result.breakdown.reasons));
