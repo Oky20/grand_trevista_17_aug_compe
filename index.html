@@ -88,6 +88,7 @@ thead th.r{text-align:right;}
 .awtag.ocr{background:rgba(46,204,113,.15);color:var(--green);}.awtag.manual{background:rgba(252,82,0,.15);color:var(--orange);}
 .aname{font-weight:500;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .adate{font-size:11px;color:var(--dim);font-family:var(--mono);margin-top:2px;}
+.awith{font-size:11px;color:var(--muted);font-family:var(--mono);margin-top:2px;}
 .astats{display:flex;gap:14px;margin-top:6px;flex-wrap:wrap;}
 .astat{font-size:11px;font-family:var(--mono);color:var(--muted);}.astat b{color:var(--text);font-weight:500;}
 .abns{display:flex;gap:5px;flex-wrap:wrap;margin-top:6px;}
@@ -611,6 +612,13 @@ function rChips() {
 }
 function selAth(id) { selA = id; aSrch = ''; document.getElementById('asrch').value = ''; PG.acts = 1; rChips(); rActs(); }
 
+function companionNamesLine(a) {
+  if (!Array.isArray(a.companions) || !a.companions.length) return '';
+  const names = a.companions.map(id => { const m = LB.find(x => x.id === id); return m ? m.name : null; }).filter(Boolean);
+  if (!names.length) return '';
+  return `<div class="awith">🤝 with: ${names.join(', ')}</div>`;
+}
+
 function rActs() {
   const tb = {}; CONFIG.TEAMS.forEach(t => tb[t.id] = t);
   let members = [...LB];
@@ -644,6 +652,7 @@ function rActs() {
         ${showWho ? `<div class="awho"><span class="awn">${a.member.name} <span style="color:${a.team.color}">${a.team.emoji} ${a.team.name}</span></span>${methodTag}</div>` : ''}
         <div class="aname">${a.name || a.sport_type}</div>
         <div class="adate">${date} · ${a.sport_type}</div>
+        ${companionNamesLine(a)}
         <div class="astats">
           <div class="astat">⏱ <b>${dm}m</b></div>
           ${dk > 0 ? `<div class="astat">📏 <b>${dk} km</b></div>` : ''}
@@ -721,6 +730,7 @@ function rMyActs() {
         <div class="awho"><span class="awn">${me.name} <span style="color:${team.color}">${team.emoji} ${team.name}</span></span>${methodTag}</div>
         <div class="aname">${a.name || a.sport_type}</div>
         <div class="adate">${date} · ${a.sport_type}</div>
+        ${companionNamesLine(a)}
         <div class="astats">
           <div class="astat">⏱ <b>${dm}m</b></div>
           ${dk > 0 ? `<div class="astat">📏 <b>${dk} km</b></div>` : ''}
