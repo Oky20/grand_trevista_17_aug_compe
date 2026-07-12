@@ -88,16 +88,22 @@ thead th.r{text-align:right;}
 .awtag.ocr{background:rgba(46,204,113,.15);color:var(--green);}.awtag.manual{background:rgba(252,82,0,.15);color:var(--orange);}
 .aname{font-weight:500;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .adate{font-size:11px;color:var(--dim);font-family:var(--mono);margin-top:2px;}
+.awith{font-size:11px;color:var(--muted);font-family:var(--mono);margin-top:2px;}
 .astats{display:flex;gap:14px;margin-top:6px;flex-wrap:wrap;}
 .astat{font-size:11px;font-family:var(--mono);color:var(--muted);}.astat b{color:var(--text);font-weight:500;}
 .abns{display:flex;gap:5px;flex-wrap:wrap;margin-top:6px;}
 .abn{background:rgba(252,82,0,.1);color:var(--orange);border-radius:4px;padding:2px 7px;font-size:10px;font-family:var(--mono);}
 .apts{text-align:right;flex-shrink:0;}.apv{font-size:20px;font-weight:600;color:var(--orange);}.apl{font-size:10px;color:var(--dim);font-family:var(--mono);}
+.adel{cursor:pointer;font-size:13px;opacity:.35;transition:opacity .15s;margin-bottom:6px;}
+.adel:hover{opacity:1;}
 .ainv{opacity:.4;}.ainv .apv{color:var(--dim);}
 .sgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:10px;}
 .sr{background:var(--card);border:0.5px solid var(--border);border-radius:var(--r);padding:14px 16px;display:flex;align-items:flex-start;gap:12px;}
 .si{font-size:20px;flex-shrink:0;margin-top:1px;}.stt{font-weight:500;font-size:13px;margin-bottom:3px;}.sd{font-size:11px;color:var(--muted);line-height:1.5;}
 .spts{margin-left:auto;padding-left:10px;flex-shrink:0;font-size:15px;font-weight:600;color:var(--orange);font-family:var(--mono);}
+.sec-title{font-size:11px;text-transform:uppercase;letter-spacing:.8px;color:var(--dim);font-family:var(--mono);margin:28px 0 10px;}
+.sec-note{font-size:12px;color:var(--muted);line-height:1.6;margin-bottom:14px;}
+.aclamp{font-size:11px;font-family:var(--mono);color:var(--gold);}
 .empty{text-align:center;padding:48px 20px;color:var(--muted);font-size:13px;}
 .spin{width:22px;height:22px;border:2px solid var(--border2);border-top-color:var(--orange);border-radius:50%;animation:sp .6s linear infinite;}
 @keyframes sp{to{transform:rotate(360deg)}}
@@ -212,6 +218,9 @@ footer{text-align:center;padding:24px 20px 36px;border-top:1px solid var(--borde
 </div>
 <div class="panel" id="panel-scoring">
   <div class="sgrid" id="sgrid"></div>
+  <div class="sec-title">Calorie Plausibility Ceiling</div>
+  <div class="sec-note" id="cnote"></div>
+  <div class="sgrid" id="cgrid"></div>
 </div>
 </div>
 
@@ -605,6 +614,30 @@ function rChips() {
 }
 function selAth(id) { selA = id; aSrch = ''; document.getElementById('asrch').value = ''; PG.acts = 1; rChips(); rActs(); }
 
+function companionNamesLine(a) {
+  if (!Array.isArray(a.companions) || !a.companions.length) return '';
+  const names = a.companions.map(id => { const m = LB.find(x => x.id === id); return m ? m.name : null; }).filter(Boolean);
+  if (!names.length) return '';
+  return `<div class="awith">🤝 with: ${names.join(', ')}</div>`;
+}
+
+function deleteBtn(a) {
+  const u = Session.get();
+  if (!u || a.user_id !== u.id) return '';
+  return `<div class="adel" title="Delete activity" onclick="handleDeleteActivity('${a.id}')">🗑</div>`;
+}
+
+async function handleDeleteActivity(activityId) {
+  if (!window.confirm('Delete this activity? This cannot be undone and will remove its points.')) return;
+  try {
+    await Activity.delete(activityId);
+    toast('Activity deleted', 'success');
+    loadData();
+  } catch (e) {
+    toast(e.message || 'Failed to delete activity.', 'error');
+  }
+}
+
 function rActs() {
   const tb = {}; CONFIG.TEAMS.forEach(t => tb[t.id] = t);
   let members = [...LB];
@@ -630,6 +663,7 @@ function rActs() {
     if (bd.distance) bn.push(`+${bd.distance} dist`); if (bd.sportBonus) bn.push(`+${bd.sportBonus} sport`); if (bd.duration) bn.push(`+${bd.duration} dur`);
     if (bd.dailyTop) bn.push(`+${bd.dailyTop} top`); if (bd.streak) bn.push(`+${bd.streak} streak`);
     if (bd.streak30) bn.push(`+${bd.streak30} 30-day streak`); if (bd.reactivation) bn.push(`+${bd.reactivation} comeback`); if (bd.groupBonus) bn.push(`+${bd.groupBonus} group`);
+    if (bd.teamActivation) bn.push(`+${bd.teamActivation} team activation`);
     const methodTag = a.submission_method === 'manual' ? '<span class="awtag manual">Manual</span>' : '<span class="awtag ocr">OCR</span>';
     return `<div class="acard${bd.valid === false ? ' ainv' : ''}">
       <div class="aico">${icon}</div>
@@ -637,15 +671,17 @@ function rActs() {
         ${showWho ? `<div class="awho"><span class="awn">${a.member.name} <span style="color:${a.team.color}">${a.team.emoji} ${a.team.name}</span></span>${methodTag}</div>` : ''}
         <div class="aname">${a.name || a.sport_type}</div>
         <div class="adate">${date} · ${a.sport_type}</div>
+        ${companionNamesLine(a)}
         <div class="astats">
           <div class="astat">⏱ <b>${dm}m</b></div>
           ${dk > 0 ? `<div class="astat">📏 <b>${dk} km</b></div>` : ''}
           ${cal > 0 ? `<div class="astat">🔥 <b>${cal} kcal</b></div>` : ''}
+          ${bd.caloriesEffective != null && bd.caloriesEffective < bd.caloriesRaw ? `<div class="astat aclamp">${Math.round(bd.caloriesRaw)}→${Math.round(bd.caloriesEffective)} kcal dipakai utk skor</div>` : ''}
           ${(bd.reasons || []).map(r => '<div class="astat" style="color:#e24b4a">❌ ' + r + '</div>').join('')}
         </div>
         ${bn.length ? `<div class="abns">${bn.map(x => `<span class="abn">${x}</span>`).join('')}</div>` : ''}
       </div>
-      <div class="apts"><div class="apv">${pts}</div><div class="apl">pts</div></div>
+      <div class="apts">${deleteBtn(a)}<div class="apv">${pts}</div><div class="apl">pts</div></div>
     </div>`;
   }).join('');
   document.getElementById('acontent').innerHTML = `<div class="alist">${cards}</div>${pages > 1 ? pgr(p, pages, tot, 'acts') : ''}`;
@@ -703,6 +739,7 @@ function rMyActs() {
     if (bd.streak30) bn.push(`+${bd.streak30} 30-day streak`);
     if (bd.reactivation) bn.push(`+${bd.reactivation} comeback`);
     if (bd.groupBonus) bn.push(`+${bd.groupBonus} group`);
+    if (bd.teamActivation) bn.push(`+${bd.teamActivation} team activation`);
     const methodTag = a.submission_method === 'manual'
       ? '<span class="awtag manual">Manual</span>'
       : '<span class="awtag ocr">OCR</span>';
@@ -712,15 +749,17 @@ function rMyActs() {
         <div class="awho"><span class="awn">${me.name} <span style="color:${team.color}">${team.emoji} ${team.name}</span></span>${methodTag}</div>
         <div class="aname">${a.name || a.sport_type}</div>
         <div class="adate">${date} · ${a.sport_type}</div>
+        ${companionNamesLine(a)}
         <div class="astats">
           <div class="astat">⏱ <b>${dm}m</b></div>
           ${dk > 0 ? `<div class="astat">📏 <b>${dk} km</b></div>` : ''}
           ${cal > 0 ? `<div class="astat">🔥 <b>${cal} kcal</b></div>` : ''}
+          ${bd.caloriesEffective != null && bd.caloriesEffective < bd.caloriesRaw ? `<div class="astat aclamp">${Math.round(bd.caloriesRaw)}→${Math.round(bd.caloriesEffective)} kcal dipakai utk skor</div>` : ''}
           ${(bd.reasons || []).map(r => '<div class="astat" style="color:#e24b4a">❌ ' + r + '</div>').join('')}
         </div>
         ${bn.length ? `<div class="abns">${bn.map(x => `<span class="abn">${x}</span>`).join('')}</div>` : ''}
       </div>
-      <div class="apts"><div class="apv">${pts}</div><div class="apl">pts</div></div>
+      <div class="apts">${deleteBtn(a)}<div class="apv">${pts}</div><div class="apl">pts</div></div>
     </div>`;
   }).join('');
   ctEl.innerHTML = `<div class="alist">${cards}</div>`;
@@ -1043,13 +1082,16 @@ async function confirmActivity() {
 
 function rScoring() {
   const S = CONFIG.SCORING;
+  const capOf = tiers => Scoring.tieredBonus(Infinity, tiers);
+  const durRawFull = S.DURATION_TIERS[0].upTo + S.DURATION_BASE;
+  const durRawHalf = S.DURATION_TIERS[1].upTo + S.DURATION_BASE;
   const rules = [
-    ['✅', 'Valid Activity', `Min duration per sport (Run:20m, Cycle:30m, Gym/Yoga/Pilates:30m, Swim:20m) + ≥${S.MIN_CAL_PER_MIN ?? 3} kcal/min for distance-based sports only (run, cycle, swim, hike, etc). Gym & non-distance sports skip cal/min check.`, `+${S.BASE_ACTIVITY}`],
-    ['💪', 'Sport Bonus', `+${CONFIG.SCORING.SPORT_BONUS || 15} for non-distance sports (Gym, Yoga, Pilates, Team & Racket Sports, Martial Arts).`, `+${CONFIG.SCORING.SPORT_BONUS || 15}`],
-    ['🔥', 'Calorie Bonus', `+${S.CALORIES_BONUS} per ${S.CALORIES_PER} kcal. Unlimited.`, `+${S.CALORIES_BONUS}/${S.CALORIES_PER}`],
-    ['📏', 'Distance Bonus', 'Varies by sport (Run: +5/2.5km, Cycling: +5/10km, Swim: +5/0.5km). Unlimited.', ''],
+    ['✅', 'Valid Activity', `Min ${S.MIN_DURATION} minutes, any sport. Calories must clear a per-sport minimum kcal/min (see Calorie Plausibility below). Walking/Hiking/Running also need a realistic pace & distance for the reported time.`, `+${S.BASE_ACTIVITY}`],
+    ['💪', 'Sport Bonus', `Non-distance sports only (Gym, Yoga, Team & Racket Sports, Martial Arts, etc). Decays per same-day occurrence — 1st +${S.SPORT_BONUS}, 2nd +${Scoring.nonDistanceSportBonus(2)}, 3rd +${Scoring.nonDistanceSportBonus(3)}, 4th+ +0.`, `+${S.SPORT_BONUS} max`],
+    ['🔥', 'Calorie Bonus', `Daily pool, all sports combined: full rate to ${S.CALORIE_TIERS[0].upTo}kcal, half rate to ${S.CALORIE_TIERS[1].upTo}kcal, flat after that.`, `+${capOf(S.CALORIE_TIERS)} max/day`],
+    ['📏', 'Distance Bonus', `Daily pool per sport: full rate to 4× the sport's normal per-step distance, half rate to 8×, flat beyond (e.g. Run/Walk: full 0-10km, half 10-20km, flat 20km+/day).`, ''],
     ['⛰️', 'Elevation Bonus', 'Trail/Hike/Climb: +5/100m, Cycling: +5/200m, eBike: +3/300m.', ''],
-    ['⏱️', 'Duration Bonus', `Above ${S.DURATION_BASE} min: +${S.DURATION_BONUS} per ${S.DURATION_STEP} min.`, `+${S.DURATION_BONUS}/${S.DURATION_STEP}m`],
+    ['⏱️', 'Duration Bonus', `Daily pool, all sports combined: first ${S.DURATION_BASE}min free, full rate to ${durRawFull}min total, half rate to ${durRawHalf}min total, flat after that.`, `+${capOf(S.DURATION_TIERS)} max/day`],
     ['🏆', 'Daily Top Cal', `Highest calories burned across ALL athletes that day.`, `+${S.DAILY_TOP_CALORIES}`],
     ['🎯', 'Streak M1', '3 consecutive days. Once per challenge.', `+${S.STREAK_MILESTONES[0]}`],
     ['🎯', 'Streak M2', '6 consecutive days. Once per challenge.', `+${S.STREAK_MILESTONES[1]}`],
@@ -1061,6 +1103,21 @@ function rScoring() {
   ];
   document.getElementById('sgrid').innerHTML = rules.map(([i, t, d, p]) => `
     <div class="sr"><div class="si">${i}</div><div><div class="stt">${t}</div><div class="sd">${d}</div></div><div class="spts">${p}</div></div>`).join('');
+  document.querySelector('#panel-scoring .sec-title').textContent = 'Calorie Plausibility Ceiling (from ' + CONFIG.RULE_CUTOVER_DATE + ')';
+  rCalorieCeilings();
+}
+
+function rCalorieCeilings() {
+  const S = CONFIG.SCORING;
+  document.getElementById('cnote').innerHTML =
+    `Kalori dicek kewajarannya per jenis olahraga pakai MET (Metabolic Equivalent) dari Compendium of Physical Activities: kal/menit &asymp; MET &times; 1.225 (referensi berat 70kg). ` +
+    `Kalau kalori yang dilaporkan melebihi batas di bawah, yang dipakai untuk hitung bonus cuma sampai batas itu &mdash; aktivitasnya tetap valid, cuma bonus kalorinya yang disesuaikan. ` +
+    `Berlaku untuk aktivitas mulai ${CONFIG.RULE_CUTOVER_DATE}; histori sebelumnya tidak terpengaruh.`;
+  const rows = Object.entries(S.CAL_PER_MIN).filter(([sport]) => sport !== 'DEFAULT').sort((a, b) => a[0].localeCompare(b[0]));
+  document.getElementById('cgrid').innerHTML = rows.map(([sport, range]) => {
+    const icon = SICO[sport] || '🏅';
+    return `<div class="sr"><div class="si">${icon}</div><div><div class="stt">${sport}</div><div class="sd">Min ${range.min} kcal/menit</div></div><div class="spts">${range.max}/menit</div></div>`;
+  }).join('');
 }
 
 // ── UTILS ───────────────────────────────────────────────────────

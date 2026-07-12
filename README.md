@@ -111,16 +111,39 @@ grand_trevista_17_aug_compe/
 
 ## Scoring Rules
 
+The engine (`js/scoring.js` + `js/config.js`) scores every activity under one of two rule sets, picked purely by the activity's own date (Jakarta time) — nothing here is retroactive:
+
+- **Before `RULE_CUTOVER_DATE`** (currently `2026-07-13`, see `js/config.js`) — the original flat rules, `CONFIG.SCORING_LEGACY`. Unbounded per-activity bonuses, per-sport minimum duration, no calorie plausibility check.
+- **From `RULE_CUTOVER_DATE` onward** — the current anti-abuse rules below, `CONFIG.SCORING`.
+
+For the exact live numbers (they can be tuned without a redeploy of this doc), open the **Scoring Guide** tab in the app — it renders straight from `CONFIG.SCORING`, so it can't drift out of sync the way a hardcoded table here would.
+
+### Always-on bonuses (same in both rule sets)
+
 | Event | Pts |
 |-------|-----|
-| Valid activity (≥ min duration) | +10 |
-| Per 250 kcal | +5 |
-| Per 2.5 km | +5 |
-| Per 30 min above 45 min | +5 |
-| Daily top calorie burner overall | +5 |
+| Valid activity | +10 |
+| Elevation gain (Trail/Hike/Climb: /100m, Cycling: /200m, eBike: /300m) | +5 (+3 eBike) |
+| Daily top calorie burner overall (across all athletes) | +5 |
 | Streak M1 — day 3 | +10 |
 | Streak M2 — day 6 | +20 |
 | Streak M3 — day 9 | +30 |
 | Streak M4+ — day 12+ | +40 |
+| 30-day streak (one-time, on top of milestones) | +50 |
+| Comeback bonus (first activity after 14+ days inactive) | +20 |
+| Group activity (5+ people, same sport, within 60min, mutually tagged) | +20/person |
 
-**Streak:** each milestone claimed once per challenge. Break = counter resets, claimed milestones kept. Max streak bonus = 100 pts.
+**Streak:** each milestone claimed once per challenge. Break = counter resets, claimed milestones kept. Max streak-milestone bonus = 100 pts (excludes the 30-day bonus).
+
+### Rules from `2026-07-13` onward (anti-abuse)
+
+These closed several gaps found in the original flat rules: unbounded bonuses from very long or very-high-calorie sessions, no plausibility check on reported calories (some fitness watches overestimate significantly), and no floor on pace/distance for walking or running.
+
+- **Minimum duration:** flat 30 minutes for every sport (previously ranged 20–60 min per sport).
+- **Calorie plausibility ceiling:** each sport has a min/max cal/min range, MET-derived from the [Compendium of Physical Activities](https://pacompendium.com/) (`cal/min ≈ MET × 1.225` at a 70kg reference). Below the minimum, the activity is rejected outright (not real exertion). Above the maximum, the activity stays valid but the calories used for scoring are clamped to the ceiling — the raw reported number is never altered or hidden, only the score is based on the clamped figure. See the Scoring Guide tab for the full per-sport table.
+- **Daily diminishing returns:** duration, calorie, and distance bonuses are no longer computed per activity — they accumulate against a running total for that person on that calendar day, and each additional activity only earns the *marginal* bonus for pushing the total further. This stops one long session (or several split across a day) from earning unlimited bonus:
+  - **Duration** (all sports combined): first 60 min/day free, then full rate, then half rate, then flat. Capped per day.
+  - **Calories** (all sports combined, using the clamped/effective value): full rate, then half rate, then flat. Capped per day.
+  - **Distance** (tracked separately per sport, since sports scale very differently): full rate up to 4× the sport's normal per-step distance, half rate to 8×, flat beyond.
+- **Sport bonus decay:** for non-distance sports (gym, yoga, racket/team sports, martial arts, etc.), the flat sport bonus now decays across a person's non-distance activities that day — 1st full, 2nd about half, 3rd about a quarter, 4th+ nothing.
+- **Pace & minimum distance floor** (Walking, Hiking, and Running variants only): each has a minimum distance and a slowest-allowed pace; failing either rejects the activity outright. Prevents "walking" a long duration without covering a plausible distance.
