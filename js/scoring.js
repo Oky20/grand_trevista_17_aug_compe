@@ -357,6 +357,44 @@ const Scoring = (() => {
     return bonusByActId;
   }
 
+  // Once a team has >= TEAM_ACTIVATION_MIN_USERS distinct members with a valid
+  // activity on the same Mon-Thu day (Jakarta, from TEAM_ACTIVATION_START_DATE
+  // onward), every one of those members earns the bonus on their own earliest
+  // valid activity that day.
+  function calcTeamActivationBonus(activities, users) {
+    const S = CONFIG.SCORING;
+    const userTeam = {};
+    users.forEach(u => { userTeam[u.id] = u.team_id; });
+
+    const candidates = activities.filter(act =>
+      jakartaDateKey(act.start_date) >= S.TEAM_ACTIVATION_START_DATE &&
+      S.TEAM_ACTIVATION_WEEKDAYS.includes(jakartaWeekday(act.start_date)) &&
+      isValidActivity(act).valid
+    );
+
+    // `${team_id}|${day}` -> Map<user_id, earliest candidate activity that day>
+    const groups = new Map();
+    candidates.forEach(act => {
+      const team = userTeam[act.user_id];
+      if (team == null) return;
+      const key = team + '|' + jakartaDateKey(act.start_date);
+      if (!groups.has(key)) groups.set(key, new Map());
+      const byUser = groups.get(key);
+      const existing = byUser.get(act.user_id);
+      if (!existing || new Date(act.start_date) < new Date(existing.start_date)) {
+        byUser.set(act.user_id, act);
+      }
+    });
+
+    const bonusByActId = new Map();
+    groups.forEach(byUser => {
+      if (byUser.size < S.TEAM_ACTIVATION_MIN_USERS) return;
+      byUser.forEach(act => bonusByActId.set(act.id, S.TEAM_ACTIVATION_BONUS));
+    });
+
+    return bonusByActId;
+  }
+
   function calcLeaderboard(users, activities, windowStart, windowEnd) {
     const S = CONFIG.SCORING; // GROUP_*/STREAK_*/REACTIVATION_* identical between legacy/current
     const inWindow = day => (!windowStart || day >= windowStart) && (!windowEnd || day <= windowEnd);
@@ -530,5 +568,5 @@ const Scoring = (() => {
     return Object.values(teamMap).sort((a, b) => b.totalPoints - a.totalPoints);
   }
 
-  return { calcLeaderboard, calcTeamStats, calcActivityPoints, isValidActivity, getMinDuration, isLegacyActivity, getEffectiveCalories, tieredBonus, nonDistanceSportBonus };
+  return { calcLeaderboard, calcTeamStats, calcActivityPoints, isValidActivity, getMinDuration, isLegacyActivity, getEffectiveCalories, tieredBonus, nonDistanceSportBonus, calcTeamActivationBonus };
 })();
