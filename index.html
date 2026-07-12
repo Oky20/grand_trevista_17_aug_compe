@@ -221,6 +221,9 @@ footer{text-align:center;padding:24px 20px 36px;border-top:1px solid var(--borde
   <div class="sec-title">Calorie Plausibility Ceiling</div>
   <div class="sec-note" id="cnote"></div>
   <div class="sgrid" id="cgrid"></div>
+  <div class="sec-title" id="pace-title">Pace &amp; Jarak Minimum</div>
+  <div class="sec-note" id="pnote"></div>
+  <div class="sgrid" id="pgrid"></div>
 </div>
 </div>
 
@@ -1105,6 +1108,8 @@ function rScoring() {
     <div class="sr"><div class="si">${i}</div><div><div class="stt">${t}</div><div class="sd">${d}</div></div><div class="spts">${p}</div></div>`).join('');
   document.querySelector('#panel-scoring .sec-title').textContent = 'Calorie Plausibility Ceiling (from ' + CONFIG.RULE_CUTOVER_DATE + ')';
   rCalorieCeilings();
+  document.getElementById('pace-title').textContent = 'Pace & Jarak Minimum (from ' + CONFIG.RULE_CUTOVER_DATE + ')';
+  rPaceMinimums();
 }
 
 function rCalorieCeilings() {
@@ -1117,6 +1122,19 @@ function rCalorieCeilings() {
   document.getElementById('cgrid').innerHTML = rows.map(([sport, range]) => {
     const icon = SICO[sport] || '🏅';
     return `<div class="sr"><div class="si">${icon}</div><div><div class="stt">${sport}</div><div class="sd">Min ${range.min} kcal/menit</div></div><div class="spts">${range.max}/menit</div></div>`;
+  }).join('');
+}
+
+function rPaceMinimums() {
+  const S = CONFIG.SCORING;
+  document.getElementById('pnote').innerHTML =
+    `Khusus Jalan Kaki, Hiking &amp; Lari: jarak dan pace-nya harus wajar buat durasi yang dilaporkan. ` +
+    `Kurang dari jarak minimum, atau pace-nya lebih lambat dari batas di bawah &mdash; aktivitasnya <b>nggak kehitung</b> (0 poin), bukan cuma dikurangi bonusnya. ` +
+    `Sport lain nggak kena aturan ini. Berlaku untuk aktivitas mulai ${CONFIG.RULE_CUTOVER_DATE}; histori sebelumnya tidak terpengaruh.`;
+  const rows = Object.entries(S.PACE).sort((a, b) => a[0].localeCompare(b[0]));
+  document.getElementById('pgrid').innerHTML = rows.map(([sport, cfg]) => {
+    const icon = SICO[sport] || '🏅';
+    return `<div class="sr"><div class="si">${icon}</div><div><div class="stt">${sport}</div><div class="sd">Min ${cfg.minDistanceKm} km</div></div><div class="spts">&le;${cfg.maxPaceMinPerKm} min/km</div></div>`;
   }).join('');
 }
 
