@@ -184,7 +184,11 @@ const Scoring = (() => {
 
     const sportType = (activity.sport_type || '').trim();
     const calories = activity.calories || 0;
-    if (calories > 0 && actualMinutes > 0) {
+    // Min cal/min floor only applies to distance-bonus-eligible sports (per legacy
+    // behavior) — low-MET non-distance sports like Yoga/Strength Training/racket
+    // sports are exempt, since their genuine cal/min is often near or below any flat floor.
+    const distCfg = S.DISTANCE[sportType] || S.DISTANCE['DEFAULT'];
+    if (calories > 0 && actualMinutes > 0 && distCfg.per > 0) {
       const range = S.CAL_PER_MIN[sportType] || S.CAL_PER_MIN['DEFAULT'];
       const calPerMin = calories / actualMinutes;
       if (calPerMin < range.min) {
