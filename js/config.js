@@ -173,8 +173,8 @@ const CONFIG = {
     // Team Sports
     'Basketball':             30,
     'Volleyball':             30,
-    'Soccer/Football':        45,
-    'Futsal':                 45,
+    'Soccer/Football':        30,
+    'Futsal':                 30,
     // Martial Arts
     'Boxing':                 30,
     'Martial Arts':           30,
