@@ -237,6 +237,8 @@ const Scoring = (() => {
     const calPoolAfter = calPoolBefore + effCalories;
     breakdown.calories = tieredBonus(calPoolAfter, S.CALORIE_TIERS) - tieredBonus(calPoolBefore, S.CALORIE_TIERS);
     total += breakdown.calories;
+    breakdown.caloriePoolBefore = calPoolBefore;
+    breakdown.caloriePoolAfter = calPoolAfter;
 
     const sportType = (activity.sport_type || '').trim();
     const distCfg = (S.DISTANCE && S.DISTANCE[sportType]) || S.DISTANCE['DEFAULT'] || { per: 5, bonus: 5 };
@@ -251,6 +253,8 @@ const Scoring = (() => {
       const distPoolAfter = distPoolBefore + distKm;
       breakdown.distance = tieredBonus(distPoolAfter, distTiers) - tieredBonus(distPoolBefore, distTiers);
       breakdown.sportBonus = 0;
+      breakdown.distancePoolBefore = distPoolBefore;
+      breakdown.distancePoolAfter = distPoolAfter;
     } else {
       breakdown.distance = 0;
       breakdown.sportBonus = nonDistanceSportBonus(poolContext.nonDistanceCountBefore + 1);
@@ -275,6 +279,8 @@ const Scoring = (() => {
     const durEffAfter = Math.max(0, durPoolAfter - S.DURATION_BASE);
     breakdown.duration = tieredBonus(durEffAfter, S.DURATION_TIERS) - tieredBonus(durEffBefore, S.DURATION_TIERS);
     total += breakdown.duration;
+    breakdown.durationPoolBefore = durPoolBefore;
+    breakdown.durationPoolAfter = durPoolAfter;
 
     if (isDailyTopCalories) {
       breakdown.dailyTop = S.DAILY_TOP_CALORIES;
