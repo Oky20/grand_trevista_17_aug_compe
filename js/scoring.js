@@ -147,12 +147,13 @@ const Scoring = (() => {
       const { currentStreak, claimedMilestones, claimedStreak30 } = streakContext;
       const milestones = S.STREAK_MILESTONES;
       const milestonesCap = milestones.length;
-      const earnedCount = Math.floor(currentStreak / 3);
+      // Each of the milestonesCap milestones can be claimed at most once ever —
+      // beyond the last milestone (day 12+), no further streak points accrue.
+      const earnedCount = Math.min(Math.floor(currentStreak / 3), milestonesCap);
 
       for (let i = 0; i < earnedCount; i++) {
         if (!claimedMilestones.has(i)) {
-          const idx = Math.min(i, milestonesCap - 1);
-          breakdown.streak += milestones[idx];
+          breakdown.streak += milestones[i];
         }
       }
       total += breakdown.streak;
@@ -295,12 +296,13 @@ const Scoring = (() => {
       const { currentStreak, claimedMilestones, claimedStreak30 } = streakContext;
       const milestones = S.STREAK_MILESTONES;
       const milestonesCap = milestones.length;
-      const earnedCount = Math.floor(currentStreak / 3);
+      // Each of the milestonesCap milestones can be claimed at most once ever —
+      // beyond the last milestone (day 12+), no further streak points accrue.
+      const earnedCount = Math.min(Math.floor(currentStreak / 3), milestonesCap);
 
       for (let i = 0; i < earnedCount; i++) {
         if (!claimedMilestones.has(i)) {
-          const idx = Math.min(i, milestonesCap - 1);
-          breakdown.streak += milestones[idx];
+          breakdown.streak += milestones[i];
         }
       }
       total += breakdown.streak;
@@ -525,7 +527,7 @@ const Scoring = (() => {
       }
 
       if (result.breakdown.valid) {
-        const earned = Math.floor((streakMap[act.user_id] || 0) / 3);
+        const earned = Math.min(Math.floor((streakMap[act.user_id] || 0) / 3), S.STREAK_MILESTONES.length);
         for (let i = 0; i < earned; i++) {
           m.claimedMilestones.add(i);
         }
