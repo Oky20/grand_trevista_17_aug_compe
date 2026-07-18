@@ -261,7 +261,7 @@ const CONFIG = {
       'Gravel Cycling': { min: 3, max: 20 }, 'Indoor Cycling': { min: 3, max: 20 },
       'eBike': { min: 3, max: 9 },
       // Swimming
-      'Pool Swimming': { min: 3, max: 13 }, 'Open Water Swimming': { min: 3, max: 13 },
+      'Pool Swimming': { min: 0, max: 13 }, 'Open Water Swimming': { min: 3, max: 13 },
       // Gym & Fitness
       'Elliptical': { min: 3, max: 7 },
       'Stair Stepper': { min: 3, max: 11 },
