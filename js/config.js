@@ -257,11 +257,11 @@ const CONFIG = {
       'Walking': { min: 3, max: 9 },
       'Hiking': { min: 3, max: 10 },
       // Cycling
-      'Road Cycling': { min: 3, max: 20 }, 'Mountain Biking (MTB)': { min: 3, max: 20 },
-      'Gravel Cycling': { min: 3, max: 20 }, 'Indoor Cycling': { min: 3, max: 20 },
-      'eBike': { min: 3, max: 9 },
+      'Road Cycling': { min: 2, max: 20 }, 'Mountain Biking (MTB)': { min: 2, max: 20 },
+      'Gravel Cycling': { min: 2, max: 20 }, 'Indoor Cycling': { min: 2, max: 20 },
+      'eBike': { min: 2, max: 9 },
       // Swimming
-      'Pool Swimming': { min: 3, max: 13 }, 'Open Water Swimming': { min: 3, max: 13 },
+      'Pool Swimming': { min: 2, max: 13 }, 'Open Water Swimming': { min: 3, max: 13 },
       // Gym & Fitness
       'Elliptical': { min: 3, max: 7 },
       'Stair Stepper': { min: 3, max: 11 },

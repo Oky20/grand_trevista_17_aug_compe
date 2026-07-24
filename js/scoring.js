@@ -147,12 +147,13 @@ const Scoring = (() => {
       const { currentStreak, claimedMilestones, claimedStreak30 } = streakContext;
       const milestones = S.STREAK_MILESTONES;
       const milestonesCap = milestones.length;
-      const earnedCount = Math.floor(currentStreak / 3);
+      // Each of the milestonesCap milestones can be claimed at most once ever —
+      // beyond the last milestone (day 12+), no further streak points accrue.
+      const earnedCount = Math.min(Math.floor(currentStreak / 3), milestonesCap);
 
       for (let i = 0; i < earnedCount; i++) {
-        const idx = Math.min(i, milestonesCap - 1);
-        if (!claimedMilestones.has(idx)) {
-          breakdown.streak += milestones[idx];
+        if (!claimedMilestones.has(i)) {
+          breakdown.streak += milestones[i];
         }
       }
       total += breakdown.streak;
@@ -295,12 +296,13 @@ const Scoring = (() => {
       const { currentStreak, claimedMilestones, claimedStreak30 } = streakContext;
       const milestones = S.STREAK_MILESTONES;
       const milestonesCap = milestones.length;
-      const earnedCount = Math.floor(currentStreak / 3);
+      // Each of the milestonesCap milestones can be claimed at most once ever —
+      // beyond the last milestone (day 12+), no further streak points accrue.
+      const earnedCount = Math.min(Math.floor(currentStreak / 3), milestonesCap);
 
       for (let i = 0; i < earnedCount; i++) {
-        const idx = Math.min(i, milestonesCap - 1);
-        if (!claimedMilestones.has(idx)) {
-          breakdown.streak += milestones[idx];
+        if (!claimedMilestones.has(i)) {
+          breakdown.streak += milestones[i];
         }
       }
       total += breakdown.streak;
@@ -533,8 +535,7 @@ const Scoring = (() => {
       }
 
       if (result.breakdown.valid) {
-        const milestonesCap = S.STREAK_MILESTONES.length;
-        const earned = Math.floor((streakMap[act.user_id] || 0) / 3);
+        const earned = Math.min(Math.floor((streakMap[act.user_id] || 0) / 3), S.STREAK_MILESTONES.length);
         for (let i = 0; i < earned; i++) {
           m.claimedMilestones.add(Math.min(i, milestonesCap - 1));
         }
