@@ -537,7 +537,7 @@ const Scoring = (() => {
       if (result.breakdown.valid) {
         const earned = Math.min(Math.floor((streakMap[act.user_id] || 0) / 3), S.STREAK_MILESTONES.length);
         for (let i = 0; i < earned; i++) {
-          m.claimedMilestones.add(Math.min(i, milestonesCap - 1));
+          m.claimedMilestones.add(i);
         }
         if (result.breakdown.streak30 > 0) m.claimedStreak30 = true;
 
