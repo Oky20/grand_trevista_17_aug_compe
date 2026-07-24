@@ -339,34 +339,42 @@ const Scoring = (() => {
       : calcActivityPointsNew(activity, streakContext, isDailyTopCalories, isReactivation, groupBonus, poolContext, teamActivationBonus);
   }
 
-  // Resolves mutually-tagged group workouts: a group of >= GROUP_MIN_SIZE people
-  // each qualifies only once every member has their own matching activity
-  // (same sport, close start time, identical companion tag set on all sides).
+  // Resolves group-workout bonuses via two independent counts on the poster's
+  // own activity: self+companions must reach GROUP_MIN_SIZE on the tagging
+  // side, AND self+distinct-tagged-back-by must also reach GROUP_MIN_SIZE
+  // (same sport, close start time). Symmetric threshold on both sides, but no
+  // exact-set / mutual-tagging requirement — each person's bonus is earned
+  // solely on their own activity.
   function calcGroupMatches(activities) {
     const S = CONFIG.SCORING; // GROUP_* values are identical between legacy/current
     const bonusByActId = new Map();
 
-    const candidates = activities.filter(act =>
-      Array.isArray(act.companions) &&
-      act.companions.length >= S.GROUP_MIN_SIZE - 1 &&
-      isValidActivity(act).valid
-    );
+    const valid = activities.filter(act => isValidActivity(act).valid);
 
-    const setEquals = (a, b) => a.size === b.size && [...a].every(x => b.has(x));
+    // user_id -> activities that tagged them as a companion.
+    const taggedByIndex = new Map();
+    valid.forEach(b => {
+      if (!Array.isArray(b.companions)) return;
+      b.companions.forEach(uid => {
+        if (!taggedByIndex.has(uid)) taggedByIndex.set(uid, []);
+        taggedByIndex.get(uid).push(b);
+      });
+    });
 
-    candidates.forEach(a => {
-      const group = new Set([a.user_id, ...a.companions]);
-      if (group.size < S.GROUP_MIN_SIZE) return;
+    valid.forEach(a => {
+      // Check 1: poster tagged enough people themselves.
+      if (!Array.isArray(a.companions) || a.companions.length < S.GROUP_MIN_SIZE - 1) return;
+
+      // Check 2: poster is tagged back by enough distinct people, same sport, within the window.
       const aTime = new Date(a.start_date).getTime();
+      const distinctTaggers = new Set();
+      (taggedByIndex.get(a.user_id) || []).forEach(b => {
+        if (b.user_id === a.user_id || b.sport_type !== a.sport_type) return;
+        if (Math.abs(new Date(b.start_date).getTime() - aTime) > S.GROUP_TIME_WINDOW_MIN * 60000) return;
+        distinctTaggers.add(b.user_id);
+      });
 
-      const allMatch = [...group].every(memberId => candidates.some(b => {
-        if (b.user_id !== memberId || b.sport_type !== a.sport_type) return false;
-        const bTime = new Date(b.start_date).getTime();
-        if (Math.abs(bTime - aTime) > S.GROUP_TIME_WINDOW_MIN * 60000) return false;
-        return setEquals(new Set([b.user_id, ...b.companions]), group);
-      }));
-
-      if (allMatch) bonusByActId.set(a.id, S.GROUP_BONUS_PER_PERSON);
+      if (distinctTaggers.size >= S.GROUP_MIN_SIZE - 1) bonusByActId.set(a.id, S.GROUP_BONUS_PER_PERSON);
     });
 
     return bonusByActId;
@@ -529,7 +537,7 @@ const Scoring = (() => {
       if (result.breakdown.valid) {
         const earned = Math.min(Math.floor((streakMap[act.user_id] || 0) / 3), S.STREAK_MILESTONES.length);
         for (let i = 0; i < earned; i++) {
-          m.claimedMilestones.add(i);
+          m.claimedMilestones.add(Math.min(i, milestonesCap - 1));
         }
         if (result.breakdown.streak30 > 0) m.claimedStreak30 = true;
 
